@@ -1135,6 +1135,48 @@ departing employee's access ends cleanly.
 Each phase leaves the practice better off than it found it, and no phase assumes the next one is
 funded.
 
+**Two milestones matter more than the phase boundaries.** The Pilot Cut in section 16.1 is the
+point at which the system can run a real search, and it is the decision point the venture actually
+turns on. The Autonomous Cut at the end of phase three is the point at which the system sends on
+its own authority. Everything between them is regulatory surface, and it is deliberately deferred.
+
+### 16.1 The Pilot Cut: phases 0 to 2 plus drafting
+
+**This is the recommended target for a fully functional prototype, and it is three phases rather
+than four.**
+
+It comprises phase zero, phase one, phase two, and the drafting half of phase three only:
+templates, the personalisation gate and the approval queue. It stops short of mailbox integration,
+reply ingestion, the consent ledger and automated sending. The recruiter reads the approved draft
+and sends it by hand from their own inbox.
+
+What that buys. Every genuinely hard and genuinely novel part of this system is proven: job
+specification parsing, market vocabulary validated against observed data, the employer watchlist and
+its fan out, signal stacking, the eight factor score with decay, tiering and cadence, and whether
+the drafted copy is good enough that a recruiter will send it. **What is deferred is the longest
+pole in the build and the entire regulatory surface**, including the counsel review that would
+otherwise sit on the critical path.
+
+What cannot be thinned even here, because retrofitting any of it is a rewrite rather than an
+upgrade: provenance on every fact, tenancy and row level security, suppression and the forget
+operation, and the personalisation gate. A pilot touches real people's personal data, which means
+Canadian privacy law applies in full. **There is no prototype exemption.**
+
+What may be crude at this milestone: the interface, identity resolution that asks the recruiter to
+confirm every match rather than resolving automatically, a single data provider rather than an
+adapter fleet, a watchlist populated by hand behind one automated feed, and no backtesting,
+dashboards or source of hire reporting.
+
+Relative size: **phase two is roughly as large as phases zero, one and the drafting slice combined**,
+because the event model, identity resolution and scoring carry the real complexity.
+
+### 16.2 The Autonomous Cut: completing phase three
+
+The remainder of phase three, mailbox sending, reply ingestion and classification, the response
+ladder actions and the full consent ledger, is what lets the system act without a human relaying
+the message. It is gated on counsel review and should not begin until the Pilot Cut has run at
+least one real search.
+
 ### Phase 0: Foundations
 
 Tenancy, authentication, the evidence ledger, the policy engine skeleton, the connector interface,
@@ -1166,13 +1208,22 @@ historical score.
 
 ### Phase 3: Engagement Engine
 
-Sequences as durable workflows, the eight templates, the personalisation gate, the approval queue,
-mailbox sending, reply ingestion and classification, the response ladder actions, the consent
-ledger, suppression and the forget operation, and the exploratory call interface.
+Split across the two milestones above.
 
-*Exit criteria:* a full sequence runs end to end with every message approved by a human; an opt out
-propagates across every channel and mandate within one minute; a message with no verified specific
-hook cannot be queued, proven by a test; counsel has reviewed the consent implementation.
+**Phase 3a, inside the Pilot Cut:** sequences as durable workflows, the eight templates, the
+personalisation gate, the approval queue and the exploratory call interface. Output is an approved
+draft the recruiter relays by hand.
+
+*Exit criteria for 3a:* a message with no verified person specific hook cannot be queued, proven by
+a test; a full sequence schedules, cancels on a recorded reply and never double queues; the approval
+edit rate is being measured from the first draft.
+
+**Phase 3b, the Autonomous Cut:** mailbox sending through the recruiter's own account, reply
+ingestion and response ladder classification, the full consent ledger and the forget operation.
+
+*Exit criteria for 3b:* a full sequence runs end to end with every message approved by a human; an
+opt out propagates across every channel and mandate within one minute; counsel has reviewed the
+consent implementation.
 
 ### Phase 4: The feedback loop
 

@@ -165,7 +165,21 @@ commissioned before the hosting region is fixed.
 ## 5. Shape of the build
 
 Four phases, each of which leaves the practice better off than it was, and none of which depends
-on the next one being funded.
+on the next one being funded. **A fully functional prototype is reached at the end of phase three,
+but the recommended target is earlier than that.**
+
+**The Pilot Cut is phases zero through two plus the drafting half of phase three, and it is the
+milestone the venture actually turns on.** At that point the system parses a mandate, builds the
+market map, watches the employers, scores receptivity and drafts the approach, and a recruiter
+relays the approved message by hand from their own inbox. Every hard and novel part of the system
+is proven and the entire regulatory surface of automated sending, along with the counsel review
+that gates it, is deferred off the critical path. Completing phase three afterwards is what lets
+the system send on its own authority.
+
+One caution worth stating plainly: a pilot touches real people's personal data, so Canadian privacy
+law applies in full from the first record. **There is no prototype exemption**, which is why
+provenance, tenancy, suppression and the personalisation gate are built properly even in the
+earliest milestone.
 
 **Phase one delivers the mandate engine.** A job specification goes in and a complete channel
 plan, search string set and pipeline projection comes out. This is the Outreach Channel Matrix
