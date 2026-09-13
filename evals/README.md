@@ -93,7 +93,9 @@ on the next, from a specification that names the Ontario Cyber Security Framewor
 electrical sector and never once says where the person sits. The inferred place both bounded the
 search on a guess and silenced the intake gap that should have asked, and a single green run would
 have reported neither. The prompt now states that location is the work location and must not be
-inferred from the regulator, the sector or the employer's identity.
+inferred from the regulator, the sector or the employer's identity, and three independent runs of
+that case now hold `location_shape` and `required_gaps` at 3/3 where a single run had reported one
+of each answer.
 
 ## Output
 

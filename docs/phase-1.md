@@ -296,6 +296,18 @@ fixed and were always going to pass. This one found something live, on a field t
 exercised, because the fourth case changed nothing about the prompt and everything about the
 sample size.
 
+The fix was then verified the way the eval's own README prescribes, with three independent runs of
+the case that was flaky rather than the single run that had reported it green:
+
+```
+location_shape    #################### 3/3
+required_gaps     #################### 3/3
+case pass rate    100%  (3/3)
+```
+
+Before the change the same case returned `null` once and `"Ontario"` once. **One green run would have
+been indistinguishable from either.**
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's
