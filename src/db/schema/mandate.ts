@@ -97,6 +97,7 @@ export const mandateConstraints = pgTable('mandate_constraints', {
   severity: constraintSeverity('severity').notNull(),
   statement: text('statement').notNull(),
   sourceQuote: text('source_quote'),
+  inferred: boolean('inferred').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [unique().on(t.mandateId, t.kind, t.statement)]);
 

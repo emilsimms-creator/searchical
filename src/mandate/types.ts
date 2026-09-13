@@ -109,8 +109,14 @@ export interface MandateConstraint {
   readonly kind: ConstraintKind;
   readonly severity: ConstraintSeverity;
   readonly statement: string;
-  /** The words from the specification that established it. */
+  /** The words from the specification that established it, copied verbatim. */
   readonly sourceQuote?: string | undefined;
+  /**
+   * True when the constraint follows from domain knowledge rather than from the
+   * specification. An inferred constraint is surfaced for the recruiter to
+   * confirm with the client, and never narrows the pipeline arithmetic.
+   */
+  readonly inferred: boolean;
 }
 
 export type TargetCompanyKind = 'competitor' | 'academy' | 'adjacent_sector' | 'client_named' | 'late_stage';

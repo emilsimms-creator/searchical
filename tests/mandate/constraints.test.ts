@@ -20,16 +20,19 @@ const SECRET_CLEARANCE: MandateConstraint = {
   kind: 'security_clearance',
   severity: 'disqualifying',
   statement: 'Must be eligible to obtain Secret clearance',
+  inferred: false,
 };
 const ONSITE: MandateConstraint = {
   kind: 'location_or_onsite',
   severity: 'disqualifying',
   statement: 'On site 12 days per month, no relocation assistance',
+  inferred: false,
 };
 const PREFERENCE: MandateConstraint = {
   kind: 'citizenship_or_status',
   severity: 'strong_preference',
   statement: 'Priority to Canadian citizens and permanent residents',
+  inferred: false,
 };
 
 describe('constraints and the addressable market', () => {

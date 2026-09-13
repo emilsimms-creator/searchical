@@ -1,0 +1,49 @@
+Job Function:
+The Senior Cybersecurity Specialist, GRC Risk Management is a senior advisor responsible for cyber risk management across IT, OT, cloud, AI, and emerging technologies. The role partners with business, technology, compliance, and security architecture stakeholders to identify, assess, and manage cybersecurity risks, ensure regulatory and security compliance, and provide risk-based guidance for technology initiatives and architecture decisions.
+Key responsibilities include leading cyber risk assessments, governance and compliance activities, security architecture reviews, control testing, risk treatment planning, identity governance, and executive reporting. A key focus of the role is leveraging security engineering and automation solutions to modernize GRC processes, streamline evidence collection and reporting, improve cyber risk visibility, and enhance operations. The role supports compliance with OEB, NERC-CIP, and other cybersecurity frameworks while delivering actionable risk insights that enable business and executive decision-making.
+
+Job Description
+The Senior IT Security Specialist will work within the OT Cybersecurity Technology & Operations team as a Defender Of Energy, protecting Hydro One Networks against Cyber Attacks and proactively assessing existing cybersecurity controls & cyber defenses.
+Join a diverse team of experienced Cybersecurity practitioners, and act as a subject matter expert for Information Security with the Lines of Business (LOB)
+
+* Focus on Cyber Risk Management as it relates to Information Technology (IT) and Operations Technology (OT) systems
+* Translate technical cyber & information security requirements into business actions. Preserve and apply the security governance framework (based on NIST) for the LOBs.
+* Work with different, potentially conflicting requirements (legal, regulatory, industry standards, security strategy) to distil realistic security requirements supporting the business strategy
+* Conduct research to maintain and expand knowledge on the latest cyber security technologies and standards, as well as the threat and vulnerability landscape for Industrial Control Systems (ICS) in general, and the Electrical sector in Ontario
+
+You are an experienced Cyber Risk Management professional with extensive knowledge and experience in architecture of the following domains and their application to IT (and preferably OT) environments:
+* Identity and Access Management
+* Threat, Risk and Compliance
+* Vulnerability Management
+* Security Operations
+* Security Governance and Policies
+* Security Architecture
+
+Specific Accountabilities may include:
+* Represent the Cyber Risk Management team as an advisor and expert Cyber Security SME to support the overall security program.
+* Seek industry trends and organizational knowledge to understand and implement effective risk management practices.
+* Provide recommendations for security architecture for all technology projects, new platforms, on premise or cloud-based and ensure alignment of technology solutions to established frameworks and security standards.
+* Provide consultation to operational teams as a risk-focused senior cyber security advisor on security-related initiatives, solution selection, security architecture and security assessments
+* Provide risk management insights through an ongoing process of gathering, analyzing and prioritizing actionable risk messages; develop content to support communication of the messages and enable technology teams to consume and apply the messages to their respective areas.
+* Contribute to the continuous improvement of processes and maturity of cyber risk management program.
+* Manage various stakeholders across levels (including executives) and engage in resolution of risk issues.
+* Build and manage effective relationships with key stakeholders, team members, and other business, functional and support groups. Collaborate with senior leaders to ensure alignment of Cyber Security initiatives.
+* Support responses to various regulatory requests and audits
+* Support the compliance sustainment and continuous improvement efforts associated with Hydro One's NERC CIP compliance program. Review NERC CIP related security incidents for systemic problems and opportunities for process improvements.
+
+Requisite Experience and Skills:
+* Extensive experience of strategic development of standards, Cyber Security Risk Identification and Mitigation techniques
+* Demonstrable experience in an advisor/consultant capacity representing Information Security
+* 10+ years of information security experience in risk management and information security
+* Strong knowledge of NIST SP800-53 and NIST Cyber Security Framework
+* Sound understanding of the Ontario Cyber Security Framework
+* Familiarity with Risk Management Frameworks (ISO 27005, NIST 800-30/39 or ISF IRAM2)
+* Demonstrated understanding of relevant standards and regulatory requirements (NERC CIP, Bill C-198, PCI, PIPEDA, etc.).
+* Familiarity with scenario-based risk analysis using common threat modelling techniques
+* Knowledge of current trends in the cyber security industry
+* Knowledge of unique threats to the energy sector and its role within Canadian critical infrastructure
+* Excellent interpersonal, communication, and presentation skills applicable to a wide audience including senior and executive management
+* Excellent organization/project planning, time and organizational change skills across multiple functional groups and departments
+* Knowledge of metrics programs and security dashboard creation
+* Post-secondary education in Computer Science or related field, or equivalent work experience
+* One or more of CISSP, CRISC, CISM or other relevant certifications would be an asset

@@ -174,6 +174,40 @@ attached, and a pipeline that reports five disqualifying constraints narrowing t
 **This is what the unproven exit criterion was hiding.** The machinery was well tested and the
 extraction was not, and every defect above sat in the gap between them.
 
+### A third live run: stated versus inferred
+
+A Senior Cybersecurity Specialist (GRC, IT and OT, energy sector) specification was run next. The
+term quality and location fixes held: the Boolean came out runnable, with `"NERC CIP"`,
+`"NIST 800-53"` and `"Cyber Risk Management"` as search tokens, and the model picked up both titles
+the document carries, since the header calls the role one thing and the body another.
+
+**One defect, and a subtle one.** The model produced this:
+
+> disqualifying / other
+> "Work falls within a NERC CIP compliance program, which typically carries personnel risk assessment
+> and background screening obligations for access to in-scope systems."
+> source: "Support the compliance sustainment and continuous improvement efforts associated with
+> Hydro One's NERC CIP compliance program."
+
+The quote is genuinely in the specification. **It does not establish the claim.** The screening
+obligation is domain knowledge, it is probably correct, it is genuinely useful to a recruiter, and
+the document never says it. Marked disqualifying and left unflagged, it narrowed the pipeline
+arithmetic on the strength of the model's background knowledge.
+
+**A source quote that is present but non-probative is the worst case of all**, because it manufactures
+exactly the confidence the quote was introduced to earn.
+
+Two fixes, because there are two distinct failures here. Every constraint now declares whether it was
+`inferred` or stated, an inferred one is surfaced for the recruiter to confirm with the client, and it
+never narrows the market on its own authority. Separately, every source quote is now **checked
+verbatim against the document it claims to come from**, which catches outright fabrication, a failure
+the `inferred` flag cannot catch and vice versa.
+
+After the fix the same specification yields three stated constraints, all three quotes verified
+against the source, and three inferred ones correctly boxed as needing confirmation, including two
+the practice would genuinely want to know: that NERC CIP access normally gates on a personnel risk
+assessment, and that a Canadian critical infrastructure operator is unlikely to sponsor.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

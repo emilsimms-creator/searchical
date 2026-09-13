@@ -73,7 +73,12 @@ export function projectPipeline(input: PipelineInput): PipelineProjection {
     );
   }
 
-  const disqualifying = (input.constraints ?? []).filter((c) => c.severity === 'disqualifying');
+  // An inferred constraint, however plausible, is the model's background
+  // knowledge rather than the client's requirement. It is surfaced for
+  // confirmation and is not allowed to narrow the market by itself.
+  const all = input.constraints ?? [];
+  const disqualifying = all.filter((c) => c.severity === 'disqualifying' && !c.inferred);
+  const inferredDisqualifying = all.filter((c) => c.severity === 'disqualifying' && c.inferred);
   const contactsRequired = Math.ceil(input.targetConversations / (responseRate * interestedShare));
   const touchesRequired = contactsRequired * touchesPerPerson;
   const longListSufficient = input.longListSize >= contactsRequired;
@@ -120,6 +125,14 @@ export function projectPipeline(input: PipelineInput): PipelineProjection {
               'calculated figure, and replace the rates with your own once this search has run.',
             'Qualify every prospect against these constraints before spending a sequence on them: five ' +
               'touches at someone who cannot take the job is the capacity this system exists to protect.',
+          ]
+        : []),
+      ...(inferredDisqualifying.length > 0
+        ? [
+            `${inferredDisqualifying.length} further constraint${inferredDisqualifying.length === 1 ? ' was' : 's were'} ` +
+              `inferred rather than stated: ${inferredDisqualifying.map((c) => c.statement).join('; ')}. ` +
+              'Confirm with the client before treating any of them as real: they are not in the ' +
+              'specification, and they are excluded from the market narrowing above until they are.',
           ]
         : []),
     ],

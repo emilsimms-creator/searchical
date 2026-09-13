@@ -101,12 +101,14 @@ export const NAV_CANADA_TECHNOLOGIST_EXTRACTION = {
       severity: 'disqualifying',
       statement: 'Bilingual in English and French',
       sourceQuote: 'Language Requirements: Bilingual (English and French)',
+      inferred: false,
     },
     {
       kind: 'licence_or_credential',
       severity: 'disqualifying',
       statement: 'Valid driver licence',
       sourceQuote: 'A valid driver\'s license',
+      inferred: false,
     },
   ],
 } as const;
@@ -157,12 +159,14 @@ export const SENIOR_DBA_EXTRACTION = {
       severity: 'disqualifying',
       statement: 'Must be eligible to obtain Secret clearance',
       sourceQuote: 'Security level required: Be eligible to obtain Secret',
+      inferred: false,
     },
     {
       kind: 'citizenship_or_status',
       severity: 'strong_preference',
       statement: 'Priority given to Canadian citizens and permanent residents',
       sourceQuote: 'Priority will be given to Canadian citizens and permanent residents',
+      inferred: false,
     },
     {
       kind: 'location_or_onsite',
@@ -171,18 +175,21 @@ export const SENIOR_DBA_EXTRACTION = {
         'On site a minimum of 12 days per month, must live in Canada within commuting distance of the office, no relocation assistance',
       sourceQuote:
         'expected on site at the Bank location a minimum of 12 days per month ... There will be no relocation assistance provided',
+      inferred: false,
     },
     {
       kind: 'schedule',
       severity: 'disqualifying',
       statement: 'Participation in an on-call rotation is required',
       sourceQuote: 'Participation in an on-call rotation is required, with additional compensation provided.',
+      inferred: false,
     },
     {
       kind: 'language',
       severity: 'nice_to_have',
       statement: 'English or French essential; second language encouraged but not required',
       sourceQuote: 'the position language requirement is English or French essential',
+      inferred: false,
     },
   ],
 } as const;

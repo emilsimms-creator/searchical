@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { PromptVersion } from '@/llm/gateway';
-import type { IntakeGap, MandateDraft, MandateTerm, PerformanceIntake, Segment } from './types';
+import type { IntakeGap, MandateConstraint, MandateDraft, MandateTerm, PerformanceIntake, Segment } from './types';
 
 /**
  * A term that will be dropped verbatim into a quoted Boolean phrase.
@@ -66,6 +66,17 @@ const ExtractionOutput = z.object({
       severity: z.enum(['disqualifying', 'strong_preference', 'nice_to_have']),
       statement: z.string().min(1),
       sourceQuote: z.string().optional(),
+      /**
+       * False when the specification states it. True when it follows from
+       * domain knowledge rather than the words on the page.
+       *
+       * A live run marked "NERC CIP work typically carries personnel risk
+       * assessment obligations" as disqualifying. The insight is probably
+       * correct and genuinely useful, and the specification says no such thing.
+       * Left unmarked it would have narrowed the pipeline arithmetic on the
+       * strength of the model's background knowledge.
+       */
+      inferred: z.boolean(),
     }),
   ).max(12),
 });
@@ -141,6 +152,18 @@ rejected outright rather than repaired.
                        ${values(itemShape(shape.constraints).kind!)}
                      severity is one of:
                        ${values(itemShape(shape.constraints).severity!)}
+                     inferred is a boolean and is REQUIRED on every constraint.
+                       false  the specification states it, and sourceQuote contains the words that
+                              do so, copied VERBATIM from the specification. Every quote is checked
+                              against the source text; one that cannot be found there is rejected.
+                       true   it follows from what you know about this domain rather than from the
+                              words on the page.
+                     A quote that is genuinely present but does not itself establish the statement
+                     is the worst case of all, because it manufactures confidence a recruiter will
+                     act on. If the specification does not say it, inferred is true, whatever else
+                     the document happens to mention.
+                     Reserve "disqualifying" for a requirement the specification states a person
+                     cannot hold the role without. An inference is rarely disqualifying.
                      Use "other" rather than inventing a kind. A kind outside this list is rejected
                      and the constraint is lost, which is worse than an imprecise label.
 
@@ -277,6 +300,46 @@ export function toDraft(output: ExtractionOutputType): MandateDraft {
     targetCompanies: output.targetCompanies,
     constraints: output.constraints,
   };
+}
+
+const normalise = (text: string): string =>
+  text
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+export interface QuoteCheck {
+  readonly statement: string;
+  readonly quote: string;
+  readonly found: boolean;
+}
+
+/**
+ * Check every constraint's source quote against the specification it came from.
+ *
+ * The whole value of a source quote is that a recruiter can check a constraint
+ * against the document rather than trusting a paraphrase. A quote that is not
+ * actually in the document defeats that completely, and does it while looking
+ * more trustworthy than no quote at all.
+ *
+ * This catches fabrication. It cannot catch a real quote that does not support
+ * its statement, which is what the `inferred` flag is for.
+ */
+export function verifySourceQuotes(
+  constraints: readonly MandateConstraint[],
+  jobSpec: string,
+): readonly QuoteCheck[] {
+  const haystack = normalise(jobSpec);
+  return constraints
+    .filter((c) => c.sourceQuote !== undefined && c.sourceQuote.trim() !== '')
+    .map((c) => ({
+      statement: c.statement,
+      quote: c.sourceQuote!,
+      found: haystack.includes(normalise(c.sourceQuote!)),
+    }));
 }
 
 const INTAKE_QUESTIONS: Record<keyof PerformanceIntake, string> = {

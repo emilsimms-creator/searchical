@@ -177,6 +177,7 @@ export class MandateService {
             severity: c.severity,
             statement: c.statement,
             sourceQuote: c.sourceQuote ?? null,
+            inferred: c.inferred,
           })),
         )
         .onConflictDoNothing();
@@ -390,6 +391,7 @@ export class MandateService {
       severity: r.severity,
       statement: r.statement,
       sourceQuote: r.sourceQuote ?? undefined,
+      inferred: r.inferred,
     }));
   }
 

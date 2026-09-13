@@ -4,5 +4,5 @@ export { projectPipeline, PIPELINE_DEFAULTS, type PipelineInput } from './pipeli
 export { planChannels, CHANNEL_THRESHOLDS, type ChannelPlan } from './planner';
 export { generateSearchStrings, type GeneratedStrings, type StringGenerationWarning } from './strings';
 export { validateVocabulary, fixtureTitleFrequency, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
-export { jobSpecExtraction, toDraft, deriveIntakeGaps, type ExtractionOutputType } from './extraction';
+export { jobSpecExtraction, toDraft, deriveIntakeGaps, verifySourceQuotes, type ExtractionOutputType, type QuoteCheck } from './extraction';
 export { MandateService, seedChannelRatings, channelCodesWithNoColdOutreach, type DraftedMandate, type SearchPlan, type TermDecision } from './service';

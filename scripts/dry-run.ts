@@ -15,7 +15,7 @@ import { claudeCliModel } from '@/llm/claude-cli';
 import {
   CHANNEL_MATRIX_SEED, deriveIntakeGaps, generateSearchStrings, isSupportedSegment,
   jobSpecExtraction, planChannels, projectPipeline, toDraft, validateVocabulary,
-  type MandateTerm,
+  verifySourceQuotes, type MandateTerm,
 } from '@/mandate';
 
 const path = process.argv[2];
@@ -63,8 +63,17 @@ if (!isSupportedSegment(draft.segment)) {
 rule('CONSTRAINTS (requirements that are not search terms)');
 if (draft.constraints.length === 0) console.log('  None stated.');
 for (const c of draft.constraints) {
-  console.log(`  ${c.severity.toUpperCase().padEnd(18)} [${c.kind}] ${c.statement}`);
+  const tag = c.inferred ? 'INFERRED, confirm with client' : c.severity.toUpperCase();
+  console.log(`  ${tag.padEnd(30)} [${c.kind}] ${c.statement}`);
   if (c.sourceQuote) console.log(`    source: "${c.sourceQuote}"`);
+}
+
+// Every quote is checked against the document it claims to come from.
+const checks = verifySourceQuotes(draft.constraints, jobSpec);
+const unverified = checks.filter((c) => !c.found);
+console.log(`\n  ${checks.length - unverified.length} of ${checks.length} source quotes verified against the specification.`);
+for (const u of unverified) {
+  console.log(`  NOT FOUND IN SOURCE: "${u.quote}"\n    claimed for: ${u.statement}`);
 }
 
 rule('INTAKE GAPS (questions for the hiring leader)');
