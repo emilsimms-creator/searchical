@@ -72,6 +72,9 @@ describe('schema parity between migrations and the typed schema', () => {
       'attributes',
       'consents',
       'employments',
+      // An identity claim is a fact about a person and carries provenance like
+      // any other. A merge made on unattributed evidence is unreviewable.
+      'person_identities',
       'sensitive_attributes',
       'signals',
     ]);

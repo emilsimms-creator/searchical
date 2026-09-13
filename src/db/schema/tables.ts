@@ -108,6 +108,10 @@ export const signalTypes = pgTable('signal_types', {
   points: integer('points').notNull(),
   recencyWindowDays: integer('recency_window_days').notNull(),
   sourceCitation: text('source_citation').notNull(),
+  subjectType: subjectType('subject_type').notNull().default('person'),
+  indicates: text('indicates'),
+  windowNote: text('window_note'),
+  ordinal: integer('ordinal'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [unique().on(t.tenantId, t.code)]);
 
