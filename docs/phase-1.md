@@ -89,6 +89,43 @@ English and French, a valid driver's licence, a credential completed within ten 
 filters, not skills, and today they would be forced into the skill list where they would corrupt the
 Boolean.
 
+### A second specification: Senior Database Administrator
+
+A genuinely in scope specification was run next: enterprise Oracle and SQL Server administration with
+Azure migration and DBaaS platform development. **The engine handled the role well.** Triage put it in
+the senior IT consultant segment and flagged the tenure as borderline (the specification asks for five
+or more years where the segment usually implies eight, which is exactly the kind of call a recruiter
+should be given the chance to overrule). The title ranking surfaced that the market says Senior
+Database Engineer and Cloud Database Engineer as well as the client's own Senior Database
+Administrator. The Boolean was runnable as written. The location and target company gaps both fired
+correctly, because the specification genuinely names neither.
+
+**Then it lost every one of six hard constraints:** eligibility for Secret clearance, priority to
+Canadian citizens and permanent residents, no relocation assistance, twelve on-site days a month
+within commuting distance of an office the specification never names, a required on-call rotation,
+and the language requirement.
+
+Three consequences, which is why this was a defect rather than a nicety. The pipeline arithmetic
+**silently overstated the addressable market**, since the published default rates were measured on
+unconstrained senior searches. The sequence would have **wasted its scarce capacity**, because
+nothing stopped five touches landing on someone who cannot obtain clearance or will not commute. And
+it **contradicted the scoring model**: factor 7 of the receptivity score is freedom from
+deal-breakers, a deal-breaker is a property of the mandate, and phase 2 would have had nothing to
+score it against.
+
+Fixed in `migrations/0005_mandate_constraints.sql`. Constraints are now first class, typed by kind and
+severity, each carrying the words from the specification that established it so a recruiter can check
+it against the source rather than trust a paraphrase. They never enter a search string. The search
+plan carries them, and when any is disqualifying the projection says plainly that the default rates
+overstate this market and must be replaced with the practice's own.
+
+**No multiplier was invented.** There is no published figure for how much a clearance requirement
+shrinks a senior technology market, so the arithmetic is unchanged and only the honesty about it
+changes. That is decision record entry 15.
+
+**Compensation remains the one open gap** and is still your call. The NAV CANADA specification carried
+two structured bands; this one carries none.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

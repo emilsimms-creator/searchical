@@ -1,0 +1,70 @@
+This role is intended for senior database professionals who combine strong enterprise Oracle and SQL Server administration expertise with demonstrated cloud platform and migration experience. You will support critical production database environments while helping lead the Bank's continued modernization toward Azure-based database services.
+
+This is not an entry point into cloud technologies. You must have practical experience implementing, administering or migrating production database workloads in the cloud and be prepared to apply that experience immediately. You will help guide migration activities, technical decisions and the evolution of the Bank's Database-as-a-Service (DBaaS) platform.
+
+This is a hybrid database administration and cloud modernization role. It combines the administration and operational support of enterprise Oracle and SQL Server environments with cloud migration, automation and platform development responsibilities. You will work across on-premises and Azure-based database services as the Bank transitions toward a standardized DBaaS model.
+
+The platform portfolio includes:
+* Azure SQL Managed Instance, the primary migration platform
+* Azure Database for PostgreSQL, a strategic growth platform
+* Oracle Database@Azure, used for targeted exception scenarios
+
+What you will do
+Database Administration and Production Operations
+* Administer and support enterprise Oracle and SQL Server database environments, including availability, performance, capacity, backup, recovery, patching and security.
+* Diagnose and resolve complex database performance, reliability and availability issues.
+* Support SQL Server Always On Availability Groups and Oracle technologies such as RAC and Data Guard.
+* Participate in incident response, problem management, root-cause analysis and the on-call rotation.
+
+Cloud Migration and Hybrid Operations
+* Assess, plan and execute migrations from on-premises SQL Server and Oracle environments to Azure database platforms.
+* Develop migration, testing, cutover, validation, rollback and post-migration support approaches.
+* Work with platform and application teams to address dependencies, compatibility, performance and operational readiness across hybrid architectures.
+* Help guide technical decisions and drive adoption of standardized database services for new and existing applications.
+
+Cloud Platform Development and Automation
+* Help design, implement and evolve Azure-based database services, including Azure SQL Managed Instance, Azure Database for PostgreSQL and Oracle Database@Azure.
+* Provision, scale, patch and decommission databases using automation, infrastructure as code, scripts, pipelines or templated deployments.
+* Develop and maintain automation for provisioning, monitoring, backup and recovery workflows.
+* Define and apply platform standards, guardrails and onboarding patterns for application teams.
+
+Security, Resilience and Governance
+* Implement high availability and disaster recovery patterns aligned with enterprise requirements.
+* Apply requirements for identity and access management, encryption, auditing, data protection, backup and recovery.
+* Implement monitoring, alerting and performance baselines to maintain reliability.
+* Contribute to architecture deliverables, governance processes and continuous service improvement.
+
+What you need to succeed
+You bring deep enterprise database administration expertise and demonstrated experience working with production cloud database platforms and migrations. You can operate critical Oracle and SQL Server environments, lead or significantly contribute to complex cloud migrations, and help develop secure, reliable and scalable database services. You are a self-starter and strong collaborator who can work independently and influence decisions across technical teams.
+
+In addition, you have:
+* Significant hands-on experience administering enterprise Oracle and SQL Server databases in production environments.
+* Demonstrated hands-on experience implementing, administering or migrating production workloads on cloud database platforms such as Azure SQL Managed Instance and/or Oracle Database@Azure.
+* Proven experience executing or leading production database migrations from on-premises environments to cloud platforms, including assessment, planning, testing, cutover, rollback and post-migration support.
+* Experience designing and operating high availability and disaster recovery solutions, including SQL Server Always On Availability Groups and Oracle RAC and/or Data Guard.
+* Experience developing or maintaining database automation using scripts, infrastructure as code, pipelines or templated deployments.
+* Strong knowledge of performance tuning, monitoring, backup, recovery, security, data protection and production incident resolution.
+* Experience improving operational efficiency through automation, standardization and reusable service patterns.
+* The ability to guide technical decisions, collaborate across infrastructure, cloud, security and application teams, and support application onboarding to shared database services.
+
+Nice to have
+* Experience with Oracle Exadata or particularly complex enterprise SQL Server deployments.
+* Familiarity with enterprise governance, security and compliance frameworks.
+* Knowledge of monitoring, logging and observability tools for cloud platforms.
+* Relevant certifications, such as Azure and/or Oracle data, database or architecture certifications.
+
+Your education and experience
+Your combined education and work experience demonstrate that you have the competencies and skills for the position. We are ideally seeking candidates with relevant education in computer science or a related field and five or more years of relevant experience in database technologies and cloud platforms.
+
+Language requirement
+The Bank's work environment is conducive to the use of both of Canada's official languages - English and French. Although the position language requirement is English or French essential, we do encourage everyone to improve their second language proficiency.
+
+What you need to know
+* Participation in an on-call rotation is required, with additional compensation provided.
+* Priority will be given to Canadian citizens and permanent residents
+* Security level required: Be eligible to obtain Secret
+* There will be no relocation assistance provided
+* The official title for this position is "Senior Database Administrator"
+
+Hybrid Work Model
+Most employees can telework from home for a portion of each month as part of the Bank's hybrid work model, and they are expected on site at the Bank location a minimum of 12 days per month. You must live in Canada, and within reasonable commuting distance of the office.

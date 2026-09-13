@@ -1,4 +1,4 @@
-import type { PipelineProjection } from './types';
+import type { MandateConstraint, PipelineProjection } from './types';
 
 /**
  * Defaults from the practice's source research. A twenty percent combined
@@ -29,6 +29,8 @@ export interface PipelineInput {
   touchesPerPerson?: number;
   ratesSource?: string;
   ratesSampleSize?: number | null;
+  /** Constraints on the mandate. Disqualifying ones shrink the market. */
+  constraints?: readonly MandateConstraint[];
 }
 
 /** Widening moves from the Channel Guide, offered rather than merely warned about. */
@@ -71,6 +73,7 @@ export function projectPipeline(input: PipelineInput): PipelineProjection {
     );
   }
 
+  const disqualifying = (input.constraints ?? []).filter((c) => c.severity === 'disqualifying');
   const contactsRequired = Math.ceil(input.targetConversations / (responseRate * interestedShare));
   const touchesRequired = contactsRequired * touchesPerPerson;
   const longListSufficient = input.longListSize >= contactsRequired;
@@ -90,16 +93,35 @@ export function projectPipeline(input: PipelineInput): PipelineProjection {
     shortfall,
     ratesSource: input.ratesSource ?? PIPELINE_DEFAULTS.ratesSource,
     ratesSampleSize: input.ratesSampleSize ?? null,
+    constrainedMarket: disqualifying.length > 0,
     workings:
       `${input.targetConversations} interested conversations divided by a ${pct(responseRate)} response rate ` +
       `and a ${pct(interestedShare)} interested share means ${contactsRequired} people contacted, ` +
       `and ${touchesRequired} touches at ${touchesPerPerson} per person.`,
-    advice: longListSufficient
-      ? []
-      : [
-          `The long list of ${input.longListSize} is ${shortfall} short of the ${contactsRequired} people ` +
-            `who must be contacted. Widen the talent map before starting outreach.`,
-          ...WIDENING_MOVES,
-        ],
+    advice: [
+      ...(longListSufficient
+        ? []
+        : [
+            `The long list of ${input.longListSize} is ${shortfall} short of the ${contactsRequired} people ` +
+              `who must be contacted. Widen the talent map before starting outreach.`,
+            ...WIDENING_MOVES,
+          ]),
+      ...(disqualifying.length > 0
+        ? [
+            // Deliberately no multiplier. Inventing one would be fake precision:
+            // there is no published figure for how much a clearance requirement
+            // or a commuting radius shrinks a senior technology market. What the
+            // system can honestly say is that the defaults do not apply.
+            `${disqualifying.length} disqualifying constraint${disqualifying.length === 1 ? '' : 's'} ` +
+              `narrow${disqualifying.length === 1 ? 's' : ''} this market: ` +
+              `${disqualifying.map((c) => c.statement).join('; ')}.`,
+            'The default response and interested rates were measured on unconstrained senior searches, so ' +
+              'they overstate this one. Expect a lower response, size the long list well above the ' +
+              'calculated figure, and replace the rates with your own once this search has run.',
+            'Qualify every prospect against these constraints before spending a sequence on them: five ' +
+              'touches at someone who cannot take the job is the capacity this system exists to protect.',
+          ]
+        : []),
+    ],
   };
 }

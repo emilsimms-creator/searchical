@@ -22,6 +22,17 @@ const ExtractionOutput = z.object({
       rationale: z.string().optional(),
     }),
   ).max(30),
+  constraints: z.array(
+    z.object({
+      kind: z.enum([
+        'security_clearance', 'citizenship_or_status', 'location_or_onsite', 'schedule',
+        'language', 'licence_or_credential', 'travel', 'other',
+      ]),
+      severity: z.enum(['disqualifying', 'strong_preference', 'nice_to_have']),
+      statement: z.string().min(1),
+      sourceQuote: z.string().optional(),
+    }),
+  ).max(12),
 });
 
 export type ExtractionOutputType = z.infer<typeof ExtractionOutput>;
@@ -49,7 +60,20 @@ Four rules govern your output.
    genuinely cannot do the job. Be specific and inclusive rather than vague and exclusive. Keep
    exclusions minimal: one or two terms that strip obvious noise, such as junior, intern or sales.
 
-4. OUTCOMES, NOT A SKILLS CHECKLIST. For firstYearOutcomes, describe what this person must have
+4. CAPTURE THE CONSTRAINTS, AND KEEP THEM OUT OF THE SKILL LIST. A requirement that cannot be
+   searched for is a constraint, not a skill: security clearance eligibility, citizenship or work
+   status, a commuting radius or on-site day count, an on-call rotation, shift work, a travel
+   cadence, a language requirement, a licence or a credential. Putting any of these in
+   mustHaveSkills corrupts the Boolean, and dropping them is worse: they decide how large the
+   addressable market actually is and whether a candidate can take the job at all.
+
+   Mark severity honestly. "disqualifying" means a person without it cannot hold the role, and
+   nothing else earns that label. A stated preference, or something the employer says is encouraged,
+   is "strong_preference" or "nice_to_have". Quote the words from the specification that established
+   each one in sourceQuote, so a recruiter can check it against the source rather than trust a
+   paraphrase.
+
+5. OUTCOMES, NOT A SKILLS CHECKLIST. For firstYearOutcomes, describe what this person must have
    delivered twelve months in, in the specification's own terms. For careerMoveCase, describe the
    stretch and growth that would make a strong, currently employed person consider this a step up.
    If the specification only lists requirements and offers no such case, return null.
@@ -92,10 +116,11 @@ export const jobSpecExtraction: PromptVersion<{ jobSpec: string }, ExtractionOut
 
 Return JSON with exactly these keys: title, segment, segmentRationale, functionDomain, location,
 engagementType, firstYearOutcomes, operatingRange, careerMoveCase, titleVariants, mustHaveSkills,
-exclusions, targetCompanies.
+exclusions, targetCompanies, constraints.
 
 titleVariants, mustHaveSkills and exclusions are arrays of {term, confidence}.
 targetCompanies is an array of {name, kind, rationale}.
+constraints is an array of {kind, severity, statement, sourceQuote}.
 location is null if the specification does not name one.
 
 --- JOB SPECIFICATION ---
@@ -139,6 +164,7 @@ export function toDraft(output: ExtractionOutputType): MandateDraft {
       ...toTerms(output.exclusions, 'exclusion'),
     ],
     targetCompanies: output.targetCompanies,
+    constraints: output.constraints,
   };
 }
 
@@ -194,12 +220,19 @@ export function deriveIntakeGaps(draft: MandateDraft): IntakeGap[] {
   // search strings with no geography, which are useless. Found by running a
   // real specification through the engine.
   if (draft.location === null || draft.location.trim() === '') {
+    const onsite = draft.constraints.some(
+      (c) => c.kind === 'location_or_onsite' && c.severity === 'disqualifying',
+    );
     gaps.push({
       field: 'location',
-      question:
-        'The specification names no location. Where is this role based, and what is genuinely ' +
-        'negotiable: remote, hybrid, relocation, or a specific site? Every search string carries ' +
-        'geography, and a national search without one returns the wrong people everywhere.',
+      question: onsite
+        ? 'The specification imposes an on-site or commuting requirement but never names the office. ' +
+          'Which city? Without it the search cannot be geographically bounded, and a commuting ' +
+          'requirement against an unknown location is unqualifiable: every prospect would have to be ' +
+          'asked, which is exactly the waste the constraint exists to prevent.'
+        : 'The specification names no location. Where is this role based, and what is genuinely ' +
+          'negotiable: remote, hybrid, relocation, or a specific site? Every search string carries ' +
+          'geography, and a national search without one returns the wrong people everywhere.',
     });
   }
 

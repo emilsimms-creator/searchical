@@ -56,6 +56,13 @@ if (!isSupportedSegment(draft.segment)) {
   process.exit(0);
 }
 
+rule('CONSTRAINTS (requirements that are not search terms)');
+if (draft.constraints.length === 0) console.log('  None stated.');
+for (const c of draft.constraints) {
+  console.log(`  ${c.severity.toUpperCase().padEnd(18)} [${c.kind}] ${c.statement}`);
+  if (c.sourceQuote) console.log(`    source: "${c.sourceQuote}"`);
+}
+
 rule('INTAKE GAPS (questions for the hiring leader)');
 const gaps = deriveIntakeGaps(draft);
 if (gaps.length === 0) console.log('  None. The specification answered everything.');
@@ -92,7 +99,7 @@ console.log(`\n  Skipped (${plan.selections.filter((s) => s.priority === 'skip')
   plan.selections.filter((s) => s.priority === 'skip').map((s) => s.name).join(', '));
 
 rule('PIPELINE');
-const pipeline = projectPipeline({ targetConversations: 10, longListSize: 75 });
+const pipeline = projectPipeline({ targetConversations: 10, longListSize: 75, constraints: draft.constraints });
 console.log(`  ${pipeline.workings}`);
 for (const line of pipeline.advice) console.log(`  ${line}`);
 

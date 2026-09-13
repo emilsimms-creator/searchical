@@ -18,6 +18,13 @@ export const channelPriority = pgEnum('channel_priority', ['primary', 'secondary
 export const targetCompanyKind = pgEnum('target_company_kind', [
   'competitor', 'academy', 'adjacent_sector', 'client_named', 'late_stage',
 ]);
+export const constraintKind = pgEnum('constraint_kind', [
+  'security_clearance', 'citizenship_or_status', 'location_or_onsite', 'schedule',
+  'language', 'licence_or_credential', 'travel', 'other',
+]);
+export const constraintSeverity = pgEnum('constraint_severity', [
+  'disqualifying', 'strong_preference', 'nice_to_have',
+]);
 export const searchStringKind = pgEnum('search_string_kind', [
   'linkedin_recruiter_boolean', 'github_xray', 'conference_talks_xray', 'provider_query',
 ]);
@@ -81,6 +88,17 @@ export const targetCompanies = pgTable('target_companies', {
   watchlisted: boolean('watchlisted').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [unique().on(t.mandateId, t.name)]);
+
+export const mandateConstraints = pgTable('mandate_constraints', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  mandateId: uuid('mandate_id').notNull().references(() => mandates.id, { onDelete: 'cascade' }),
+  kind: constraintKind('kind').notNull(),
+  severity: constraintSeverity('severity').notNull(),
+  statement: text('statement').notNull(),
+  sourceQuote: text('source_quote'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [unique().on(t.mandateId, t.kind, t.statement)]);
 
 export const channelRatings = pgTable('channel_ratings', {
   id: uuid('id').primaryKey().defaultRandom(),

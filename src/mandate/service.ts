@@ -1,7 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 import type { TenantTx } from '@/db/client';
 import {
-  channelRatings, channelSelections, intakeGaps, mandates, mandateTerms,
+  channelRatings, channelSelections, intakeGaps, mandateConstraints, mandates, mandateTerms,
   pipelineProjections, searchStrings, sourceOfHireEvents, targetCompanies,
 } from '@/db/schema';
 import type { LlmGateway } from '@/llm/gateway';
@@ -10,7 +10,7 @@ import { deriveIntakeGaps, jobSpecExtraction, toDraft } from './extraction';
 import { projectPipeline, type PipelineInput } from './pipeline';
 import { planChannels, type ChannelPlan } from './planner';
 import { generateSearchStrings, type GeneratedStrings } from './strings';
-import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
+import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateConstraint, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
 import { validateVocabulary, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
 
 export interface Actor {
@@ -32,6 +32,8 @@ export interface SearchPlan {
   readonly strings: GeneratedStrings;
   readonly channels: ChannelPlan;
   readonly pipeline: PipelineProjection;
+  /** Requirements that are not search terms. Qualify against these before sequencing. */
+  readonly constraints: readonly MandateConstraint[];
 }
 
 export interface TermDecision {
@@ -164,6 +166,22 @@ export class MandateService {
         .values(gaps.map((g) => ({ tenantId: args.tenantId, mandateId, field: g.field, question: g.question })));
     }
 
+    if (draft.constraints.length > 0) {
+      await this.#tx
+        .insert(mandateConstraints)
+        .values(
+          draft.constraints.map((c) => ({
+            tenantId: args.tenantId,
+            mandateId,
+            kind: c.kind,
+            severity: c.severity,
+            statement: c.statement,
+            sourceQuote: c.sourceQuote ?? null,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
     if (draft.targetCompanies.length > 0) {
       await this.#tx.insert(targetCompanies).values(
         draft.targetCompanies.map((c) => ({
@@ -285,9 +303,12 @@ export class MandateService {
     }
     const channels = planChannels(ratings as unknown as ChannelRatingSeed[], mandate.segment as Segment);
 
+    const constraints = await this.#constraintsFor(args.mandateId);
+
     const pipeline = projectPipeline({
       targetConversations: args.pipeline?.targetConversations ?? 10,
       longListSize: args.pipeline?.longListSize ?? 75,
+      constraints,
       ...(args.pipeline?.responseRate !== undefined ? { responseRate: args.pipeline.responseRate } : {}),
       ...(args.pipeline?.interestedShare !== undefined ? { interestedShare: args.pipeline.interestedShare } : {}),
       ...(args.pipeline?.touchesPerPerson !== undefined ? { touchesPerPerson: args.pipeline.touchesPerPerson } : {}),
@@ -326,7 +347,7 @@ export class MandateService {
       ratesSampleSize: pipeline.ratesSampleSize,
     });
 
-    return { mandateId: args.mandateId, strings, channels, pipeline };
+    return { mandateId: args.mandateId, strings, channels, pipeline, constraints };
   }
 
   /**
@@ -357,6 +378,19 @@ export class MandateService {
     const [row] = await this.#tx.select().from(mandates).where(eq(mandates.id, mandateId)).limit(1);
     if (!row) throw new MandateError(`mandate ${mandateId} not found in this tenant`);
     return row;
+  }
+
+  async #constraintsFor(mandateId: string): Promise<MandateConstraint[]> {
+    const rows = await this.#tx
+      .select()
+      .from(mandateConstraints)
+      .where(eq(mandateConstraints.mandateId, mandateId));
+    return rows.map((r) => ({
+      kind: r.kind,
+      severity: r.severity,
+      statement: r.statement,
+      sourceQuote: r.sourceQuote ?? undefined,
+    }));
   }
 
   async #allTerms(mandateId: string): Promise<MandateTerm[]> {

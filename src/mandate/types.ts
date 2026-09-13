@@ -78,6 +78,37 @@ export interface MandateDraft {
   readonly intake: PerformanceIntake;
   readonly terms: readonly MandateTerm[];
   readonly targetCompanies: readonly { name: string; kind: TargetCompanyKind; rationale?: string | undefined }[];
+  readonly constraints: readonly MandateConstraint[];
+}
+
+export type ConstraintKind =
+  | 'security_clearance'
+  | 'citizenship_or_status'
+  | 'location_or_onsite'
+  | 'schedule'
+  | 'language'
+  | 'licence_or_credential'
+  | 'travel'
+  | 'other';
+
+/** Only `disqualifying` removes people from the addressable market. */
+export type ConstraintSeverity = 'disqualifying' | 'strong_preference' | 'nice_to_have';
+
+/**
+ * A requirement that is not a search term.
+ *
+ * Clearance eligibility, citizenship, a commuting radius, an on-call rotation,
+ * a language. These never belong in a Boolean (forcing them into the skill list
+ * corrupts it) but they decide the size of the addressable market, they decide
+ * whether a sequence is worth spending on someone, and they are what the
+ * receptivity score's freedom-from-deal-breakers factor is scored against.
+ */
+export interface MandateConstraint {
+  readonly kind: ConstraintKind;
+  readonly severity: ConstraintSeverity;
+  readonly statement: string;
+  /** The words from the specification that established it. */
+  readonly sourceQuote?: string | undefined;
 }
 
 export type TargetCompanyKind = 'competitor' | 'academy' | 'adjacent_sector' | 'client_named' | 'late_stage';
@@ -105,6 +136,8 @@ export interface PipelineProjection {
   readonly shortfall: number;
   readonly ratesSource: string;
   readonly ratesSampleSize: number | null;
+  /** True when a disqualifying constraint narrows the market the rates assume. */
+  readonly constrainedMarket: boolean;
   /** Shown as a working, not a number. */
   readonly workings: string;
   /** Concrete widening moves when the long list is short. */
