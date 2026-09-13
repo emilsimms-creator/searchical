@@ -19,6 +19,7 @@ and every score it produces can be explained and replayed.**
 | [Executive Summary](docs/executive-summary.md) | Sponsor, partner, investor, anyone deciding whether to fund or proceed | What the system does, why it wins, what it cannot do, the honest constraints, the build shape and the decisions that need making |
 | [Technical Architecture](docs/architecture.md) | Engineers who will build and operate it | Principles, system and container views, the three engines, data model, policy engine, connector framework, technology choices, build plan, decision record |
 | [Phase 0 notes](docs/phase-0.md) | Engineers | What the foundations layer contains, and how each exit criterion is proven |
+| [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 
 Read the Executive Summary first. It stands alone. The Architecture assumes it.
 
@@ -53,5 +54,10 @@ functions, and only a real Postgres demonstrates those.
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
 [docs/phase-0.md](docs/phase-0.md).
 
-Next is phase 1, the Mandate Engine. The open decisions are listed at the end of the
-[Executive Summary](docs/executive-summary.md).
+**Phase 1 code complete.** The Mandate Engine turns a job specification into a confirmed market
+vocabulary, a ranked channel plan, four search strings and the pipeline arithmetic. 90 tests
+passing. One exit criterion is operational and needs three real mandates run through it. See
+[docs/phase-1.md](docs/phase-1.md).
+
+Next is phase 2, the Receptivity Engine and the employer watchlist. The open decisions are listed at
+the end of the [Executive Summary](docs/executive-summary.md).
