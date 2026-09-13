@@ -269,6 +269,33 @@ regression showed up immediately in an existing test, where the VP Infrastructur
 emitting a code host search because the code host rates 1 of 5 for executives. That was the fix
 working.
 
+### What the eval caught once it had four cases
+
+Running the four case suite produced the first failure the eval found on its own rather than
+reproducing one already known:
+
+```
+FAIL  senior-cybersecurity-grc
+        x location_shape: expected null, got "Ontario"
+        x required_gaps: 0/1; raised: none
+```
+
+The same specification had returned `null` on an earlier run. It names the Ontario Cyber Security
+Framework and the Ontario electrical sector, and **never says where the person sits.** So "Ontario"
+is the employer's regulatory jurisdiction leaking into a field that bounds the search geographically
+and, worse, suppresses the intake gap that would have asked the hiring leader the question. Both
+costs land on the recruiter and neither is visible to them.
+
+This is the `inferred` doctrine from the previous run, applying to a field that had no such guard:
+**an inference must not silently fill a slot that changes downstream behaviour.** The prompt now
+states that location is the stated work location and must not be inferred from the employer's
+identity, its regulator, its sector, the standards it complies with, or where its customers are.
+
+**A failing suite is the eval working.** Three of these four cases were built from defects already
+fixed and were always going to pass. This one found something live, on a field two cases had already
+exercised, because the fourth case changed nothing about the prompt and everything about the
+sample size.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

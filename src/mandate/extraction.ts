@@ -111,13 +111,21 @@ rejected outright rather than repaired.
   outOfScopeReason   ${values((shape.outOfScopeReason as unknown as { unwrap(): z.ZodTypeAny }).unwrap())}, or null
                      Required to be non-null exactly when segment is "out_of_scope".
   functionDomain     string
-  location           a PLACE NAME only, at most 60 characters, or null.
+  location           the STATED WORK LOCATION, as a place name, at most 60 characters, or null.
                      Good: "Ottawa" / "Ottawa, Ontario" / "Toronto or Montreal" / null
                      Bad:  "Canada, within commuting distance of the office; the city is not named"
+
+                     Where the person will work, and nothing else. Do NOT infer it from the
+                     employer's identity, the jurisdiction that regulates the employer, the sector
+                     it operates in, the standards it must comply with, or where its customers are.
+                     A specification that names a provincial regulator and a provincial industry
+                     twelve times, and never says where the person sits, has a location of null.
+
                      If the specification imposes a commuting or on-site rule but never names the
-                     city, the answer is null and the rule is a constraint. Null is the finding: it
-                     raises the question with the hiring leader. A sentence here is dropped straight
-                     into a search query, where it matches nothing.
+                     place, the answer is still null and the rule is a constraint. Null is the
+                     finding: it raises the question with the hiring leader, and an inferred place
+                     silences that question while bounding the search on a guess. Both of those
+                     costs land on the recruiter, who will not know either happened.
   engagementType     ${values(shape.engagementType)}
                      Use "unstated" when the specification does not say. Do not guess, and do not
                      explain in this field: the explanation belongs nowhere, the null belongs here.

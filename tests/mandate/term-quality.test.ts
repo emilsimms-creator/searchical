@@ -131,3 +131,24 @@ describe('the prompt is generated from the schema', () => {
     expect(system).toMatch(/confidence is a NUMBER between 0 and 1/);
   });
 });
+
+describe('location is the work location, not the regulator', () => {
+  /**
+   * The GRC specification names the Ontario Cyber Security Framework and the
+   * Ontario electrical sector, and never says where the person sits. One eval
+   * run returned null, a later one returned "Ontario". An inferred place
+   * bounds the search on a guess and silences the gap that should have asked,
+   * and the recruiter learns about neither.
+   */
+  const { system } = jobSpecExtraction.render({ jobSpec: 'x' });
+
+  it('tells the model not to infer a location from the regulator or the sector', () => {
+    expect(system).toMatch(/Do NOT infer it from the/);
+    expect(system).toMatch(/jurisdiction that regulates the employer/);
+    expect(system).toMatch(/never says where the person sits, has a location of null/);
+  });
+
+  it('explains what an inferred place costs', () => {
+    expect(system).toMatch(/silences that question while bounding the search on a guess/);
+  });
+});

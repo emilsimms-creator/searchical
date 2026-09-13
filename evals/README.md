@@ -88,6 +88,13 @@ does not. Whether it would move a passive candidate is a judgment call for the r
 trusting a change; the per check table then shows how often each check holds rather than whether it
 held once.
 
+This is not theoretical. The GRC case returned `location: null` on one run and `location: "Ontario"`
+on the next, from a specification that names the Ontario Cyber Security Framework and the Ontario
+electrical sector and never once says where the person sits. The inferred place both bounded the
+search on a guess and silenced the intake gap that should have asked, and a single green run would
+have reported neither. The prompt now states that location is the work location and must not be
+inferred from the regulator, the sector or the employer's identity.
+
 ## Output
 
 `evals/results/results.jsonl` carries one row per case per run with the per check scores and timing.
