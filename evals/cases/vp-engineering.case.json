@@ -1,0 +1,14 @@
+{
+  "id": "vp-engineering",
+  "spec": "fixtures/vp-engineering.txt",
+  "label": "positive",
+  "why": "The first in-scope executive: VP Engineering reporting to a Chief Product and Technology Officer, clearing both the seniority and the domain bar. Closes the last untested path, since the senior_executive branch had only ever been exercised by refusals. Also a direct test of the location rule: the specification names the employer and an office environment, and never a city.",
+  "expect": {
+    "segment": "senior_executive",
+    "searchPlan": true,
+    "constraintKinds": ["prior_experience", "licence_or_credential"],
+    "gaps": ["location"],
+    "skills": ["devsecops"],
+    "location": "null"
+  }
+}

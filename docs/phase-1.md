@@ -308,6 +308,32 @@ case pass rate    100%  (3/3)
 Before the change the same case returned `null` once and `"Ontario"` once. **One green run would have
 been indistinguishable from either.**
 
+### The fifth live run: the last untested path
+
+A VP Engineering reporting to a Chief Product and Technology Officer. The first **in scope**
+executive, and the first case to run the `senior_executive` branch all the way through to a channel
+plan against a real document rather than stopping at a refusal.
+
+It passed clean, and three of the fixes made in the preceding runs held on a specification none of
+them had been tuned against.
+
+**The two bar framing worked as intended.** The rationale addressed both explicitly: Vice President
+reporting to the CPTO with an engineering organization under it, and the work itself SDLC, CI/CD,
+architecture and modernization, so "both the seniority and domain bars are cleared".
+
+**The location rule held.** The specification names its employer and an office environment and never
+a city, and the extraction returned null and raised the gap. That is the fix from the previous run
+holding on unseen input, which is the only test of it that means anything.
+
+**The channel plan omission was stated rather than silent.** No code host search was generated, with
+the reason given: the plan rates that surface as skipped for executives.
+
+**And the contrast that validates the domain bar.** This mandate puts the CIO Association of Canada
+at the top of the plan, which is exactly right for a VP of Engineering, and it is the same channel
+that was exactly wrong for the Director of Corporate Strategy two runs earlier. **The fix was never
+"stop recommending CIOCAN". It was "check the domain bar first."** A single specification cannot
+show that; the pair does.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

@@ -1,0 +1,65 @@
+The Opportunity
+
+The Vice President, Engineering reports to the Chief Product and Technology Officer and is accountable for the application engineering organization, including engineering standards, technical delivery, software quality, release readiness, application reliability, supportability, and modernization.
+
+This role leads the teams and practices to design, build, test, release, support, and modernize applications, platforms, and systems that enable underwriting, servicing, funding and internal and external experiences (broker, customer, and partner).
+
+The VP, Engineering leads an integrated Engineering organization that includes the product aligned delivery capabilities required to translate business priorities into clear roadmaps, sequenced execution plans, and measurable technology outcomes.
+
+How you will contribute:
+
+* Lead and develop a multi-disciplinary engineering organization, including engineering managers, technical leads, application engineering teams, QA, DevSecOps, release management, solution architecture, and application support.
+* Set and improve engineering standards and SDLC practices by embedding QA, test automation, DevSecOps, solution architecture, release readiness, change management, observability, and operational support into an end-to-end delivery model.
+* Establish and manage engineering performance measures across predictability, productivity, software quality, release health, application reliability, supportability, and technical debt reduction.
+* Lead the product aligned delivery planning needed to translates business priorities and product roadmaps into sequenced engineering plans with clear tradeoffs, dependencies, risks, capacity assumptions, and release readiness expectations.
+* Lead planning, sequencing, capacity tradeoffs, and delivery commitments across engineering, product delivery, and business analysis teams, ensuring modernization, automation, AI enabled delivery, prioritize investments based on business value, risk reduction, supportability, and measurable impact.
+* Ensure architecture and technical designs are scalable, secure, maintainable, testable, observable, supportable, and aligned to enterprise standards.
+* Lead modernization of priority applications and components where modernization improves business agility, risk posture, scalability, cost efficiency, security, reliability, or long-term supportability.
+* Reduce technical debt and improve maintainability, integration, and operational readiness by using AI assisted engineering, automation, reusable components, cloud services, modern architecture patterns, and off-the-shelf libraries where appropriate.
+* Own application-level supportability, defect resolution, production readiness, and response to issues with Enterprise IT and Infrastructure on environments, cloud platforms, monitoring, deployment automation, infrastructure operations, system health, and platform reliability.
+* Partner with Technology Governance, Risk and Performance to advance SDLC standards, change management, incident management, controls, risk, and delivery reporting.
+* Build a high performance engineering culture with modern capabilities, learning agility, technical discipline, strong ownership of outcomes, and accountability for measurable Outcomes.
+* Operate as a member of the CPTO leadership team, helping Engineering, product delivery, Enterprise IT and Infrastructure, and Technology Governance, Risk and Performance work as an integrated team.
+
+The experience you need:
+
+* Bachelor's degree in computer science, engineering, technology or a related discipline
+* 10 + years of progressive engineering experience required
+* Senior engineering leadership experience in a complex environment, with accountability for engineering teams, managers, technical standards, delivery execution, and software quality.
+* Experience leading application development, platforms, QA, release management, DevSecOps, solution architecture, and support teams.
+* Strong understanding of modern software engineering practices, SDLC, CI/CD, test automation, cloud-enabled delivery, observability, operational readiness, and secure delivery practices.
+* Proven ability to lead integrated engineering and product delivery teams balancing business priorities, technical constraints, delivery capacity, risk, modernization needs, quality, reliability, and measurable outcomes.
+* Practical experience modernizing legacy applications and technology components with minimal disruption or cost.
+* Experience using or scaling AI enabled engineering, developer productivity tools, automation, and reusable engineering patterns while ensuring security, privacy, risk, and code review controls.
+* Strong technical judgment across application architecture, integration, data flows, reliability, security, maintainability, observability, and supportability.
+* Ability to partner effectively with Infrastructure, Security, Risk, Finance, business stakeholders, and external partners.
+* Strong people leadership capability, including building engineering talent, coaching managers, improving team performance, managing capacity, strengthening succession, and raising technical standards.
+* Experience in financial services, mortgage lending, lending operations, servicing, broker channels, third-party partnerships, or regulated technology environments is preferred.
+
+Relationships:
+
+* External Customers: Engages vendors, platform providers, and implementation partners to support solution delivery and technical quality.
+* Internal Customers: Partners with senior leaders, business stakeholders, product delivery teams, and technology teams to deliver modern, secure, and scalable technology solutions
+
+Working Environment and Physical Demands Analysis:
+
+* Office environment
+* Periods of high volume with tight timelines
+* Long periods of stationary position/sitting
+* Prolonged periods of repetitive movement (i.e. using a keyboard and mouse)
+* Long periods of time in viewing a computer screen
+* Multi-tasking may include speaking to customers on a telephone call while looking up information on a computer program.
+
+Why join First National?
+
+* Competitive Compensation
+* Comprehensive benefits program (i.e., Health Spending Account, Maternity and Parental Leave Top Up)
+* Extensive training programs to set our employees up for success
+* Modern office environment conducive to collaboration
+* Supportive teamwork culture
+* Opportunities to give back to the communities and work through events focused on a variety of charities
+* Ongoing social events throughout the year
+
+The team you'll join:
+Founded in 1988, First National is one of Canada's largest non-bank lenders. We provide residential mortgages exclusively through the mortgage broker channel and we are Canada's largest commercial mortgage lender.
+First National has been consistently recognized as a great place to work and we are proud that our employee engagement feedback is higher than our industry partners.

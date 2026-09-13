@@ -26,14 +26,16 @@ is the failure this eval exists to prevent.
 | `nav-canada-technologist` | negative | Entry level field electronics role. The engine must refuse it rather than force it into the nearest segment. Found the triage defect |
 | `senior-database-administrator` | positive | In scope senior individual contributor carrying six hard constraints that are not search terms, and naming no city despite an on-site rule. Found the lost constraints defect, then the description-shaped search terms defect |
 | `senior-cybersecurity-grc` | positive | In scope, carries two different titles for the same role, and invites domain inference the engine must label rather than assert. Found the unearned provenance defect |
+| `vp-engineering` | positive | The first in-scope executive: VP Engineering reporting to a Chief Product and Technology Officer, clearing both bars. Closes the last untested path, and confirms the location rule holds on a specification that names its employer and an office environment but never a city |
 | `director-enterprise-strategy` | negative | A genuine executive and genuinely not this practice's market: corporate strategy at a credit union. Clears the seniority bar, fails the domain bar. Found the second axis of force fitting, and the search strings that contradicted their own channel plan |
 
-**Four cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred
+**Five cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred
 inputs, and at n=3 a single flaky case swings the score by a third. This set is what exists, every
 member of it earned its place by finding a real defect, and **the first priority for this eval is
-more real specifications**. The gaps now: an **in scope** executive search (the executive case here is
-a refusal, so the `senior_executive` branch still has no case that proceeds all the way to a channel
-plan), a contract or consulting engagement, and a specification carrying a stated compensation band.
+more real specifications**. All three verdicts are now covered by a real document: `senior_executive`, `senior_it_consultant` and
+`out_of_scope` on each of its two axes. The gaps now: a contract or consulting engagement, a
+specification carrying a stated compensation band, and one that actually names its work location, so
+that `location_shape` is exercised in the positive direction rather than only against null.
 
 ## How it grades
 
