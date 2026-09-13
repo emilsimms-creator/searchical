@@ -59,6 +59,36 @@ three of them. Second, **the title frequency source is a fixture** until a data 
 contracted, so validation currently says plainly that the variants are unvalidated model output
 rather than pretending otherwise.
 
+## What running a real specification found
+
+A NAV CANADA Technologist posting was run through the engine: an entry level field electronics role
+maintaining air navigation equipment, with no minimum years of experience, a diploma standing in for
+experience, an explicit statement that prior sector experience is not required, and a training salary
+band ahead of a qualified band.
+
+**The engine had no way to say "this is not a role I handle".** `mandate_segment` offered exactly two
+values, so extraction was forced to pick one, and the planner then recommended GitHub, AWS Community
+Builders, Microsoft MVP and the CNCF ambassador directories for a technician who maintains radar. That
+is the "excellent search string for the wrong search" failure the architecture warns about, occurring
+one level higher than the architecture anticipated: at the segment rather than the title.
+
+Fixed in `migrations/0004_segment_triage.sql` and the triage tests. Triage now runs before anything
+else, `out_of_scope` is a first class verdict carrying its reasoning, the mandate is recorded rather
+than discarded (what the practice is being sent and cannot serve is worth knowing), and there is no
+path from an out of scope mandate to a search plan: confirmation and planning both refuse.
+
+The same run found a second, smaller miss. The specification named no location, and the engine did
+not ask. A national employer with site based roles and no geography produces search strings that
+return the wrong people everywhere, so that is now an intake gap.
+
+Two further gaps were found and are **not** fixed, because they are enhancements rather than defects
+and the scope is yours to set. The mandate model has no field for **compensation**, though this
+specification carried two structured bands, and the method calls for holding a range without leading
+with it. It also has nowhere to put a **hard qualification that is not a search term**: bilingual
+English and French, a valid driver's licence, a credential completed within ten years. These are
+filters, not skills, and today they would be forced into the skill list where they would corrupt the
+Boolean.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

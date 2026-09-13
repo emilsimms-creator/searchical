@@ -1,6 +1,10 @@
-export type Segment = 'senior_executive' | 'senior_it_consultant';
+/** The two segments this practice recruits, and the verdict for everything else. */
+export type SupportedSegment = 'senior_executive' | 'senior_it_consultant';
+export type Segment = SupportedSegment | 'out_of_scope';
+
+export const isSupportedSegment = (s: Segment): s is SupportedSegment => s !== 'out_of_scope';
 export type EngagementType = 'permanent' | 'contract' | 'either';
-export type MandateStatus = 'draft' | 'awaiting_confirmation' | 'live' | 'closed';
+export type MandateStatus = 'draft' | 'awaiting_confirmation' | 'live' | 'closed' | 'out_of_scope';
 export type ConfidentialityLevel = 'fully_confidential' | 'client_named_at_stage' | 'open';
 export type TermKind = 'title_variant' | 'must_have_skill' | 'exclusion';
 export type TermOrigin = 'extracted' | 'recruiter' | 'market_observed';
@@ -59,13 +63,15 @@ export interface PerformanceIntake {
 }
 
 export interface IntakeGap {
-  readonly field: keyof PerformanceIntake | 'title_variants' | 'must_have_skills' | 'target_companies';
+  readonly field: keyof PerformanceIntake | 'title_variants' | 'must_have_skills' | 'target_companies' | 'location';
   readonly question: string;
 }
 
 export interface MandateDraft {
   readonly title: string;
   readonly segment: Segment;
+  /** Why that segment. Required reading when the verdict is out_of_scope. */
+  readonly segmentRationale: string;
   readonly functionDomain: string;
   readonly location: string | null;
   readonly engagementType: EngagementType;
@@ -111,3 +117,20 @@ export interface SearchString {
 }
 
 export class MandateError extends Error {}
+
+/**
+ * Raised when a mandate falls outside the two segments this practice recruits.
+ *
+ * A refusal costs a minute. A confidently wrong channel plan costs a search.
+ */
+export class OutOfScopeError extends MandateError {
+  readonly rationale: string;
+  constructor(title: string, rationale: string) {
+    super(
+      `"${title}" is outside the two segments this practice recruits (senior executives and senior ` +
+        `IT consultants), so no channel plan will be produced. ${rationale}`,
+    );
+    this.name = 'OutOfScopeError';
+    this.rationale = rationale;
+  }
+}

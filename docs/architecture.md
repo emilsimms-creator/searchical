@@ -287,6 +287,12 @@ hiring manager invented does not exist at the companies you should be targeting.
 single most common failure mode in automated sourcing and the system is designed specifically to
 defeat it.
 
+**The same failure occurs one level higher, at the segment.** A specification for a role the
+practice does not recruit will be forced into the nearest supported segment unless the system can
+say otherwise, and the channel plan that follows is confidently, uselessly wrong. Triage therefore
+runs before anything else and has its own verdict: out of scope, with the reasoning attached. See
+decision record entry 13.
+
 Three mechanisms, layered.
 
 First, extraction produces *candidate* title variants, never final ones, and each carries a
@@ -1305,6 +1311,7 @@ instrument.
 | 10 | Canadian data residency by default | Provisional | Quebec Law 25 requires an assessment before transfer outside Quebec | Confirm on receipt of the privacy impact assessment |
 | 11 | Build for the European high risk obligations now despite the December 2027 deferral | Accepted | Risk management, data governance, logging, human oversight and documentation cost far more retrofitted | Foundational |
 | 12 | Licensed professional data provider selected by paid bake off, not demonstration | Accepted | Vendor claims in this category are self reported and the one independent test contradicts them materially | Re-run on renewal |
+| 13 | A mandate outside the two supported segments is refused, not force fitted | Accepted | Found by running a real specification through the engine. With two segments available, extraction had to pick one, and the planner then recommended code hosts and cloud ambassador directories for an entry level field electronics role. A refusal costs a minute; a confidently wrong channel plan costs a search | Revisited when the practice opens to other functions, which changes what is in scope rather than whether triage exists |
 
 ---
 

@@ -31,6 +31,9 @@ export function failingModel(message: string, id = 'failing-model'): LanguageMod
 export const VP_INFRASTRUCTURE_EXTRACTION = {
   title: 'VP, Infrastructure and Cloud',
   segment: 'senior_executive',
+  segmentRationale:
+    'Reports to the CIO with a team of about 60 and a 40 million dollar budget: director level and ' +
+    'above with organizational scope.',
   functionDomain: 'Hybrid cloud and infrastructure operations',
   location: 'Ottawa',
   engagementType: 'permanent',
@@ -57,4 +60,38 @@ export const VP_INFRASTRUCTURE_EXTRACTION = {
     { name: 'National Bank of Example', kind: 'competitor', rationale: 'Comparable hybrid estate' },
     { name: 'Example Telecom', kind: 'adjacent_sector', rationale: 'Same operational complexity' },
   ],
+} as const;
+
+/**
+ * A real specification that falls outside both segments: a NAV CANADA
+ * Technologist posting, an entry level field electronics role maintaining air
+ * navigation equipment. No minimum years of experience, a qualification
+ * standing in for experience, an explicit statement that prior sector
+ * experience is not required, and a training salary band.
+ *
+ * This fixture exists because running the real thing through the engine is what
+ * found the segment triage defect. It stays as a regression test.
+ */
+export const NAV_CANADA_TECHNOLOGIST_EXTRACTION = {
+  title: 'Technologist',
+  segment: 'out_of_scope',
+  segmentRationale:
+    'Entry level. The specification requires a diploma completed within the last ten years rather ' +
+    'than any minimum experience, states plainly that previous aviation sector experience is not ' +
+    'required, and quotes a training salary band before a qualified band. There is no seniority ' +
+    'marker in the title or the responsibilities. This is neither a senior executive nor a senior ' +
+    'IT consultant.',
+  functionDomain: 'Electronic maintenance of air navigation systems',
+  location: null,
+  engagementType: 'permanent',
+  firstYearOutcomes: null,
+  operatingRange: null,
+  careerMoveCase: null,
+  titleVariants: [
+    { term: 'Technologist', confidence: 0.9 },
+    { term: 'Electronics Technologist', confidence: 0.6 },
+  ],
+  mustHaveSkills: [{ term: 'Engineering Technology', confidence: 0.8 }],
+  exclusions: [],
+  targetCompanies: [],
 } as const;

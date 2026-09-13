@@ -20,6 +20,16 @@ export const DEFAULT_MODEL = 'claude-opus-5';
 const FALLBACK_BETA = 'server-side-fallback-2026-06-01';
 const FALLBACK_MODEL = 'claude-opus-4-8';
 
+export class MissingCredentialsError extends Error {
+  constructor(cause: string) {
+    super(
+      'No Anthropic credentials found. Set ANTHROPIC_API_KEY, or run `ant auth login` to store a ' +
+        `profile the SDK reads automatically. (${cause})`,
+    );
+    this.name = 'MissingCredentialsError';
+  }
+}
+
 export class ModelRefusalError extends Error {
   readonly category: string | null;
   constructor(category: string | null, explanation: string | undefined) {
@@ -39,7 +49,19 @@ export interface ClaudeModelOptions {
 }
 
 export function claudeModel(options: ClaudeModelOptions = {}): LanguageModel {
-  const client = options.client ?? new Anthropic();
+  // Constructed lazily. Building the adapter must not require credentials: it
+  // is assembled at wiring time and may never be called.
+  let client: Anthropic | undefined = options.client;
+  const clientOrThrow = (): Anthropic => {
+    if (client) return client;
+    try {
+      client = new Anthropic();
+      return client;
+    } catch (error) {
+      throw new MissingCredentialsError((error as Error).message.split('\n')[0] ?? 'unknown');
+    }
+  };
+
   const model = options.model ?? DEFAULT_MODEL;
   const maxTokens = options.maxTokens ?? 16_000;
   const effort = options.effort ?? 'high';
@@ -48,7 +70,7 @@ export function claudeModel(options: ClaudeModelOptions = {}): LanguageModel {
     id: model,
     async complete({ system, user, maxTokens: perCall }) {
       try {
-        const response = await client.beta.messages.create({
+        const response = await clientOrThrow().beta.messages.create({
           model,
           max_tokens: perCall ?? maxTokens,
           betas: [FALLBACK_BETA],
@@ -72,6 +94,11 @@ export function claudeModel(options: ClaudeModelOptions = {}): LanguageModel {
           .map((block) => block.text)
           .join('\n');
       } catch (error) {
+        // The SDK constructs without credentials and only fails when it builds
+        // the request headers, as a plain Error rather than a typed one.
+        if (error instanceof Error && /Could not resolve authentication method/.test(error.message)) {
+          throw new MissingCredentialsError('no apiKey, authToken or profile resolved');
+        }
         // Most specific first: the distinction between retryable and terminal
         // is lost if everything is caught as one class.
         if (error instanceof Anthropic.AuthenticationError) {

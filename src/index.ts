@@ -8,4 +8,4 @@ export * from './ledger';
 export * from './policy';
 export * from './mandate';
 export { LlmGateway, ModelOutputError, type LanguageModel, type PromptVersion } from './llm/gateway';
-export { claudeModel, DEFAULT_MODEL, ModelRefusalError } from './llm/anthropic';
+export { claudeModel, DEFAULT_MODEL, ModelRefusalError, MissingCredentialsError } from './llm/anthropic';

@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run test"
+    "verify": "npm run typecheck && npm run test",
+    "mandate:dry-run": "tsx --tsconfig tsconfig.json scripts/dry-run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

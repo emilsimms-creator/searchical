@@ -10,7 +10,7 @@ import { deriveIntakeGaps, jobSpecExtraction, toDraft } from './extraction';
 import { projectPipeline, type PipelineInput } from './pipeline';
 import { planChannels, type ChannelPlan } from './planner';
 import { generateSearchStrings, type GeneratedStrings } from './strings';
-import { MandateError, type ChannelRatingSeed, type IntakeGap, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
+import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
 import { validateVocabulary, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
 
 export interface Actor {
@@ -22,7 +22,9 @@ export interface DraftedMandate {
   readonly draft: MandateDraft;
   readonly vocabulary: ValidatedVocabulary;
   readonly gaps: readonly IntakeGap[];
-  readonly status: 'awaiting_confirmation';
+  readonly status: 'awaiting_confirmation' | 'out_of_scope';
+  /** Set only when the verdict is out_of_scope: why, in the recruiter's terms. */
+  readonly outOfScopeReason?: string;
 }
 
 export interface SearchPlan {
@@ -79,6 +81,38 @@ export class MandateService {
     const extracted = await this.#gateway.run(jobSpecExtraction, { jobSpec: args.jobSpec });
     const draft = toDraft(extracted);
 
+    // Triage before anything else. A mandate outside the two segments this
+    // practice recruits is recorded and stopped, not force fitted: the channel
+    // matrix has no opinion about it, and inventing one produces a plan that is
+    // confidently wrong. The row is kept because what the practice is being
+    // sent and cannot serve is itself worth knowing.
+    if (!isSupportedSegment(draft.segment)) {
+      const [outOfScope] = await this.#tx
+        .insert(mandates)
+        .values({
+          tenantId: args.tenantId,
+          title: draft.title,
+          segment: 'out_of_scope',
+          segmentRationale: draft.segmentRationale,
+          functionDomain: draft.functionDomain,
+          location: draft.location,
+          engagementType: draft.engagementType,
+          status: 'out_of_scope',
+          sourceDocumentRef: args.sourceDocumentRef ?? null,
+          createdBy: args.actor.id,
+        })
+        .returning({ id: mandates.id });
+
+      return {
+        mandateId: outOfScope!.id,
+        draft,
+        vocabulary: { terms: [], zeroCount: [], checkedAgainst: null, note: 'Not assessed: mandate is out of scope.' },
+        gaps: [],
+        status: 'out_of_scope',
+        outOfScopeReason: draft.segmentRationale,
+      };
+    }
+
     const vocabulary = await validateVocabulary(
       draft.terms,
       { targetCompanies: draft.targetCompanies.map((c) => c.name), location: draft.location },
@@ -92,6 +126,7 @@ export class MandateService {
         tenantId: args.tenantId,
         title: draft.title,
         segment: draft.segment,
+        segmentRationale: draft.segmentRationale,
         functionDomain: draft.functionDomain,
         location: draft.location,
         engagementType: draft.engagementType,
@@ -163,6 +198,9 @@ export class MandateService {
     tenantId: string;
   }): Promise<{ confirmed: number; rejected: number }> {
     const mandate = await this.#requireMandate(args.mandateId);
+    if (mandate.status === 'out_of_scope') {
+      throw new OutOfScopeError(mandate.title, mandate.segmentRationale ?? '');
+    }
     if (mandate.status === 'live') {
       throw new MandateError(`mandate ${args.mandateId} is already live`);
     }
@@ -225,6 +263,9 @@ export class MandateService {
     pipeline?: Partial<PipelineInput>;
   }): Promise<SearchPlan> {
     const mandate = await this.#requireMandate(args.mandateId);
+    if (mandate.status === 'out_of_scope') {
+      throw new OutOfScopeError(mandate.title, mandate.segmentRationale ?? '');
+    }
     if (mandate.status !== 'live') {
       throw new MandateError(
         `mandate ${args.mandateId} is "${mandate.status}": a recruiter must confirm the market vocabulary ` +

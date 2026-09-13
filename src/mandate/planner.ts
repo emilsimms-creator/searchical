@@ -1,4 +1,4 @@
-import type { ChannelPriority, ChannelRatingSeed, ChannelSelection, Segment } from './types';
+import { OutOfScopeError, type ChannelPriority, type ChannelRatingSeed, type ChannelSelection, type Segment, type SupportedSegment } from './types';
 
 export const CHANNEL_THRESHOLDS = {
   primary: 4,
@@ -24,13 +24,13 @@ export interface ChannelPlan {
   readonly note: string;
 }
 
-const fitFor = (rating: ChannelRatingSeed, segment: Segment): number =>
+const fitFor = (rating: ChannelRatingSeed, segment: SupportedSegment): number =>
   segment === 'senior_executive' ? rating.fitSeniorExecutive : rating.fitSeniorItConsultant;
 
 const priorityFor = (fit: number): ChannelPriority =>
   fit >= CHANNEL_THRESHOLDS.primary ? 'primary' : fit >= CHANNEL_THRESHOLDS.secondary ? 'secondary' : 'skip';
 
-const segmentLabel = (segment: Segment) =>
+const segmentLabel = (segment: SupportedSegment) =>
   segment === 'senior_executive' ? 'senior executives' : 'senior IT consultants';
 
 /**
@@ -41,6 +41,16 @@ const segmentLabel = (segment: Segment) =>
  * plan. See architecture.md s5.4.
  */
 export function planChannels(ratings: readonly ChannelRatingSeed[], segment: Segment): ChannelPlan {
+  // The matrix rates channels for two senior segments. Asked about anything
+  // else it has no opinion, and inventing one is how a technician search ends
+  // up pointed at the CNCF ambassador directory.
+  if (segment === 'out_of_scope') {
+    throw new OutOfScopeError(
+      'this mandate',
+      'The channel matrix rates channels for senior executives and senior IT consultants only.',
+    );
+  }
+
   const selections: ChannelSelection[] = ratings
     .map((rating) => {
       const fit = fitFor(rating, segment);

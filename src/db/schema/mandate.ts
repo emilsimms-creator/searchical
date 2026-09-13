@@ -5,9 +5,9 @@ import { organizations, persons, tenants } from './tables';
 
 /** Mirrors migrations/0003_mandate.sql, which is the source of truth. */
 
-export const mandateSegment = pgEnum('mandate_segment', ['senior_executive', 'senior_it_consultant']);
+export const mandateSegment = pgEnum('mandate_segment', ['senior_executive', 'senior_it_consultant', 'out_of_scope']);
 export const engagementTypeEnum = pgEnum('engagement_type', ['permanent', 'contract', 'either']);
-export const mandateStatus = pgEnum('mandate_status', ['draft', 'awaiting_confirmation', 'live', 'closed']);
+export const mandateStatus = pgEnum('mandate_status', ['draft', 'awaiting_confirmation', 'live', 'closed', 'out_of_scope']);
 export const confidentialityLevel = pgEnum('confidentiality_level', [
   'fully_confidential', 'client_named_at_stage', 'open',
 ]);
@@ -27,6 +27,7 @@ export const mandates = pgTable('mandates', {
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   segment: mandateSegment('segment').notNull(),
+  segmentRationale: text('segment_rationale'),
   functionDomain: text('function_domain').notNull(),
   location: text('location'),
   engagementType: engagementTypeEnum('engagement_type').notNull().default('permanent'),
