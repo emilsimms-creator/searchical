@@ -8,6 +8,7 @@ export * from './ledger';
 export * from './policy';
 export * from './mandate';
 export * from './receptivity';
+export * from './engagement';
 export { LlmGateway, ModelOutputError, type LanguageModel, type PromptVersion } from './llm/gateway';
 export { claudeModel, DEFAULT_MODEL, ModelRefusalError, MissingCredentialsError } from './llm/anthropic';
 export { claudeCliModel, ClaudeCliError } from './llm/claude-cli';

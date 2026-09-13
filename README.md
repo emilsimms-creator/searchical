@@ -20,6 +20,9 @@ and every score it produces can be explained and replayed.**
 | [Technical Architecture](docs/architecture.md) | Engineers who will build and operate it | Principles, system and container views, the three engines, data model, policy engine, connector framework, technology choices, build plan, decision record |
 | [Phase 0 notes](docs/phase-0.md) | Engineers | What the foundations layer contains, and how each exit criterion is proven |
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
+| [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
+| [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
+| [Eval notes](evals/README.md) | Engineers | The extraction eval: the cases, the pass criteria, and what it deliberately does not measure |
 
 Read the Executive Summary first. It stands alone. The Architecture assumes it.
 
@@ -54,17 +57,28 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
+**228 tests passing, typecheck clean.**
+
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
 [docs/phase-0.md](docs/phase-0.md).
 
-**Phase 1 code complete, with a live eval.** `npm run eval` grades the extraction prompt against
-three real job specifications on sixteen programmatic pass criteria. See [evals/README.md](evals/README.md).
+**Phase 1 complete, with a live eval.** The Mandate Engine turns a job specification into a confirmed
+market vocabulary, a ranked channel plan, four search strings and the pipeline arithmetic.
+`npm run eval` grades the extraction prompt against five real job specifications on eighteen
+programmatic pass criteria, and passes 5 of 5. See [docs/phase-1.md](docs/phase-1.md) and
+[evals/README.md](evals/README.md).
 
-**Phase 1 code complete.** The Mandate Engine turns a job specification into a confirmed market
-vocabulary, a ranked channel plan, four search strings and the pipeline arithmetic. 90 tests
-passing. One exit criterion is operational and needs three real mandates run through it. See
-[docs/phase-1.md](docs/phase-1.md).
+**Phase 2 complete.** The Receptivity Engine scores who to approach and when: twenty three signals on
+two independent clocks, the employer watchlist that fans a trigger out to everyone tracked there, the
+stacking rule, and a scoring model that is versioned data rather than constants so a change can be
+backtested before it is installed. See [docs/phase-2.md](docs/phase-2.md).
 
-Next is phase 2, the Receptivity Engine and the employer watchlist. The open decisions are listed at
-the end of the [Executive Summary](docs/executive-summary.md).
+**Phase 3a complete.** The Engagement Engine drafts: the five touch sequence, the eight templates, the
+personalisation gate that makes a generic message unqueueable at both the service and the database,
+the approval queue with its edit rate, the reply ladder and the exploratory call. Nothing sends. See
+[docs/phase-3a.md](docs/phase-3a.md).
+
+Next is phase 3b, connecting a channel so approved drafts can leave the building, which needs the
+consent and suppression rules bound at send time and the open commercial decisions settled first.
+Those decisions are listed at the end of the [Executive Summary](docs/executive-summary.md).

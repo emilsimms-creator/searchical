@@ -72,6 +72,10 @@ describe('schema parity between migrations and the typed schema', () => {
       'attributes',
       'consents',
       'employments',
+      // The hook is the claim that a message is personal to this person. It
+      // names the evidence it rests on, so an approver can follow the citation
+      // and an auditor can ask what a sent message asserted and on what basis.
+      'message_hooks',
       // An identity claim is a fact about a person and carries provenance like
       // any other. A merge made on unattributed evidence is unreviewable.
       'person_identities',
