@@ -96,6 +96,7 @@ export class MandateService {
           title: draft.title,
           segment: 'out_of_scope',
           segmentRationale: draft.segmentRationale,
+          outOfScopeReason: draft.outOfScopeReason ?? 'both',
           functionDomain: draft.functionDomain,
           location: draft.location,
           engagementType: draft.engagementType,
@@ -292,9 +293,6 @@ export class MandateService {
       );
     }
 
-    const terms = await this.#allTerms(args.mandateId);
-    const strings = generateSearchStrings({ terms, location: mandate.location });
-
     const ratings = await this.#tx
       .select()
       .from(channelRatings)
@@ -303,6 +301,16 @@ export class MandateService {
       throw new MandateError('channel matrix is not seeded for this tenant: call seedChannelRatings first');
     }
     const channels = planChannels(ratings as unknown as ChannelRatingSeed[], mandate.segment as Segment);
+
+    // The plan is computed first so the strings can respect it: a search string
+    // for a channel the same plan tells the recruiter to skip is a
+    // contradiction inside one output.
+    const terms = await this.#allTerms(args.mandateId);
+    const strings = generateSearchStrings({
+      terms,
+      location: mandate.location,
+      skippedChannels: channels.selections.filter((c) => c.priority === 'skip').map((c) => c.channelCode),
+    });
 
     const constraints = await this.#constraintsFor(args.mandateId);
 

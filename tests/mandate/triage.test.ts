@@ -143,3 +143,42 @@ describe('the location gap', () => {
     expect(deriveIntakeGaps(draft).some((g) => g.field === 'location')).toBe(false);
   });
 });
+
+/**
+ * The second axis of the force-fitting defect.
+ *
+ * A Director of Enterprise Strategy at a credit union clears the seniority bar
+ * comfortably and is not this practice's market. The segments are seniority
+ * definitions; the channel matrix behind them was researched for senior
+ * technology talent. Nothing connected the two, so the engine passed her through
+ * triage and recommended the CIO Association of Canada as the top channel.
+ */
+describe('domain triage', () => {
+  it('refuses a senior executive who is outside technology, and says which bar failed', async () => {
+    const { LlmGateway } = await import('@/llm/gateway');
+    const { fakeModel, DIRECTOR_ENTERPRISE_STRATEGY_EXTRACTION } = await import('../helpers/model');
+    const draft = toDraft(
+      await new LlmGateway(fakeModel(DIRECTOR_ENTERPRISE_STRATEGY_EXTRACTION)).run(jobSpecExtraction, { jobSpec: 'x' }),
+    );
+
+    expect(draft.segment).toBe('out_of_scope');
+    expect(draft.outOfScopeReason).toBe('domain');
+    expect(draft.segmentRationale).toMatch(/clears the seniority bar/i);
+    expect(() => planChannels(CHANNEL_MATRIX_SEED, draft.segment)).toThrow(OutOfScopeError);
+  });
+
+  it('records no refusal reason for a mandate that is in scope', async () => {
+    const { LlmGateway } = await import('@/llm/gateway');
+    const { fakeModel, VP_INFRASTRUCTURE_EXTRACTION } = await import('../helpers/model');
+    const draft = toDraft(
+      await new LlmGateway(fakeModel(VP_INFRASTRUCTURE_EXTRACTION)).run(jobSpecExtraction, { jobSpec: 'x' }),
+    );
+    expect(draft.outOfScopeReason).toBeNull();
+  });
+
+  it('names both technology segments as technology segments in the prompt', () => {
+    const { system } = jobSpecExtraction.render({ jobSpec: 'x' });
+    expect(system).toMatch(/SENIOR TECHNOLOGY TALENT/);
+    expect(system).toMatch(/every modern executive role touches technology, and almost none of them are technology/);
+  });
+});

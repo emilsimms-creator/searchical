@@ -26,14 +26,14 @@ is the failure this eval exists to prevent.
 | `nav-canada-technologist` | negative | Entry level field electronics role. The engine must refuse it rather than force it into the nearest segment. Found the triage defect |
 | `senior-database-administrator` | positive | In scope senior individual contributor carrying six hard constraints that are not search terms, and naming no city despite an on-site rule. Found the lost constraints defect, then the description-shaped search terms defect |
 | `senior-cybersecurity-grc` | positive | In scope, carries two different titles for the same role, and invites domain inference the engine must label rather than assert. Found the unearned provenance defect |
+| `director-enterprise-strategy` | negative | A genuine executive and genuinely not this practice's market: corporate strategy at a credit union. Clears the seniority bar, fails the domain bar. Found the second axis of force fitting, and the search strings that contradicted their own channel plan |
 
-**Three cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred
+**Four cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred
 inputs, and at n=3 a single flaky case swings the score by a third. This set is what exists, every
 member of it earned its place by finding a real defect, and **the first priority for this eval is
-more real specifications**, particularly: an executive segment case (all three current cases are
-individual contributor or out of scope, so the `senior_executive` branch of triage is untested
-against a real document), a contract or consulting engagement, and a specification that genuinely
-names its location.
+more real specifications**. The gaps now: an **in scope** executive search (the executive case here is
+a refusal, so the `senior_executive` branch still has no case that proceeds all the way to a channel
+plan), a contract or consulting engagement, and a specification carrying a stated compensation band.
 
 ## How it grades
 
@@ -60,6 +60,8 @@ only if every case passes; a failing suite exits non-zero.
 | `required_skills` | Capabilities the specification plainly requires but the model missed | |
 | `required_gaps` | A question the specification leaves open that the engine failed to raise | |
 | `boolean_runnable` | A search string a recruiter cannot paste and run | |
+| `scope_reason_correct` | A refusal that does not say which bar failed, or an in-scope mandate carrying a refusal reason | Director, Enterprise Strategy |
+| `strings_match_plan` | A search string generated for a channel the same plan says to skip | Director, Enterprise Strategy |
 | `no_search_plan` / `channel_plan` | A plan produced for a refused mandate, or refused for a live one | NAV CANADA |
 
 Triage accuracy is reported separately from the overall pass rate, because it is a classification and

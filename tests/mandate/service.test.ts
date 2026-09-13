@@ -145,8 +145,11 @@ describe('the mandate engine end to end', () => {
       return r.rows[0]!;
     });
 
-    // Four string kinds, generated twice: history is kept so an old string stays explicable.
-    expect(counts.strings).toBe(8);
+    // Three string kinds, generated twice: history is kept so an old string
+    // stays explicable. Three rather than four because this is an executive
+    // mandate, the code host rates 1 of 5 for that segment and is skipped, and
+    // the strings now respect the plan rather than contradicting it.
+    expect(counts.strings).toBe(6);
     expect(counts.projections).toBe(2);
     // Channel selections are per mandate, so the second run is a no-op.
     expect(counts.channels).toBe(29);

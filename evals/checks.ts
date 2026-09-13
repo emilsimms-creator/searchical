@@ -27,6 +27,8 @@ export interface CheckResult {
 
 export interface CaseExpectation {
   readonly segment: string;
+  /** Which bar a refused case must say it failed. */
+  readonly outOfScopeReason?: string;
   readonly searchPlan: boolean;
   readonly constraintKinds: readonly string[];
   readonly gaps: readonly string[];
@@ -65,6 +67,27 @@ export function runChecks(
       ? ok('segment_correct', `segment = ${draft.segment}`)
       : bad('segment_correct', `expected ${expect.segment}, got ${draft.segment}`),
   );
+
+  // The rule is derived from the expected segment rather than read from the
+  // case file, so a case that forgets to declare a reason cannot silently
+  // weaken the check. An earlier version relied on the case file and the eval
+  // duly caught the omission on its first run.
+  const shouldBeRefused = expect.segment === 'out_of_scope';
+  if (!shouldBeRefused) {
+    results.push(
+      draft.outOfScopeReason === null
+        ? ok('scope_reason_correct', 'in scope, no refusal reason')
+        : bad('scope_reason_correct', `in scope but carries refusal reason "${draft.outOfScopeReason}"`),
+    );
+  } else if (draft.outOfScopeReason === null) {
+    results.push(bad('scope_reason_correct', 'refused without saying which bar failed'));
+  } else if (expect.outOfScopeReason !== undefined && draft.outOfScopeReason !== expect.outOfScopeReason) {
+    results.push(
+      bad('scope_reason_correct', `expected reason "${expect.outOfScopeReason}", got "${draft.outOfScopeReason}"`),
+    );
+  } else {
+    results.push(ok('scope_reason_correct', `refused on ${draft.outOfScopeReason} grounds`));
+  }
 
   results.push(
     draft.segmentRationale.trim().length >= 80
@@ -173,7 +196,23 @@ export function runChecks(
     // A Boolean a recruiter can paste and run is the deliverable.
     try {
       const confirmed: MandateTerm[] = terms.map((t) => ({ ...t, status: 'confirmed' as const }));
-      const { strings } = generateSearchStrings({ terms: confirmed, location: draft.location });
+      const plan = planChannels(CHANNEL_MATRIX_SEED, draft.segment);
+      const skippedChannels = plan.selections.filter((c) => c.priority === 'skip').map((c) => c.channelCode);
+      const { strings } = generateSearchStrings({ terms: confirmed, location: draft.location, skippedChannels });
+
+      // A search string for a channel the same plan says to skip is a
+      // contradiction inside one output.
+      const contradictions = strings.filter(
+        (str) =>
+          (str.kind === 'github_xray' && skippedChannels.includes('github')) ||
+          (str.kind === 'conference_talks_xray' && skippedChannels.includes('conferences_and_summits')),
+      );
+      results.push(
+        contradictions.length === 0
+          ? ok('strings_match_plan', 'no search string for a skipped channel')
+          : bad('strings_match_plan', `generated for skipped channels: ${contradictions.map((c) => c.kind).join(', ')}`),
+      );
+
       const boolean = strings.find((s) => s.kind === 'linkedin_recruiter_boolean')?.value ?? '';
       const runnable = boolean.length > 20 && boolean.includes(' OR ') && !/\(\s*\)/.test(boolean);
       results.push(

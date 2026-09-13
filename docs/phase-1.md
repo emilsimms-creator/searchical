@@ -237,6 +237,38 @@ finding a real defect, and the first priority is more real specifications: an ex
 above all, since all three current cases are individual contributor or out of scope and the
 `senior_executive` branch of triage has never been tested against a real document.
 
+### The fourth live run: an executive, and the second axis of force fitting
+
+A Director of Enterprise Strategy at a credit union. The first case to exercise the `senior_executive`
+branch of triage against a real document, and it exposed two defects.
+
+**Triage called it correctly on seniority and the planner then aimed it at the wrong market.** The
+rationale was sound: Director level, reports to the Chief Strategy Officer, leads a team of two, ELT
+and Board as the audience. The engine then recommended **the CIO Association of Canada as the top
+channel for a corporate strategy executive in financial services.**
+
+The cause is structural rather than a slip. The two segments are **seniority** definitions; the
+twenty nine channel matrix behind them was researched for **senior technology talent**. Nothing
+connected the two, so a senior non-technology executive cleared triage and received a plan pointed at
+a market she has no presence in. This is the NAV CANADA defect on a second axis: force fitting by
+domain rather than by seniority, and the remedy is the same one.
+
+Triage now states that the practice recruits senior technology talent and that a role must clear
+**both** bars. A refusal records **which** bar failed, in `out_of_scope_reason`, because the practice
+intends to open to other functions later and **the volume of work it is turning away on domain
+grounds is the number that tells it when.** The prompt also warns against the obvious false positive:
+every modern executive role touches technology and almost none of them are technology roles, so
+domain is judged by what the person does rather than by whether the specification mentions a
+dashboard.
+
+**Second defect, and a plain contradiction inside one output.** The same run generated a code host
+X-ray for the strategy executive while listing the code host under `Skipped (12)` four lines below.
+Search string generation never consulted the channel plan. It does now: a string is not produced for
+a channel the plan tells the recruiter to skip, and the omission is stated rather than silent. The
+regression showed up immediately in an existing test, where the VP Infrastructure mandate stopped
+emitting a code host search because the code host rates 1 of 5 for executives. That was the fix
+working.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

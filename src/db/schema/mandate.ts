@@ -11,6 +11,7 @@ export const mandateStatus = pgEnum('mandate_status', ['draft', 'awaiting_confir
 export const confidentialityLevel = pgEnum('confidentiality_level', [
   'fully_confidential', 'client_named_at_stage', 'open',
 ]);
+export const outOfScopeReason = pgEnum('out_of_scope_reason', ['seniority', 'domain', 'both']);
 export const termKind = pgEnum('term_kind', ['title_variant', 'must_have_skill', 'exclusion']);
 export const termOrigin = pgEnum('term_origin', ['extracted', 'recruiter', 'market_observed']);
 export const termStatus = pgEnum('term_status', ['proposed', 'confirmed', 'rejected']);
@@ -35,6 +36,7 @@ export const mandates = pgTable('mandates', {
   title: text('title').notNull(),
   segment: mandateSegment('segment').notNull(),
   segmentRationale: text('segment_rationale'),
+  outOfScopeReason: outOfScopeReason('out_of_scope_reason'),
   functionDomain: text('function_domain').notNull(),
   location: text('location'),
   engagementType: engagementTypeEnum('engagement_type').notNull().default('permanent'),

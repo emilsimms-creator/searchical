@@ -1,0 +1,15 @@
+{
+  "id": "director-enterprise-strategy",
+  "spec": "fixtures/director-enterprise-strategy.txt",
+  "label": "negative",
+  "why": "A genuine executive and genuinely not this practice's market. Clears the seniority bar, fails the domain bar: corporate strategy at a credit union, not a technology function. Found the second axis of the force-fitting defect, where triage passed it and the planner recommended the CIO Association of Canada.",
+  "expect": {
+    "segment": "out_of_scope",
+    "outOfScopeReason": "domain",
+    "searchPlan": false,
+    "constraintKinds": ["location_or_onsite"],
+    "gaps": [],
+    "skills": [],
+    "location": "place"
+  }
+}

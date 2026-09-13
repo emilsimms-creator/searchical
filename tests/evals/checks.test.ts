@@ -132,6 +132,7 @@ describe('the graders handle the refusal case', () => {
   const draft = toDraft(NAV_CANADA_TECHNOLOGIST_EXTRACTION as never);
   const expectation: CaseExpectation = {
     segment: 'out_of_scope',
+    outOfScopeReason: 'seniority',
     searchPlan: false,
     constraintKinds: ['language', 'licence_or_credential'],
     gaps: [],
@@ -146,7 +147,7 @@ describe('the graders handle the refusal case', () => {
   });
 
   it('does not apply the search plan checks to a refused mandate', () => {
-    for (const id of ['boolean_runnable', 'channel_plan', 'required_skills', 'required_gaps']) {
+    for (const id of ['boolean_runnable', 'channel_plan', 'required_skills', 'required_gaps', 'strings_match_plan']) {
       expect(results.find((r) => r.id === id), id).toBeUndefined();
     }
   });

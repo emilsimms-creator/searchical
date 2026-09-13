@@ -7,6 +7,8 @@ export const isSupportedSegment = (s: Segment): s is SupportedSegment => s !== '
 export type EngagementType = 'permanent' | 'contract' | 'either' | 'unstated';
 export type MandateStatus = 'draft' | 'awaiting_confirmation' | 'live' | 'closed' | 'out_of_scope';
 export type ConfidentialityLevel = 'fully_confidential' | 'client_named_at_stage' | 'open';
+export type OutOfScopeReason = 'seniority' | 'domain' | 'both';
+
 export type TermKind = 'title_variant' | 'must_have_skill' | 'exclusion';
 export type TermOrigin = 'extracted' | 'recruiter' | 'market_observed';
 export type TermStatus = 'proposed' | 'confirmed' | 'rejected';
@@ -73,6 +75,12 @@ export interface MandateDraft {
   readonly segment: Segment;
   /** Why that segment. Required reading when the verdict is out_of_scope. */
   readonly segmentRationale: string;
+  /**
+   * Which bar a refused mandate failed. The practice intends to open to other
+   * functions later, and the volume it is turning away on `domain` grounds is
+   * the number that tells it when.
+   */
+  readonly outOfScopeReason: OutOfScopeReason | null;
   readonly functionDomain: string;
   readonly location: string | null;
   readonly engagementType: EngagementType;

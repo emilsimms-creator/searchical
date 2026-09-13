@@ -33,7 +33,8 @@ export const VP_INFRASTRUCTURE_EXTRACTION = {
   segment: 'senior_executive',
   segmentRationale:
     'Reports to the CIO with a team of about 60 and a 40 million dollar budget: director level and ' +
-    'above with organizational scope.',
+    'above with organizational scope, and squarely a technology function.',
+  outOfScopeReason: null,
   functionDomain: 'Hybrid cloud and infrastructure operations',
   location: 'Ottawa',
   engagementType: 'permanent',
@@ -82,6 +83,7 @@ export const NAV_CANADA_TECHNOLOGIST_EXTRACTION = {
     'required, and quotes a training salary band before a qualified band. There is no seniority ' +
     'marker in the title or the responsibilities. This is neither a senior executive nor a senior ' +
     'IT consultant.',
+  outOfScopeReason: 'seniority',
   functionDomain: 'Electronic maintenance of air navigation systems',
   location: null,
   engagementType: 'permanent',
@@ -129,6 +131,7 @@ export const SENIOR_DBA_EXTRACTION = {
     'Senior individual contributor: guides technical decisions and influences across infrastructure, ' +
     'cloud, security and application teams, with no direct reports. Borderline on tenure, since the ' +
     'specification asks for five or more years where this segment usually implies eight or more.',
+  outOfScopeReason: null,
   functionDomain:
     'Enterprise Oracle and SQL Server administration with Azure database migration and DBaaS platform development',
   location: null,
@@ -198,6 +201,49 @@ export const SENIOR_DBA_EXTRACTION = {
       severity: 'nice_to_have',
       statement: 'English or French essential; second language encouraged but not required',
       sourceQuote: 'the position language requirement is English or French essential',
+      inferred: false,
+    },
+  ],
+} as const;
+
+/**
+ * A genuine executive, and genuinely not this practice's market: Director,
+ * Enterprise Strategy at a credit union.
+ *
+ * Kept as a regression test because it exposed the second axis of the
+ * force-fitting defect. Triage correctly called it senior_executive on
+ * seniority, and the engine then recommended the CIO Association of Canada as
+ * the top channel for a corporate strategy executive in financial services.
+ */
+export const DIRECTOR_ENTERPRISE_STRATEGY_EXTRACTION = {
+  title: 'Director, Enterprise Strategy',
+  segment: 'out_of_scope',
+  segmentRationale:
+    'Clears the seniority bar comfortably: Director level, reports to the Chief Strategy Officer, ' +
+    'leads a team of two with the Executive Leadership Team and Board as the audience. It does not ' +
+    'clear the domain bar. This is corporate strategy and business planning at a credit union, not a ' +
+    'technology function, and the communities and directories this practice works would reach the ' +
+    'wrong market entirely.',
+  outOfScopeReason: 'domain',
+  functionDomain: 'Corporate strategy and enterprise business planning in financial services',
+  location: 'Vancouver, British Columbia',
+  engagementType: 'permanent',
+  firstYearOutcomes: null,
+  operatingRange: null,
+  careerMoveCase: null,
+  titleVariants: [
+    { term: 'Director, Enterprise Strategy', confidence: 0.9 },
+    { term: 'Director, Corporate Strategy', confidence: 0.85 },
+  ],
+  mustHaveSkills: [{ term: 'Strategic Planning', confidence: 0.9 }],
+  exclusions: [{ term: 'intern', confidence: 0.9 }],
+  targetCompanies: [],
+  constraints: [
+    {
+      kind: 'location_or_onsite',
+      severity: 'disqualifying',
+      statement: 'Vancouver head office, hybrid, on site for events and business demands',
+      sourceQuote: 'Our head office is based in Vancouver and while this position provides a hybrid work arrangement',
       inferred: false,
     },
   ],

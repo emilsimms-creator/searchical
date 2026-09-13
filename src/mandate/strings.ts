@@ -37,6 +37,15 @@ const confirmed = (terms: readonly MandateTerm[], kind: MandateTerm['kind']): st
 export interface StringGenerationInput {
   readonly terms: readonly MandateTerm[];
   readonly location: string | null;
+  /**
+   * The channel plan for this mandate, when one exists.
+   *
+   * A search string for a channel the same plan tells the recruiter to skip is
+   * a contradiction inside one output. A live run produced a code host X-ray
+   * for a corporate strategy executive while listing the code host under
+   * "Skipped", which is how this was found.
+   */
+  readonly skippedChannels?: readonly string[];
 }
 
 /**
@@ -103,9 +112,18 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
     },
   ];
 
+  const skipped = new Set(input.skippedChannels ?? []);
+
   // The code host X-ray needs a skill to search on; a title alone finds nothing
   // there, because the evidence on that surface is the work, not the job title.
-  if (skills.length > 0) {
+  if (skipped.has('github')) {
+    warnings.push({
+      term: '(code host)',
+      warning:
+        'No code host search was generated: the channel plan rates that surface as skipped for this ' +
+        'segment. A search string for a channel the plan tells you to skip is worse than none.',
+    });
+  } else if (skills.length > 0) {
     strings.push({
       kind: 'github_xray',
       value: ['site:github.com', skillGroup, location ? quote(location) : '', ADVERT_EXCLUSIONS.join(' ')]
@@ -117,6 +135,16 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
       term: '(none)',
       warning:
         'No confirmed must have skill, so no code host search was generated. That surface indexes work, not titles.',
+    });
+  }
+
+  if (skipped.has('conferences_and_summits')) {
+    // Drop the conference X-ray the same way, and say so.
+    const index = strings.findIndex((s) => s.kind === 'conference_talks_xray');
+    if (index >= 0) strings.splice(index, 1);
+    warnings.push({
+      term: '(conferences)',
+      warning: 'No conference search was generated: the channel plan rates that surface as skipped.',
     });
   }
 

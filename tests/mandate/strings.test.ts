@@ -97,3 +97,33 @@ describe('search string generation', () => {
     );
   });
 });
+
+describe('search strings respect the channel plan', () => {
+  it('omits the code host search when the plan skips that channel', () => {
+    const { strings, warnings } = generateSearchStrings({
+      terms: workedExampleA,
+      location: 'Ottawa',
+      skippedChannels: ['github'],
+    });
+    expect(strings.find((s) => s.kind === 'github_xray')).toBeUndefined();
+    expect(warnings.some((w) => /the plan tells you to skip/.test(w.warning))).toBe(true);
+  });
+
+  it('omits the conference search when the plan skips that channel', () => {
+    const { strings } = generateSearchStrings({
+      terms: workedExampleA,
+      location: 'Ottawa',
+      skippedChannels: ['conferences_and_summits'],
+    });
+    expect(strings.find((s) => s.kind === 'conference_talks_xray')).toBeUndefined();
+  });
+
+  it('still produces the Boolean and the provider query regardless', () => {
+    const { strings } = generateSearchStrings({
+      terms: workedExampleA,
+      location: 'Ottawa',
+      skippedChannels: ['github', 'conferences_and_summits'],
+    });
+    expect(strings.map((s) => s.kind).sort()).toEqual(['linkedin_recruiter_boolean', 'provider_query']);
+  });
+});

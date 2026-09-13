@@ -94,10 +94,16 @@ for (const t of vocabulary.terms) {
   console.log(`  ${t.kind.padEnd(16)} ${t.term.padEnd(42)} ${count}${confidence}`);
 }
 
+const plan = planChannels(CHANNEL_MATRIX_SEED, draft.segment);
+
 rule('SEARCH STRINGS (as if every term were confirmed)');
 const asConfirmed: MandateTerm[] = draft.terms.map((t) => ({ ...t, status: 'confirmed' }));
 try {
-  const { strings, warnings } = generateSearchStrings({ terms: asConfirmed, location: draft.location });
+  const { strings, warnings } = generateSearchStrings({
+    terms: asConfirmed,
+    location: draft.location,
+    skippedChannels: plan.selections.filter((c) => c.priority === 'skip').map((c) => c.channelCode),
+  });
   for (const s of strings) console.log(`  [${s.kind}]\n    ${s.value}\n`);
   for (const w of warnings) console.log(`  WARNING (${w.term}): ${w.warning}`);
 } catch (error) {
@@ -105,7 +111,6 @@ try {
 }
 
 rule('CHANNEL PLAN');
-const plan = planChannels(CHANNEL_MATRIX_SEED, draft.segment);
 console.log(`  ${plan.note}\n`);
 for (const c of plan.recommended) console.log(`  ${c.fit}/5  ${c.name}\n        ${c.etiquette}`);
 console.log(`\n  Skipped (${plan.selections.filter((s) => s.priority === 'skip').length}): ` +

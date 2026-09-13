@@ -41,6 +41,7 @@ const ExtractionOutput = z.object({
   title: z.string().min(1),
   segment: z.enum(['senior_executive', 'senior_it_consultant', 'out_of_scope']),
   segmentRationale: z.string().min(1),
+  outOfScopeReason: z.enum(['seniority', 'domain', 'both']).nullable(),
   functionDomain: z.string().min(1),
   location: placeName,
   engagementType: z.enum(['permanent', 'contract', 'either', 'unstated']),
@@ -107,6 +108,8 @@ rejected outright rather than repaired.
   title              string
   segment            ${values(shape.segment)}
   segmentRationale   string, always required
+  outOfScopeReason   ${values((shape.outOfScopeReason as unknown as { unwrap(): z.ZodTypeAny }).unwrap())}, or null
+                     Required to be non-null exactly when segment is "out_of_scope".
   functionDomain     string
   location           a PLACE NAME only, at most 60 characters, or null.
                      Good: "Ottawa" / "Ottawa, Ontario" / "Toronto or Montreal" / null
@@ -210,7 +213,9 @@ Four rules govern your output.
    stretch and growth that would make a strong, currently employed person consider this a step up.
    If the specification only lists requirements and offers no such case, return null.
 
-SEGMENT TRIAGE. This practice recruits two populations and nothing else:
+SEGMENT TRIAGE. This practice recruits SENIOR TECHNOLOGY TALENT, and nothing else. Both segments
+below are technology segments; the channels, communities and directories behind them were
+researched for technology people. A role must clear BOTH bars, seniority and domain, to be in scope.
 
   senior_executive      Director level and above with organizational scope: a team, a budget, a
                         function. Titles like VP, Director, Head of, Chief.
@@ -218,10 +223,21 @@ SEGMENT TRIAGE. This practice recruits two populations and nothing else:
                         contract and consulting engagements. Deep individual expertise, typically
                         eight years or more, usually with a title carrying Principal, Lead, Staff,
                         Senior or Architect.
-  out_of_scope          Everything else.
+  out_of_scope          Everything else, on either axis.
 
 Return out_of_scope whenever the specification describes a role this practice does not recruit, and
-say so plainly in segmentRationale. The signals are reliable: no minimum years of experience;
+say so plainly in segmentRationale. Set outOfScopeReason to name the axis that failed:
+
+  "seniority"  the role is not senior enough, or is not the right shape.
+  "domain"     senior enough, but outside technology. A Director of Corporate Strategy, a Head of
+               Finance or a VP of Marketing is a genuine executive and is not this practice's
+               market; recommending a technology community to reach them is worse than declining.
+  "both"       neither bar is cleared.
+
+Set outOfScopeReason to null whenever segment is not out_of_scope. Judge domain by what the person
+actually does, not by whether the employer happens to use technology or the specification mentions
+a dashboard: every modern executive role touches technology, and almost none of them are technology
+roles. The seniority signals are reliable: no minimum years of experience;
 entry level, graduate, apprentice or trainee framing; a training salary or training period; a
 qualification such as a diploma standing in for experience; explicit statements that prior
 experience is not required; junior, associate, coordinator, administrator, technician or analyst
@@ -284,6 +300,7 @@ export function toDraft(output: ExtractionOutputType): MandateDraft {
     title: output.title,
     segment: output.segment as Segment,
     segmentRationale: output.segmentRationale,
+    outOfScopeReason: output.outOfScopeReason,
     functionDomain: output.functionDomain,
     location: output.location,
     engagementType: output.engagementType,
