@@ -6,7 +6,7 @@ import { organizations, persons, tenants } from './tables';
 /** Mirrors migrations/0003_mandate.sql, which is the source of truth. */
 
 export const mandateSegment = pgEnum('mandate_segment', ['senior_executive', 'senior_it_consultant', 'out_of_scope']);
-export const engagementTypeEnum = pgEnum('engagement_type', ['permanent', 'contract', 'either']);
+export const engagementTypeEnum = pgEnum('engagement_type', ['permanent', 'contract', 'either', 'unstated']);
 export const mandateStatus = pgEnum('mandate_status', ['draft', 'awaiting_confirmation', 'live', 'closed', 'out_of_scope']);
 export const confidentialityLevel = pgEnum('confidentiality_level', [
   'fully_confidential', 'client_named_at_stage', 'open',
@@ -20,7 +20,7 @@ export const targetCompanyKind = pgEnum('target_company_kind', [
 ]);
 export const constraintKind = pgEnum('constraint_kind', [
   'security_clearance', 'citizenship_or_status', 'location_or_onsite', 'schedule',
-  'language', 'licence_or_credential', 'travel', 'other',
+  'language', 'licence_or_credential', 'prior_experience', 'travel', 'other',
 ]);
 export const constraintSeverity = pgEnum('constraint_severity', [
   'disqualifying', 'strong_preference', 'nice_to_have',

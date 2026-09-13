@@ -11,6 +11,7 @@
 import { readFile } from 'node:fs/promises';
 import { LlmGateway } from '@/llm/gateway';
 import { claudeModel, MissingCredentialsError } from '@/llm/anthropic';
+import { claudeCliModel } from '@/llm/claude-cli';
 import {
   CHANNEL_MATRIX_SEED, deriveIntakeGaps, generateSearchStrings, isSupportedSegment,
   jobSpecExtraction, planChannels, projectPipeline, toDraft, validateVocabulary,
@@ -26,7 +27,10 @@ if (!path) {
 const rule = (title: string) => console.log(`\n${'-'.repeat(72)}\n${title}\n${'-'.repeat(72)}`);
 
 const jobSpec = await readFile(path, 'utf8');
-const gateway = new LlmGateway(claudeModel());
+// --via-cli runs through the Claude Code CLI instead of the API, for machines
+// that have Claude Code installed but no API key configured.
+const viaCli = process.argv.includes('--via-cli');
+const gateway = new LlmGateway(viaCli ? claudeCliModel() : claudeModel());
 
 rule('EXTRACTION');
 let draft;

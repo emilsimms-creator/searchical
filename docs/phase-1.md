@@ -126,6 +126,54 @@ changes. That is decision record entry 15.
 **Compensation remains the one open gap** and is still your call. The NAV CANADA specification carried
 two structured bands; this one carries none.
 
+### The first run against a live model
+
+Everything above was found with hand authored extractions. Running the Senior Database Administrator
+specification through an actual model, using the Claude Code CLI as a backend since this environment
+has no API key, **failed on the first attempt and found four defects that fixtures structurally could
+not have caught**, because the fixtures were written by hand and were therefore already well formed.
+
+**The prompt and the schema had drifted.** The prompt described the fields in prose while only the
+schema knew the permitted enum values, the numeric types and the array caps. The model invented a
+reasonable taxonomy of its own (`on_site_requirement`, `residency_commuting_radius`,
+`prior_experience_floor`) and every guess was rejected; confidences came back as strings; a sector
+name landed in the `kind` field. The prompt is now **generated from the schema**, so the instruction
+and the validation cannot disagree again, and a test asserts every enum value appears in the rendered
+prompt.
+
+**Search terms were descriptions.** The model produced
+`"Azure database platforms (Azure SQL Managed Instance, Azure Database for PostgreSQL, Oracle Database@Azure)"`
+as a must-have skill. It is an excellent summary of the role and it matches nobody on any platform,
+because a term goes verbatim into a quoted Boolean phrase. A term is now validated as a searchable
+token: at most 48 characters, no brackets or semicolons, not a sentence. **Commas are deliberately
+allowed**, because `"Director, Cloud Infrastructure"` is how the market writes that title.
+
+**Location took a whole sentence.** `"Canada, the specification requires living within reasonable
+commuting distance of the Bank's office, but names no city"` went straight into both X-ray queries and,
+worse, suppressed the intake gap that should have fired. Location is now validated as a place name or
+null, and null is the finding that raises the question.
+
+**Two of the model's inventions were better than the taxonomy it was given** and were adopted:
+`prior_experience` as a constraint kind, and `unstated` as an engagement type, because the
+specification genuinely does not say and forcing a guess would put an invented fact into the mandate.
+
+After the fixes the same specification produces a Boolean a recruiter can paste and run:
+
+```
+("Senior Database Administrator" OR "Senior DBA" OR "Database Administrator" OR
+ "Senior Database Engineer" OR "Cloud Database Engineer" OR "Database Platform Engineer" OR
+ "Lead Database Administrator" OR "Database Architect")
+AND ("SQL Server" OR "Oracle" OR "Azure SQL Managed Instance" OR "Database Migration" OR
+     "Always On Availability Groups" OR "Oracle RAC")
+NOT ("Junior" OR "Intern" OR "Sales")
+```
+
+eleven constraints with their source quotes, a correctly null location with the sharpened question
+attached, and a pipeline that reports five disqualifying constraints narrowing the market.
+
+**This is what the unproven exit criterion was hiding.** The machinery was well tested and the
+extraction was not, and every defect above sat in the gap between them.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

@@ -3,7 +3,8 @@ export type SupportedSegment = 'senior_executive' | 'senior_it_consultant';
 export type Segment = SupportedSegment | 'out_of_scope';
 
 export const isSupportedSegment = (s: Segment): s is SupportedSegment => s !== 'out_of_scope';
-export type EngagementType = 'permanent' | 'contract' | 'either';
+/** `unstated` is a real answer: the specification did not say, so nothing was invented. */
+export type EngagementType = 'permanent' | 'contract' | 'either' | 'unstated';
 export type MandateStatus = 'draft' | 'awaiting_confirmation' | 'live' | 'closed' | 'out_of_scope';
 export type ConfidentialityLevel = 'fully_confidential' | 'client_named_at_stage' | 'open';
 export type TermKind = 'title_variant' | 'must_have_skill' | 'exclusion';
@@ -88,6 +89,7 @@ export type ConstraintKind =
   | 'schedule'
   | 'language'
   | 'licence_or_credential'
+  | 'prior_experience'
   | 'travel'
   | 'other';
 

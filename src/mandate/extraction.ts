@@ -2,19 +2,54 @@ import { z } from 'zod';
 import type { PromptVersion } from '@/llm/gateway';
 import type { IntakeGap, MandateDraft, MandateTerm, PerformanceIntake, Segment } from './types';
 
+/**
+ * A term that will be dropped verbatim into a quoted Boolean phrase.
+ *
+ * The first real extraction run produced terms like
+ *   "Azure database platforms (Azure SQL Managed Instance, Azure Database for PostgreSQL, ...)"
+ * which read as an excellent summary of the role and match nobody on any
+ * platform. A search term is the token a person writes on their own profile,
+ * not a description of the requirement.
+ *
+ * Validated rather than merely requested, because the confirmation gate cannot
+ * catch this: a plausible looking description is exactly what a recruiter would
+ * confirm, and the broken Boolean would only surface as an empty result set.
+ */
+const searchableTerm = z
+  .string()
+  .min(1)
+  .max(48, 'a search term must be a token a person writes on their profile, not a description')
+  // Commas are deliberately allowed: "Director, Cloud Infrastructure" and
+  // "VP, Engineering" are how the market actually writes those titles. Brackets
+  // and semicolons never are, and the length cap catches the descriptions.
+  .refine((t) => !/[()\[\];]/.test(t), {
+    message: 'a search term must not contain brackets or semicolons: split it into separate terms',
+  })
+  .refine((t) => !/\.\s|\.$/.test(t), { message: 'a search term is not a sentence' });
+
+/** A place a search can be bounded by, not a paragraph about where the office is. */
+const placeName = z
+  .string()
+  .min(1)
+  .max(60, 'location must be a place name; if the specification does not name one, return null')
+  .refine((t) => !/\.\s|\.$/.test(t), { message: 'location must be a place name, not a sentence' })
+  .nullable();
+
+const scoredTerm = z.object({ term: searchableTerm, confidence: z.number().min(0).max(1) });
+
 const ExtractionOutput = z.object({
   title: z.string().min(1),
   segment: z.enum(['senior_executive', 'senior_it_consultant', 'out_of_scope']),
   segmentRationale: z.string().min(1),
   functionDomain: z.string().min(1),
-  location: z.string().nullable(),
-  engagementType: z.enum(['permanent', 'contract', 'either']),
+  location: placeName,
+  engagementType: z.enum(['permanent', 'contract', 'either', 'unstated']),
   firstYearOutcomes: z.string().nullable(),
   operatingRange: z.string().nullable(),
   careerMoveCase: z.string().nullable(),
-  titleVariants: z.array(z.object({ term: z.string().min(1), confidence: z.number().min(0).max(1) })).max(8),
-  mustHaveSkills: z.array(z.object({ term: z.string().min(1), confidence: z.number().min(0).max(1) })).max(6),
-  exclusions: z.array(z.object({ term: z.string().min(1), confidence: z.number().min(0).max(1) })).max(4),
+  titleVariants: z.array(scoredTerm).max(8),
+  mustHaveSkills: z.array(scoredTerm).max(6),
+  exclusions: z.array(scoredTerm).max(4),
   targetCompanies: z.array(
     z.object({
       name: z.string().min(1),
@@ -26,7 +61,7 @@ const ExtractionOutput = z.object({
     z.object({
       kind: z.enum([
         'security_clearance', 'citizenship_or_status', 'location_or_onsite', 'schedule',
-        'language', 'licence_or_credential', 'travel', 'other',
+        'language', 'licence_or_credential', 'prior_experience', 'travel', 'other',
       ]),
       severity: z.enum(['disqualifying', 'strong_preference', 'nice_to_have']),
       statement: z.string().min(1),
@@ -36,6 +71,80 @@ const ExtractionOutput = z.object({
 });
 
 export type ExtractionOutputType = z.infer<typeof ExtractionOutput>;
+
+/**
+ * Render the permitted values straight out of the schema.
+ *
+ * The first real extraction run failed because the prompt described the fields
+ * in prose while only the schema knew the enum values, the numeric types and the
+ * array caps. The model invented a sensible taxonomy of its own and every one of
+ * its guesses was rejected. Deriving the contract from the schema means the
+ * instruction and the validation can never disagree again.
+ */
+const values = (schema: z.ZodTypeAny): string =>
+  (schema as unknown as { options: readonly string[] }).options.map((o) => `"${o}"`).join(' | ');
+
+const shape = ExtractionOutput.shape;
+const itemShape = (arr: z.ZodTypeAny) =>
+  (arr as unknown as { element: { shape: Record<string, z.ZodTypeAny> } }).element.shape;
+const maxOf = (arr: z.ZodTypeAny) =>
+  (arr as unknown as { _def: { maxLength: { value: number } } })._def.maxLength.value;
+
+const FIELD_CONTRACT = `EXACT OUTPUT CONTRACT. Every value below is checked, and anything outside it is
+rejected outright rather than repaired.
+
+  title              string
+  segment            ${values(shape.segment)}
+  segmentRationale   string, always required
+  functionDomain     string
+  location           a PLACE NAME only, at most 60 characters, or null.
+                     Good: "Ottawa" / "Ottawa, Ontario" / "Toronto or Montreal" / null
+                     Bad:  "Canada, within commuting distance of the office; the city is not named"
+                     If the specification imposes a commuting or on-site rule but never names the
+                     city, the answer is null and the rule is a constraint. Null is the finding: it
+                     raises the question with the hiring leader. A sentence here is dropped straight
+                     into a search query, where it matches nothing.
+  engagementType     ${values(shape.engagementType)}
+                     Use "unstated" when the specification does not say. Do not guess, and do not
+                     explain in this field: the explanation belongs nowhere, the null belongs here.
+  firstYearOutcomes  string, or null
+  operatingRange     string, or null
+  careerMoveCase     string, or null
+
+  titleVariants      array, at most ${maxOf(shape.titleVariants)} items of {term: string, confidence: number}
+  mustHaveSkills     array, at most ${maxOf(shape.mustHaveSkills)} items of {term: string, confidence: number}
+  exclusions         array, at most ${maxOf(shape.exclusions)} items of {term: string, confidence: number}
+
+                     confidence is a NUMBER between 0 and 1, written as 0.85, never as a string,
+                     a percentage or a word.
+
+                     EVERY term goes verbatim into a quoted Boolean phrase, so it must be the token
+                     a person writes on their own profile, not a description of the requirement.
+                     At most 48 characters. No brackets or semicolons. Not a sentence. A comma is
+                     fine where the market writes one, as in "Director, Cloud Infrastructure".
+                       Good: "Azure SQL Managed Instance" / "Always On" / "Oracle RAC" / "Terraform"
+                       Bad:  "Azure database platforms (Azure SQL MI, PostgreSQL, Oracle@Azure)"
+                       Bad:  "On-premises to cloud database migration (assessment, cutover)"
+                     Split a compound requirement into separate terms rather than describing it.
+                     Terms must be unique within their list.
+
+  targetCompanies    array, at most ${maxOf(shape.targetCompanies)} items of
+                     {name: string, kind: <enum>, rationale: string}
+                     name is the company or sector itself. kind is one of:
+                       ${values(itemShape(shape.targetCompanies).kind!)}
+                     Put the sector in name and the classification in kind. They are not the same
+                     field.
+
+  constraints        array, at most ${maxOf(shape.constraints)} items of
+                     {kind: <enum>, severity: <enum>, statement: string, sourceQuote: string}
+                     kind is one of:
+                       ${values(itemShape(shape.constraints).kind!)}
+                     severity is one of:
+                       ${values(itemShape(shape.constraints).severity!)}
+                     Use "other" rather than inventing a kind. A kind outside this list is rejected
+                     and the constraint is lost, which is worse than an imprecise label.
+
+Return ONLY the JSON object. No preamble, no commentary, no markdown fence.`;
 
 const SYSTEM = `You are the intake analyst for a senior technology executive search practice.
 
@@ -103,7 +212,7 @@ recruiter can overrule you.
 segmentRationale is always required, on every verdict, and names the evidence in the specification
 that decided it.
 
-Return only JSON matching the requested shape. No commentary.`;
+${FIELD_CONTRACT}`;
 
 export const jobSpecExtraction: PromptVersion<{ jobSpec: string }, ExtractionOutputType> = {
   id: 'mandate.job_spec_extraction',
@@ -112,16 +221,7 @@ export const jobSpecExtraction: PromptVersion<{ jobSpec: string }, ExtractionOut
   render({ jobSpec }) {
     return {
       system: SYSTEM,
-      user: `Extract the mandate from this job specification.
-
-Return JSON with exactly these keys: title, segment, segmentRationale, functionDomain, location,
-engagementType, firstYearOutcomes, operatingRange, careerMoveCase, titleVariants, mustHaveSkills,
-exclusions, targetCompanies, constraints.
-
-titleVariants, mustHaveSkills and exclusions are arrays of {term, confidence}.
-targetCompanies is an array of {name, kind, rationale}.
-constraints is an array of {kind, severity, statement, sourceQuote}.
-location is null if the specification does not name one.
+      user: `Extract the mandate from this job specification, following the output contract exactly.
 
 --- JOB SPECIFICATION ---
 ${jobSpec}
@@ -133,8 +233,18 @@ ${jobSpec}
 const toTerms = (
   items: readonly { term: string; confidence: number }[],
   kind: MandateTerm['kind'],
-): MandateTerm[] =>
-  items.map((item, index) => ({
+): MandateTerm[] => {
+  // The model repeated a title at two confidences on the first real run. The
+  // database would reject the duplicate; the in-memory list would still show it
+  // twice to the recruiter confirming the vocabulary.
+  const seen = new Set<string>();
+  const unique = items.filter((item) => {
+    const key = item.term.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return unique.map((item, index) => ({
     kind,
     term: item.term.trim(),
     origin: 'extracted' as const,
@@ -144,6 +254,7 @@ const toTerms = (
     extractionConfidence: item.confidence,
     rank: index,
   }));
+};
 
 export function toDraft(output: ExtractionOutputType): MandateDraft {
   return {
