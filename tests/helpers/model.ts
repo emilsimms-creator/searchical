@@ -168,13 +168,22 @@ export const SENIOR_DBA_EXTRACTION = {
       sourceQuote: 'Priority will be given to Canadian citizens and permanent residents',
       inferred: false,
     },
+    // Two constraints, not one. An earlier version of this fixture stitched two
+    // separate passages together with an ellipsis and quoted them as a single
+    // span, which is exactly what verifySourceQuotes() exists to catch, and it
+    // caught it here.
     {
       kind: 'location_or_onsite',
       severity: 'disqualifying',
-      statement:
-        'On site a minimum of 12 days per month, must live in Canada within commuting distance of the office, no relocation assistance',
-      sourceQuote:
-        'expected on site at the Bank location a minimum of 12 days per month ... There will be no relocation assistance provided',
+      statement: 'On site a minimum of 12 days per month, within commuting distance of the office',
+      sourceQuote: 'expected on site at the Bank location a minimum of 12 days per month',
+      inferred: false,
+    },
+    {
+      kind: 'location_or_onsite',
+      severity: 'strong_preference',
+      statement: 'No relocation assistance, so the pool is effectively those already within range',
+      sourceQuote: 'There will be no relocation assistance provided',
       inferred: false,
     },
     {

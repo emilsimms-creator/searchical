@@ -208,6 +208,35 @@ against the source, and three inferred ones correctly boxed as needing confirmat
 the practice would genuinely want to know: that NERC CIP access normally gates on a personnel risk
 assessment, and that a Canadian critical infrastructure operator is unlikely to sponsor.
 
+### The eval
+
+The three specifications are now an eval with pass criteria: `npm run eval -- --via-cli`.
+
+Sixteen programmatic checks, every one a hard gate, each traceable to a defect a live run actually
+found. No model judge: the output space here is a label from a closed set plus structured data plus
+strings that must satisfy a syntactic rule, so a judge would add cost and non-determinism without
+measuring anything a deterministic check cannot. Triage accuracy is reported separately from the
+overall pass rate, and the negative case on its own line, because **force fitting an out of scope
+role is a different and more expensive error than missing one required skill**.
+
+First live run: **3 of 3 cases pass, 16 of 16 checks, triage 3/3, mean extraction 61 seconds.**
+
+**A green suite on day one proves less than it appears to.** This eval encodes defects that have
+already been fixed, so of course it passes. Its value is that the next regression fails a check
+instead of waiting to be noticed, and that the next class of defect can be added to it as a case
+rather than argued about.
+
+The graders are themselves tested, without spending a model call, against known good and known bad
+drafts. That test immediately earned its place: it found that a hand authored fixture had stitched
+two separate passages of the specification together with an ellipsis and quoted them as one span.
+Not verbatim, exactly what the quote verifier exists to catch, and caught.
+
+**Three cases is below the honest floor** for a first eval, where the guidance is fifteen to a
+hundred, and at n=3 one flaky case swings the score by a third. Every member earned its place by
+finding a real defect, and the first priority is more real specifications: an executive segment case
+above all, since all three current cases are individual contributor or out of scope and the
+`senior_executive` branch of triage has never been tested against a real document.
+
 ## Notable decisions
 
 **The Anthropic adapter opts into refusal fallback by default.** Extraction runs over real people's

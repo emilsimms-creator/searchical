@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify": "npm run typecheck && npm run test",
-    "mandate:dry-run": "tsx --tsconfig tsconfig.json scripts/dry-run.ts"
+    "mandate:dry-run": "tsx --tsconfig tsconfig.json scripts/dry-run.ts",
+    "eval": "tsx --tsconfig tsconfig.json evals/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

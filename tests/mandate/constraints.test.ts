@@ -135,7 +135,8 @@ describe('the Senior Database Administrator specification end to end', () => {
     });
 
     expect(rows.map((r) => r.kind)).toEqual([
-      'citizenship_or_status', 'language', 'location_or_onsite', 'schedule', 'security_clearance',
+      'citizenship_or_status', 'language', 'location_or_onsite', 'location_or_onsite',
+      'schedule', 'security_clearance',
     ]);
     expect(rows.filter((r) => r.severity === 'disqualifying')).toHaveLength(3);
     // Every one is checkable against the source rather than a paraphrase.
@@ -162,7 +163,7 @@ describe('the Senior Database Administrator specification end to end', () => {
       return svc.buildSearchPlan({ mandateId: drafted.mandateId, tenantId: tenant });
     });
 
-    expect(plan.constraints).toHaveLength(5);
+    expect(plan.constraints).toHaveLength(6);
     expect(plan.pipeline.constrainedMarket).toBe(true);
     expect(plan.pipeline.advice.join(' ')).toMatch(/Secret clearance/);
 

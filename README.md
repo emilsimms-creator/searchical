@@ -41,8 +41,12 @@ departure is stated explicitly and the reason given.
 
 ```bash
 npm ci
-npm run verify     # typecheck, then the full test suite
+npm run verify                  # typecheck, then the full test suite
+npm run eval -- --via-cli       # the extraction eval, against a live model
 ```
+
+`npm run verify` costs nothing and needs no services. `npm run eval` calls the model once per case
+and spends real quota; `--via-cli` routes through the Claude Code CLI for machines with no API key.
 
 No database service is needed. The suite runs Postgres in process through PGlite, because the
 properties under test are roles, forced row level security, grants and `SECURITY DEFINER`
@@ -53,6 +57,9 @@ functions, and only a real Postgres demonstrates those.
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
 [docs/phase-0.md](docs/phase-0.md).
+
+**Phase 1 code complete, with a live eval.** `npm run eval` grades the extraction prompt against
+three real job specifications on sixteen programmatic pass criteria. See [evals/README.md](evals/README.md).
 
 **Phase 1 code complete.** The Mandate Engine turns a job specification into a confirmed market
 vocabulary, a ranked channel plan, four search strings and the pipeline arithmetic. 90 tests

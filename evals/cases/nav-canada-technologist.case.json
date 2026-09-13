@@ -1,0 +1,14 @@
+{
+  "id": "nav-canada-technologist",
+  "spec": "fixtures/nav-canada-technologist.txt",
+  "label": "negative",
+  "why": "Entry level field electronics role. The practice does not recruit this population, and the engine must say so rather than force it into the nearest segment.",
+  "expect": {
+    "segment": "out_of_scope",
+    "searchPlan": false,
+    "constraintKinds": ["language", "licence_or_credential"],
+    "gaps": [],
+    "skills": [],
+    "location": "any"
+  }
+}

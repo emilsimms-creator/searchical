@@ -1,0 +1,14 @@
+{
+  "id": "senior-cybersecurity-grc",
+  "spec": "fixtures/senior-cybersecurity-grc.txt",
+  "label": "positive",
+  "why": "In scope senior individual contributor. Carries two different titles for the same role, a ten year experience floor, and invites domain inference the engine must label rather than assert.",
+  "expect": {
+    "segment": "senior_it_consultant",
+    "searchPlan": true,
+    "constraintKinds": ["prior_experience", "licence_or_credential"],
+    "gaps": ["location"],
+    "skills": ["nerc cip", "nist"],
+    "location": "null"
+  }
+}

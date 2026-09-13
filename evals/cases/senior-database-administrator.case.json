@@ -1,0 +1,14 @@
+{
+  "id": "senior-database-administrator",
+  "spec": "fixtures/senior-database-administrator.txt",
+  "label": "positive",
+  "why": "In scope senior individual contributor. Carries six hard constraints that are not search terms, and names no city despite an on-site rule.",
+  "expect": {
+    "segment": "senior_it_consultant",
+    "searchPlan": true,
+    "constraintKinds": ["security_clearance", "location_or_onsite", "schedule"],
+    "gaps": ["location"],
+    "skills": ["oracle", "sql server", "azure"],
+    "location": "null"
+  }
+}
