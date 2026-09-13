@@ -1,0 +1,27 @@
+name: verify
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # Typecheck is not a formality here. The constraint that a manual entry
+      # only connector cannot be ingested is enforced by the type system, and
+      # tests/connector-persistence.test.ts proves it with a @ts-expect-error
+      # that fails this step if the constraint is ever weakened.
+      - run: npm run typecheck
+      # The suite runs Postgres in process via PGlite, so no service container
+      # is needed. The properties under test are roles, forced row level
+      # security, grants and SECURITY DEFINER functions, which only a real
+      # Postgres can demonstrate.
+      - run: npm test

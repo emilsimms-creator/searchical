@@ -18,6 +18,7 @@ and every score it produces can be explained and replayed.**
 | --- | --- | --- |
 | [Executive Summary](docs/executive-summary.md) | Sponsor, partner, investor, anyone deciding whether to fund or proceed | What the system does, why it wins, what it cannot do, the honest constraints, the build shape and the decisions that need making |
 | [Technical Architecture](docs/architecture.md) | Engineers who will build and operate it | Principles, system and container views, the three engines, data model, policy engine, connector framework, technology choices, build plan, decision record |
+| [Phase 0 notes](docs/phase-0.md) | Engineers | What the foundations layer contains, and how each exit criterion is proven |
 
 Read the Executive Summary first. It stands alone. The Architecture assumes it.
 
@@ -35,7 +36,22 @@ the functional specification:
 Where this design departs from those documents, or adds a constraint they do not cover, the
 departure is stated explicitly and the reason given.
 
+## Running the code
+
+```bash
+npm ci
+npm run verify     # typecheck, then the full test suite
+```
+
+No database service is needed. The suite runs Postgres in process through PGlite, because the
+properties under test are roles, forced row level security, grants and `SECURITY DEFINER`
+functions, and only a real Postgres demonstrates those.
+
 ## Status
 
-Design stage. No application code yet. The next decision points are listed at the end of the
-Executive Summary.
+**Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
+engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
+[docs/phase-0.md](docs/phase-0.md).
+
+Next is phase 1, the Mandate Engine. The open decisions are listed at the end of the
+[Executive Summary](docs/executive-summary.md).
