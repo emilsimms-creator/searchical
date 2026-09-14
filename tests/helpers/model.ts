@@ -62,6 +62,18 @@ export const VP_INFRASTRUCTURE_EXTRACTION = {
     { name: 'Example Telecom', kind: 'adjacent_sector', rationale: 'Same operational complexity' },
   ],
   constraints: [],
+  // The one fixture that carries a band, so "nothing left to ask" stays a
+  // meaningful assertion rather than one the compensation gap can never satisfy.
+  compensation: {
+    currency: 'CAD',
+    period: 'annual',
+    baseMin: 185_000,
+    baseMax: 225_000,
+    bonusTargetPct: 20,
+    pensionNote: 'Defined contribution, matched to six percent.',
+    equityNote: null,
+    sourceQuote: 'Base salary $185,000 to $225,000 with a 20% target bonus',
+  },
 } as const;
 
 /**
@@ -113,6 +125,7 @@ export const NAV_CANADA_TECHNOLOGIST_EXTRACTION = {
       inferred: false,
     },
   ],
+  compensation: null,
 } as const;
 
 /**
@@ -204,6 +217,7 @@ export const SENIOR_DBA_EXTRACTION = {
       inferred: false,
     },
   ],
+  compensation: null,
 } as const;
 
 /**
@@ -247,4 +261,5 @@ export const DIRECTOR_ENTERPRISE_STRATEGY_EXTRACTION = {
       inferred: false,
     },
   ],
+  compensation: null,
 } as const;

@@ -41,7 +41,15 @@ export interface PolicyContext {
     readonly hasUnsubscribe: boolean;
     /** A verified, person specific hook with a live citation. See architecture.md s7.2. */
     readonly personalisationEvidenceIds: readonly string[];
+    /** The body, so the gate can see whether it quotes money. */
+    readonly body?: string;
   };
+  /**
+   * Whether the mandate's compensation band has been confirmed by the hiring
+   * leader. Undefined means not supplied, and the money rule then abstains
+   * rather than guessing.
+   */
+  readonly compensationBandConfirmed?: boolean;
 }
 
 export interface PolicyReason {

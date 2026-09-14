@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import type { PromptVersion } from '@/llm/gateway';
-import type { IntakeGap, MandateConstraint, MandateDraft, MandateTerm, PerformanceIntake, Segment } from './types';
+import { missingBandQuestion } from '@/compensation/jurisdiction';
+import type {
+  IntakeGap, MandateConstraint, MandateDraft, MandateTerm, PerformanceIntake, Segment,
+  StatedCompensation,
+} from './types';
 
 /**
  * A term that will be dropped verbatim into a quoted Boolean phrase.
@@ -80,6 +84,27 @@ const ExtractionOutput = z.object({
       inferred: z.boolean(),
     }),
   ).max(12),
+  /**
+   * The band, only where the specification states one.
+   *
+   * Null is the common and correct answer. Ontario's posting rule does not
+   * apply above the equivalent of $200,000 a year, which is where most of this
+   * practice's mandates sit, so a senior technology specification with no band
+   * is unremarkable rather than a finding. What matters is that a missing band
+   * becomes a question for the hiring leader instead of a number the model
+   * estimated from the market, which would read downstream exactly like a
+   * number the client committed to.
+   */
+  compensation: z.object({
+    currency: z.string().length(3),
+    period: z.enum(['annual', 'daily', 'hourly']),
+    baseMin: z.number().nonnegative().nullable(),
+    baseMax: z.number().nonnegative().nullable(),
+    bonusTargetPct: z.number().nonnegative().max(500).nullable(),
+    pensionNote: z.string().max(300).nullable(),
+    equityNote: z.string().max(300).nullable(),
+    sourceQuote: z.string().min(1),
+  }).nullable(),
 });
 
 export type ExtractionOutputType = z.infer<typeof ExtractionOutput>;
@@ -177,6 +202,34 @@ rejected outright rather than repaired.
                      cannot hold the role without. An inference is rarely disqualifying.
                      Use "other" rather than inventing a kind. A kind outside this list is rejected
                      and the constraint is lost, which is worse than an imprecise label.
+
+  compensation       an object, or null. NULL IS THE EXPECTED ANSWER unless the specification
+                     states a figure.
+                     {currency, period, baseMin, baseMax, bonusTargetPct, pensionNote,
+                      equityNote, sourceQuote}
+                     currency is a three letter ISO code, "CAD" unless the specification names
+                     another. period is one of:
+                       ${values(
+                         (shape.compensation as unknown as { unwrap(): { shape: Record<string, z.ZodTypeAny> } })
+                           .unwrap().shape.period!,
+                       )}
+                     baseMin and baseMax are NUMBERS OF WHOLE CURRENCY UNITS, never strings and
+                     never text: 185000, not "$185,000" and not "185k". Either may be null where
+                     only one end is stated.
+                     bonusTargetPct is the target bonus as a percentage of base, so 20 means
+                     twenty percent. Null where none is stated.
+                     pensionNote and equityNote are short prose, and pension matters: a defined
+                     benefit pension is a material part of total reward at the public sector and
+                     Crown employers this practice recruits from, and a base compared against a
+                     private sector band without it misleads in a predictable direction.
+                     sourceQuote is REQUIRED and is copied VERBATIM from the specification. It is
+                     checked against the source text and a band whose quote cannot be found is
+                     rejected outright.
+
+                     DO NOT ESTIMATE. If the specification states no figure, return null. A
+                     plausible market range here is the single most damaging invention this
+                     contract permits, because it becomes the number a recruiter says out loud to
+                     a senior candidate on what looks like the client's authority.
 
 Return ONLY the JSON object. No preamble, no commentary, no markdown fence.`;
 
@@ -324,6 +377,7 @@ export function toDraft(output: ExtractionOutputType): MandateDraft {
     ],
     targetCompanies: output.targetCompanies,
     constraints: output.constraints,
+    compensation: output.compensation,
   };
 }
 
@@ -356,15 +410,23 @@ export interface QuoteCheck {
 export function verifySourceQuotes(
   constraints: readonly MandateConstraint[],
   jobSpec: string,
+  compensation?: StatedCompensation | null,
 ): readonly QuoteCheck[] {
   const haystack = normalise(jobSpec);
-  return constraints
+  const band: QuoteCheck[] = compensation
+    ? [{
+        statement: 'compensation band',
+        quote: compensation.sourceQuote,
+        found: haystack.includes(normalise(compensation.sourceQuote)),
+      }]
+    : [];
+  return [...band, ...constraints
     .filter((c) => c.sourceQuote !== undefined && c.sourceQuote.trim() !== '')
     .map((c) => ({
       statement: c.statement,
       quote: c.sourceQuote!,
       found: haystack.includes(normalise(c.sourceQuote!)),
-    }));
+    }))];
 }
 
 const INTAKE_QUESTIONS: Record<keyof PerformanceIntake, string> = {
@@ -433,6 +495,13 @@ export function deriveIntakeGaps(draft: MandateDraft): IntakeGap[] {
           'negotiable: remote, hybrid, relocation, or a specific site? Every search string carries ' +
           'geography, and a national search without one returns the wrong people everywhere.',
     });
+  }
+
+  // The number a search dies on at offer, and the one place the system must not
+  // fill a null with a plausible guess. The question is sharpened by where the
+  // role sits, because the jurisdictions differ on what a posting had to carry.
+  if (draft.compensation === null) {
+    gaps.push({ field: 'compensation', question: missingBandQuestion(draft.location) });
   }
 
   if (draft.targetCompanies.length === 0) {

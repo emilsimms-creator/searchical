@@ -66,7 +66,9 @@ export interface PerformanceIntake {
 }
 
 export interface IntakeGap {
-  readonly field: keyof PerformanceIntake | 'title_variants' | 'must_have_skills' | 'target_companies' | 'location';
+  readonly field:
+    | keyof PerformanceIntake
+    | 'title_variants' | 'must_have_skills' | 'target_companies' | 'location' | 'compensation';
   readonly question: string;
 }
 
@@ -88,6 +90,27 @@ export interface MandateDraft {
   readonly terms: readonly MandateTerm[];
   readonly targetCompanies: readonly { name: string; kind: TargetCompanyKind; rationale?: string | undefined }[];
   readonly constraints: readonly MandateConstraint[];
+  /**
+   * The band, only where the specification stated one. Null is the ordinary
+   * answer and becomes an intake question rather than an estimate.
+   */
+  readonly compensation: StatedCompensation | null;
+}
+
+/**
+ * A band as the specification wrote it. Dollars here rather than cents: this is
+ * the extraction boundary, and the conversion to the integer cents the database
+ * stores happens once, on the way in, where it can be checked.
+ */
+export interface StatedCompensation {
+  readonly currency: string;
+  readonly period: 'annual' | 'daily' | 'hourly';
+  readonly baseMin: number | null;
+  readonly baseMax: number | null;
+  readonly bonusTargetPct: number | null;
+  readonly pensionNote: string | null;
+  readonly equityNote: string | null;
+  readonly sourceQuote: string;
 }
 
 export type ConstraintKind =

@@ -1,3 +1,4 @@
+import { mentionsMoney } from '@/compensation/money';
 import type { PolicyRule } from './types';
 
 const allow = (rule: string, statement: string, basis: string) =>
@@ -151,6 +152,39 @@ export const sendRules: readonly PolicyRule[] = [
             'No verified person specific hook. Somewhat personalised outreach performs no better than ' +
               'none, so this message is routed back to research rather than sent.',
             'Gem benchmark via the practice Playbook s4.5; architecture.md s7.2',
+          ),
+  },
+  {
+    /**
+     * A figure in an outreach message is a commitment the client has to honour.
+     *
+     * The reply ladder tells a recruiter to answer a compensation question with
+     * a range anchored to track record, and that range has exactly one lawful
+     * source: a band the hiring leader has confirmed. A number that reached a
+     * senior candidate on the authority of a job posting, a market estimate or
+     * a recruiter's recollection cannot be withdrawn, and the person who
+     * discovers the difference is the candidate, at offer.
+     *
+     * Deliberately over-detects. A false positive costs one look at a draft.
+     */
+    id: 'send.compensation_confirmed',
+    gate: 'send',
+    appliesTo: (c) => c.message?.body !== undefined && mentionsMoney(c.message.body),
+    evaluate: (c) =>
+      c.compensationBandConfirmed === true
+        ? allow(
+            'send.compensation_confirmed',
+            'The message refers to compensation and the band is confirmed by the hiring leader.',
+            'architecture.md s5.6',
+          )
+        : deny(
+            'send.compensation_confirmed',
+            c.compensationBandConfirmed === false
+              ? 'This message refers to compensation and the mandate has no confirmed band. A figure ' +
+                'quoted on an unconfirmed band cannot be withdrawn once a senior candidate has read it.'
+              : 'This message refers to compensation and no band status was supplied, so the gate ' +
+                'cannot establish there is a confirmed number behind it.',
+            'BC Pay Transparency Act and Ontario ESA posting rules make the stated range consequential; architecture.md s5.6',
           ),
   },
   {

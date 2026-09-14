@@ -22,6 +22,7 @@ and every score it produces can be explained and replayed.**
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 | [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
 | [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
+| [Compensation](docs/compensation.md) | Engineers, and a recruiter who wants to argue with it | The band, its provenance and confirmation, the gap analysis, Canadian pay transparency and the pay history question for counsel |
 | [Eval notes](evals/README.md) | Engineers | The extraction eval: the cases, the pass criteria, and what it deliberately does not measure |
 
 Read the Executive Summary first. It stands alone. The Architecture assumes it.
@@ -57,7 +58,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**228 tests passing, typecheck clean.**
+**266 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
@@ -78,6 +79,11 @@ backtested before it is installed. See [docs/phase-2.md](docs/phase-2.md).
 personalisation gate that makes a generic message unqueueable at both the service and the database,
 the approval queue with its edit rate, the reply ladder and the exploratory call. Nothing sends. See
 [docs/phase-3a.md](docs/phase-3a.md).
+
+**Compensation, in CAD.** The band is versioned on the mandate with its source quote and a
+confirmation the client stands behind, only a confirmed band is quotable or comparable, and the gap
+between the band and the candidate's expectation is surfaced at the first call rather than at offer.
+Closes factor 8 of the scoring model. See [docs/compensation.md](docs/compensation.md).
 
 Next is phase 3b, connecting a channel so approved drafts can leave the building, which needs the
 consent and suppression rules bound at send time and the open commercial decisions settled first.
