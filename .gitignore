@@ -7,3 +7,6 @@ dist/
 coverage/
 .pglite/
 evals/results/
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo

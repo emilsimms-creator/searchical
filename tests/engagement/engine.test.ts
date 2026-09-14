@@ -337,6 +337,11 @@ describe('the engagement engine', () => {
         .rejects.toThrow(/record it as approved if nothing changed/);
       await expect(svc.decide({ messageId: id, decision: 'rejected', decidedAt: START }))
         .rejects.toThrow(/needs a reason/);
+      // The approval queue puts the draft in an editable box, so this is
+      // reachable by anyone who changes the words and clicks Approve.
+      await expect(svc.decide({
+        messageId: id, decision: 'approved', finalBody: 'Quietly rewritten.', decidedAt: START,
+      })).rejects.toThrow(/this approval changed the body, so it is an edit/);
     });
   });
 

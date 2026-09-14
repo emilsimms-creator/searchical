@@ -81,6 +81,49 @@ export interface ApprovalMetrics {
   readonly statement: string;
 }
 
+/** One row of the approval queue: enough to triage without opening the draft. */
+export interface QueueItem {
+  readonly messageId: string;
+  readonly prospectId: string;
+  readonly personName: string;
+  readonly mandateId: string;
+  readonly mandateTitle: string;
+  readonly touch: number;
+  readonly templateCode: string;
+  readonly channel: string;
+  readonly scheduledFor: string;
+  readonly body: string;
+  readonly hookCount: number;
+  readonly queuedAt: Date;
+}
+
+/**
+ * Everything an approver needs to decide, in one payload.
+ *
+ * The whole argument for a human in this loop is that they see what the draft
+ * rests on. A screen that shows the message and hides the evidence turns the
+ * approver into a rubber stamp, which is the failure mode the edit rate is
+ * there to detect and this payload is there to prevent.
+ */
+export interface MessageDetail extends QueueItem {
+  readonly subject: string | null;
+  readonly templatePurpose: string;
+  readonly templateEvidence: string;
+  readonly hooks: readonly {
+    readonly token: string;
+    readonly value: string;
+    readonly citation: string;
+    readonly evidenceLive: boolean;
+    readonly collectedAt: Date;
+  }[];
+  readonly sequenceTouches: number;
+  readonly priorDecisions: readonly {
+    readonly touch: number;
+    readonly decision: string;
+    readonly decidedAt: Date;
+  }[];
+}
+
 export class EngagementError extends Error {}
 
 export class PersonalisationGateError extends EngagementError {

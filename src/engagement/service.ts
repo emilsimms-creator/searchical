@@ -8,9 +8,31 @@ import { SEQUENCE_LIMITS, sequenceFor } from './sequence-plan';
 import { checkLength, evaluatePersonalisation, type EvidenceFact } from './personalisation';
 import {
   EngagementError, PersonalisationGateError,
-  type ApprovalMetrics, type MessageTemplate, type PersonalisationHook, type ReplyRung,
+  type ApprovalMetrics, type MessageDetail, type MessageTemplate, type PersonalisationHook,
+  type QueueItem, type ReplyRung,
 } from './types';
 import type { SupportedSegment } from '@/mandate/types';
+
+interface QueueRow {
+  id: string; body: string; template_code: string; channel: string; created_at: string;
+  touch: number; scheduled_for: string; prospect_id: string; display_name: string;
+  mandate_id: string; title: string; hooks: number;
+}
+
+const toQueueItem = (r: QueueRow): QueueItem => ({
+  messageId: r.id,
+  prospectId: r.prospect_id,
+  personName: r.display_name,
+  mandateId: r.mandate_id,
+  mandateTitle: r.title,
+  touch: r.touch,
+  templateCode: r.template_code,
+  channel: r.channel,
+  scheduledFor: r.scheduled_for,
+  body: r.body,
+  hookCount: r.hooks,
+  queuedAt: new Date(r.created_at),
+});
 
 export interface Actor { readonly id: string }
 
@@ -189,6 +211,17 @@ export class EngagementService {
     if (args.decision === 'edited' && (args.finalBody === undefined || args.finalBody === message.body)) {
       throw new EngagementError('an edit must change the body; record it as approved if nothing changed');
     }
+    // The mirror of the rule above, and the one an interface makes reachable.
+    // An approval queue puts the draft in an editable box, so an operator can
+    // change the words and click Approve. Recorded as approved, that edit
+    // vanishes from the only metric that says whether the drafting is worth
+    // keeping. The decision follows the text, not the button.
+    if (args.decision === 'approved' && args.finalBody !== undefined && args.finalBody !== message.body) {
+      throw new EngagementError(
+        'this approval changed the body, so it is an edit. Recording it as approved understates ' +
+        'the edit rate, which is the measure of whether the drafting is doing its job',
+      );
+    }
     if (args.decision === 'rejected' && !args.reason) {
       throw new EngagementError('a rejection needs a reason: it is the signal that improves the drafting');
     }
@@ -332,6 +365,103 @@ export class EngagementService {
    * says so. Measured from the first draft rather than added once the numbers
    * look good.
    */
+  /**
+   * Everything waiting on a human, oldest first.
+   *
+   * Oldest first rather than by score or by mandate, deliberately: a draft that
+   * has sat in the queue longest is the one whose scheduled day is closest to
+   * passing, and a sequence whose touch three goes out a week late is no longer
+   * the sequence the research supports.
+   */
+  async pendingQueue(): Promise<QueueItem[]> {
+    const res = (await this.#tx.execute(sql`
+      SELECT m.id, m.body, m.template_code, m.channel::text AS channel, m.created_at,
+             st.touch, st.scheduled_for,
+             p.id AS prospect_id, pe.display_name, ma.id AS mandate_id, ma.title,
+             (SELECT count(*)::int FROM message_hooks h WHERE h.message_id = m.id) AS hooks
+        FROM messages m
+        JOIN sequence_steps st ON st.id = m.sequence_step_id
+        JOIN sequences s ON s.id = st.sequence_id
+        JOIN prospects p ON p.id = s.prospect_id
+        JOIN persons pe ON pe.id = p.person_id
+        JOIN mandates ma ON ma.id = p.mandate_id
+       WHERE m.state = 'awaiting_approval' AND s.state = 'active'
+       ORDER BY m.created_at ASC
+    `)) as unknown as { rows: Record<string, never>[] };
+    return (res.rows as unknown as QueueRow[]).map(toQueueItem);
+  }
+
+  /**
+   * One draft with the evidence it rests on, so the approver is reading the
+   * claim and its source together rather than trusting a sentence.
+   */
+  async messageDetail(messageId: string): Promise<MessageDetail | null> {
+    const res = (await this.#tx.execute(sql`
+      SELECT m.id, m.body, m.subject, m.template_code, m.channel::text AS channel, m.created_at,
+             st.touch, st.scheduled_for, st.purpose,
+             p.id AS prospect_id, pe.display_name, ma.id AS mandate_id, ma.title,
+             (SELECT count(*)::int FROM message_hooks h WHERE h.message_id = m.id) AS hooks,
+             (SELECT count(*)::int FROM sequence_steps x WHERE x.sequence_id = s.id) AS touches
+        FROM messages m
+        JOIN sequence_steps st ON st.id = m.sequence_step_id
+        JOIN sequences s ON s.id = st.sequence_id
+        JOIN prospects p ON p.id = s.prospect_id
+        JOIN persons pe ON pe.id = p.person_id
+        JOIN mandates ma ON ma.id = p.mandate_id
+       WHERE m.id = ${messageId}::uuid
+    `)) as unknown as {
+      rows: (QueueRow & { subject: string | null; touches: number; purpose: string })[];
+    };
+    const row = res.rows[0];
+    if (!row) return null;
+
+    const hookRows = (await this.#tx.execute(sql`
+      SELECT h.token, h.value, h.citation, e.collected_at, e.expires_at
+        FROM message_hooks h
+        JOIN evidence e ON e.id = h.evidence_id
+       WHERE h.message_id = ${messageId}::uuid
+       ORDER BY h.token
+    `)) as unknown as {
+      rows: { token: string; value: string; citation: string; collected_at: string; expires_at: string | null }[];
+    };
+
+    const priorRows = (await this.#tx.execute(sql`
+      SELECT st.touch, a.decision::text AS decision, a.decided_at
+        FROM approvals a
+        JOIN messages m2 ON m2.id = a.message_id
+        JOIN sequence_steps st ON st.id = m2.sequence_step_id
+        JOIN sequences s2 ON s2.id = st.sequence_id
+        JOIN prospects p2 ON p2.id = s2.prospect_id
+       WHERE p2.id = ${row.prospect_id}::uuid
+       ORDER BY st.touch
+    `)) as unknown as { rows: { touch: number; decision: string; decided_at: string }[] };
+
+    const template = templateByCode(row.template_code);
+    const now = Date.now();
+    return {
+      ...toQueueItem(row),
+      subject: row.subject,
+      // The step's purpose says what THIS touch is for; the template's principles
+      // say what the wording rests on. An approver reading a draft without both
+      // is judging prose rather than a decision.
+      templatePurpose: row.purpose,
+      templateEvidence: template.appliesPrinciples,
+      sequenceTouches: row.touches,
+      hooks: hookRows.rows.map((h) => ({
+        token: h.token,
+        value: h.value,
+        citation: h.citation,
+        // Expiry is what makes a hook stale. A talk from four years ago cited
+        // as "recently" is the sentence that ends the conversation.
+        evidenceLive: h.expires_at === null || new Date(h.expires_at).getTime() > now,
+        collectedAt: new Date(h.collected_at),
+      })),
+      priorDecisions: priorRows.rows.map((r) => ({
+        touch: r.touch, decision: r.decision, decidedAt: new Date(r.decided_at),
+      })),
+    };
+  }
+
   async approvalMetrics(): Promise<ApprovalMetrics> {
     const res = (await this.#tx.execute(sql`
       SELECT decision::text AS decision, count(*)::int AS n FROM approvals GROUP BY 1

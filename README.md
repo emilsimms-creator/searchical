@@ -22,6 +22,7 @@ and every score it produces can be explained and replayed.**
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 | [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
 | [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
+| [The approval queue](docs/approval-queue.md) | Engineers, and the operator who lives in it | The two screens, why evidence comes before prose, and why the decision follows the text rather than the button |
 | [Compensation](docs/compensation.md) | Engineers, and a recruiter who wants to argue with it | The band, its provenance and confirmation, the gap analysis, Canadian pay transparency and the pay history question for counsel |
 | [Eval notes](evals/README.md) | Engineers | The extraction eval: the cases, the pass criteria, and what it deliberately does not measure |
 
@@ -49,6 +50,16 @@ npm run verify                  # typecheck, then the full test suite
 npm run eval -- --via-cli       # the extraction eval, against a live model
 ```
 
+To run the approval queue against a real PostgreSQL instance:
+
+```bash
+export DATABASE_URL=postgres://...
+npm run seed:pilot              # migrates, creates a tenant, queues three drafts
+export SEARCHICAL_TENANT_ID=... # the id seed:pilot prints
+export SEARCHICAL_OPERATOR=emil # every approval is recorded against this name
+npm run dev
+```
+
 `npm run verify` costs nothing and needs no services. `npm run eval` calls the model once per case
 and spends real quota; `--via-cli` routes through the Claude Code CLI for machines with no API key.
 
@@ -58,7 +69,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**266 tests passing, typecheck clean.**
+**275 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
@@ -79,6 +90,11 @@ backtested before it is installed. See [docs/phase-2.md](docs/phase-2.md).
 personalisation gate that makes a generic message unqueueable at both the service and the database,
 the approval queue with its edit rate, the reply ladder and the exploratory call. Nothing sends. See
 [docs/phase-3a.md](docs/phase-3a.md).
+
+**The approval queue ships.** Two screens over the engagement engine: what is waiting on a human,
+and one draft with the evidence it rests on shown before the prose. Editing the words and pressing
+Approve records an edit, because the edit rate is only worth measuring if it cannot be dodged.
+Nothing sends. See [docs/approval-queue.md](docs/approval-queue.md).
 
 **Compensation, in CAD.** The band is versioned on the mandate with its source quote and a
 confirmation the client stands behind, only a confirmed band is quotable or comparable, and the gap

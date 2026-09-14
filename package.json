@@ -13,20 +13,30 @@
     "test:watch": "vitest",
     "verify": "npm run typecheck && npm run test",
     "mandate:dry-run": "tsx --tsconfig tsconfig.json scripts/dry-run.ts",
-    "eval": "tsx --tsconfig tsconfig.json evals/run.ts"
+    "eval": "tsx --tsconfig tsconfig.json evals/run.ts",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed:pilot": "tsx --tsconfig tsconfig.json scripts/seed-pilot.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
     "drizzle-orm": "^0.45.2",
+    "next": "^16.3.5",
     "pg": "^8.23.0",
     "pino": "^9.14.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^22.20.2",
     "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "drizzle-kit": "^0.31.10",
+    "playwright": "^1.63.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
