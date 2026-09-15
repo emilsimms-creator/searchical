@@ -7,6 +7,7 @@ import {
   type ManualEntryConnector,
   type PersistingConnector,
 } from '@/connectors/contract';
+import { PolicyEngine, PolicyViolation, databaseLookups, requiredNamespace } from '@/policy';
 import { LedgerError, type Actor, type ConspicuousPublication, type ConsentBasisCode, type Provenance } from './types';
 
 type Row = Record<string, unknown>;
@@ -33,10 +34,31 @@ const id = (res: unknown, key: string): string => String(first(res)[key]);
 export class Ledger {
   readonly #tx: TenantTx;
   readonly #actor: Actor;
+  readonly #policy: PolicyEngine;
 
-  constructor(tx: TenantTx, actor: Actor) {
+  constructor(tx: TenantTx, actor: Actor, policy?: PolicyEngine) {
     this.#tx = tx;
     this.#actor = actor;
+    // Constructed here rather than injected at every call site. A gate a caller
+    // has to remember to pass is a gate that will eventually be forgotten, and
+    // the forgetting will look exactly like ordinary code.
+    this.#policy = policy ?? new PolicyEngine(databaseLookups(tx));
+  }
+
+  /**
+   * Evaluate a gate and record the decision, whichever way it goes.
+   *
+   * An allowed decision is worth writing down too. The question a regulator
+   * asks is not "did you block anything" but "on what basis did you proceed",
+   * and an audit trail that holds only the refusals cannot answer it.
+   */
+  async #gate(ctx: Parameters<PolicyEngine['evaluate']>[0]): Promise<void> {
+    const decision = await this.#policy.evaluate(ctx);
+    await this.audit(`policy.${ctx.gate}`, 'policy', undefined, {
+      allowed: decision.allowed,
+      reasons: decision.reasons.map((r) => ({ rule: r.rule, allowed: r.allowed, statement: r.statement })),
+    });
+    if (!decision.allowed) throw new PolicyViolation(decision);
   }
 
   /** Register a connector as a source of facts. Idempotent per tenant. */
@@ -71,17 +93,36 @@ export class Ledger {
     return id(res, 'id');
   }
 
+  /**
+   * Write one attribute, through the enrichment gate.
+   *
+   * The gate decides the namespace from the key. A caller that passes
+   * `sensitive: false` for a date of birth is refused rather than obeyed, which
+   * is the whole point: the caller is writing an import loop and the
+   * classification is a legal question.
+   */
   async recordAttribute(args: {
     personId: string;
     key: string;
     value: string;
     evidenceId: string;
     sensitive?: boolean;
+    jurisdiction?: string;
   }): Promise<string> {
+    const namespace = requiredNamespace(args.key, args.sensitive === true);
+    await this.#gate({
+      gate: 'enrichment',
+      jurisdiction: args.jurisdiction ?? 'CA',
+      now: new Date(),
+      attributeKey: args.key,
+      attributeIsSensitive: args.sensitive === true,
+      writingToSensitiveTable: namespace.sensitive,
+    });
+
     const res = await this.#tx.execute(sql`
       SELECT ledger_record_attribute(
         ${args.personId}::uuid, ${args.key}, ${args.value},
-        ${args.evidenceId}::uuid, ${args.sensitive ?? false}
+        ${args.evidenceId}::uuid, ${namespace.sensitive}
       ) AS id
     `);
     return id(res, 'id');
@@ -165,6 +206,15 @@ export class Ledger {
     opts: { jurisdiction: string; personIdFor: (r: IngestibleRecord) => string | undefined },
   ): Promise<{ evidenceIds: string[]; attributeIds: string[] }> {
     assertPersistable(connector);
+    // The type system already refuses a manual entry connector here. The gate
+    // adds the check the types cannot make: whether this connector is licensed
+    // for the jurisdiction being collected from. Nothing enforced that before.
+    await this.#gate({
+      gate: 'collection',
+      jurisdiction: opts.jurisdiction,
+      now: new Date(),
+      connector,
+    });
 
     const sourceId = await this.registerSource(connector);
     const evidenceIds: string[] = [];
@@ -214,6 +264,17 @@ export class Ledger {
         `manual entry from "${connector.id}" requires a human actor, received "${this.#actor.type}"`,
       );
     }
+    // The persistence rule would refuse this connector, and correctly so for an
+    // automated path. Declaring the collection method is what distinguishes the
+    // two: `recruiter_entered` is the human route the rule leaves open, and the
+    // jurisdiction rule still applies to it.
+    await this.#gate({
+      gate: 'collection',
+      jurisdiction: opts.jurisdiction,
+      now: new Date(),
+      connector,
+      collectionMethod: 'recruiter_entered',
+    });
     const sourceId = await this.registerSource(connector);
     const evidenceId = await this.recordEvidence({
       sourceId,

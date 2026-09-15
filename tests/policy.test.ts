@@ -13,6 +13,7 @@ const lookups = (over: Partial<PolicyLookups> = {}): PolicyLookups => ({
 });
 
 const goodMessage = {
+  stage: 'send' as const,
   identifiesSender: true,
   hasMailingAddress: true,
   hasUnsubscribe: true,

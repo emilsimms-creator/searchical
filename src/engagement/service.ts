@@ -11,13 +11,39 @@ import {
   type ApprovalMetrics, type MessageDetail, type MessageTemplate, type PersonalisationHook,
   type QueueItem, type ReplyRung,
 } from './types';
+import { PolicyEngine, PolicyViolation, databaseLookups, type Channel } from '@/policy';
 import type { SupportedSegment } from '@/mandate/types';
+
+/**
+ * Outreach channels the policy engine knows about. The engagement engine has a
+ * `referral` channel the policy model treats the same way, and both vocabularies
+ * are deliberately kept separate so neither is forced to grow to suit the other.
+ */
+const POLICY_CHANNEL: Readonly<Record<string, Channel>> = {
+  linkedin_connection: 'linkedin_connection',
+  linkedin_inmail: 'linkedin_inmail',
+  email: 'email',
+  phone: 'phone',
+  voicemail: 'voicemail',
+  referral: 'referral',
+};
 
 interface QueueRow {
   id: string; body: string; template_code: string; channel: string; created_at: string;
   touch: number; scheduled_for: string; prospect_id: string; display_name: string;
   mandate_id: string; title: string; hooks: number;
 }
+
+/**
+ * Does the draft say who wrote it?
+ *
+ * The templates all end with a signature token, so this checks that the token
+ * was actually filled rather than left as a bracket. Crude on purpose: it
+ * catches the failure that matters, a message going out with "[Your name]" in
+ * it, and phase 3b will know the real sender identity from the mailbox.
+ */
+const identifiesSender = (body: string): boolean =>
+  !/\[your name\]/i.test(body) && body.trim().length > 0;
 
 const toQueueItem = (r: QueueRow): QueueItem => ({
   messageId: r.id,
@@ -67,11 +93,13 @@ export class EngagementService {
   readonly #tx: TenantTx;
   readonly #tenantId: string;
   readonly #actor: Actor;
+  readonly #policy: PolicyEngine;
 
-  constructor(tx: TenantTx, tenantId: string, actor: Actor) {
+  constructor(tx: TenantTx, tenantId: string, actor: Actor, policy?: PolicyEngine) {
     this.#tx = tx;
     this.#tenantId = tenantId;
     this.#actor = actor;
+    this.#policy = policy ?? new PolicyEngine(databaseLookups(tx));
   }
 
   /**
@@ -165,6 +193,37 @@ export class EngagementService {
 
     const tooLong = checkLength(template, args.body);
     if (tooLong) throw new EngagementError(tooLong);
+
+    /*
+     * The send gate, run at draft time.
+     *
+     * The engine's own doc says why here rather than only at send: a message
+     * that fails policy must never reach the approval queue, because asking a
+     * human to rubber stamp something the system already knows is not permitted
+     * trains them to stop reading. Rules that genuinely cannot bind until the
+     * message is rendered and addressed declare `stage: 'send'` and sit this
+     * one out; they bind in phase 3b.
+     */
+    const subject = await this.#subjectOf(step.sequenceId);
+    const decision = await this.#policy.evaluate({
+      gate: 'send',
+      jurisdiction: subject.jurisdiction,
+      now: new Date(),
+      personId: subject.personId,
+      subjectHashes: subject.hashes,
+      channel: POLICY_CHANNEL[template.channel] ?? 'email',
+      message: {
+        stage: 'draft',
+        identifiesSender: identifiesSender(args.body),
+        // Added by the sending layer, so neither binds at draft. See the rule.
+        hasMailingAddress: false,
+        hasUnsubscribe: false,
+        personalisationEvidenceIds: verdict.hooks.map((h) => h.evidenceId),
+        body: args.body,
+      },
+    });
+    await this.#auditPolicy(decision, subject.personId);
+    if (!decision.allowed) throw new PolicyViolation(decision);
 
     const res = (await this.#tx.execute(sql`
       SELECT engagement_queue_message(
@@ -460,6 +519,61 @@ export class EngagementService {
         touch: r.touch, decision: r.decision, decidedAt: new Date(r.decided_at),
       })),
     };
+  }
+
+  /**
+   * Who this sequence is aimed at, and every identifier we hold for them.
+   *
+   * The identifier hashes are what a suppression is matched against, so a
+   * person who asked to be forgotten is not reachable through an address we
+   * happen to hold under a different key. The person's own record hashes to an
+   * identifier too, so the control works before any contact detail is on file.
+   */
+  async #subjectOf(sequenceId: string): Promise<{
+    personId: string;
+    jurisdiction: string;
+    hashes: readonly string[];
+  }> {
+    const res = (await this.#tx.execute(sql`
+      SELECT p.person_id,
+             encode(sha256(convert_to('person:' || p.person_id::text, 'UTF8')), 'hex') AS person_hash,
+             COALESCE(
+               array_agg(encode(sha256(convert_to(lower(trim(a.value)), 'UTF8')), 'hex'))
+                 FILTER (WHERE a.id IS NOT NULL),
+               '{}'
+             ) AS identifier_hashes
+        FROM sequences s
+        JOIN prospects p ON p.id = s.prospect_id
+        LEFT JOIN attributes a
+          ON a.person_id = p.person_id
+         AND a.key IN ('email', 'personal_email', 'work_email', 'phone', 'mobile', 'linkedin_url')
+       WHERE s.id = ${sequenceId}::uuid
+       GROUP BY p.person_id
+    `)) as unknown as {
+      rows: { person_id: string; person_hash: string; identifier_hashes: string[] }[];
+    };
+    const row = res.rows[0];
+    if (!row) throw new EngagementError(`sequence ${sequenceId} has no prospect in this tenant`);
+    return {
+      personId: row.person_id,
+      // Canada first for outreach, which is the practice's stated posture. When
+      // phase 3b sends outside it, this comes from the person's own location.
+      jurisdiction: 'CA',
+      hashes: [row.person_hash, ...row.identifier_hashes],
+    };
+  }
+
+  async #auditPolicy(decision: { allowed: boolean; gate: string; reasons: readonly { rule: string; allowed: boolean; statement: string }[] }, personId: string): Promise<void> {
+    await this.#tx.execute(sql`
+      SELECT audit_write(
+        'user'::actor_type, ${this.#actor.id}, ${'policy.' + decision.gate}, 'person',
+        ${personId}::text,
+        ${JSON.stringify({
+          allowed: decision.allowed,
+          reasons: decision.reasons.map((r) => ({ rule: r.rule, allowed: r.allowed, statement: r.statement })),
+        })}::jsonb
+      )
+    `);
   }
 
   async approvalMetrics(): Promise<ApprovalMetrics> {

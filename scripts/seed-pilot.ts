@@ -51,6 +51,17 @@ async function main() {
       });
       const personId = one(await tx.execute(sql`
         INSERT INTO persons (tenant_id, display_name) VALUES (${tenant.id}::uuid, ${name}) RETURNING id`));
+
+      // Without this the send gate refuses every email touch, and correctly so:
+      // Canadian anti spam law puts the burden of proving consent on the sender.
+      // A real pipeline records the basis at the moment the public evidence is
+      // collected, which is what this is imitating.
+      await ledger.recordConsent({
+        personId, basis: 'implied_conspicuous_publication', capturedAt: new Date(), evidenceId,
+        conspicuousPublication: {
+          publishedBySubject: true, noRefusalNotice: true, relevantToRole: true, sourceUrl: citation,
+        },
+      });
       const prospectId = one(await tx.execute(sql`
         INSERT INTO prospects (tenant_id, mandate_id, person_id)
         VALUES (${tenant.id}::uuid, ${mandateId}::uuid, ${personId}::uuid) RETURNING id`));

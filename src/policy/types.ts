@@ -24,6 +24,20 @@ export interface PolicyLookups {
   consentFor(personId: string): Promise<readonly ConsentRecord[]>;
 }
 
+/**
+ * Where a message is in its life.
+ *
+ * A draft sitting in the approval queue is not a commercial electronic message
+ * being sent, so the rules about what a sent message must carry do not bind it
+ * yet. Running them anyway would block every draft forever, since the mailing
+ * address and the unsubscribe are added by the sending layer.
+ *
+ * The distinction is modelled rather than fudged: the stage says which rules
+ * apply, every rule declares which stages it binds at, and nothing is quietly
+ * skipped. A rule that applies only at send still applies at send.
+ */
+export type MessageStage = 'draft' | 'send';
+
 export interface PolicyContext {
   readonly gate: Gate;
   readonly jurisdiction: string;
@@ -34,8 +48,21 @@ export interface PolicyContext {
   readonly writingToSensitiveTable?: boolean;
   readonly personId?: string;
   readonly subjectHash?: string;
+  /**
+   * Every identifier hash known for this person, so a suppression recorded
+   * against one of them stops contact on all of them.
+   *
+   * A person who asks to be forgotten by replying to an email must not then
+   * receive an InMail because the suppression was keyed to the address. The
+   * service supplies every hash it holds, including one derived from the person
+   * record itself, so the control works before any contact detail is on file.
+   */
+  readonly subjectHashes?: readonly string[];
   readonly channel?: Channel;
+  /** The attribute key being written, so the system classifies its sensitivity. */
+  readonly attributeKey?: string;
   readonly message?: {
+    readonly stage: MessageStage;
     readonly identifiesSender: boolean;
     readonly hasMailingAddress: boolean;
     readonly hasUnsubscribe: boolean;

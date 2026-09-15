@@ -1,4 +1,5 @@
 import { mentionsMoney } from '@/compensation/money';
+import { requiredNamespace } from './sensitivity';
 import type { PolicyRule } from './types';
 
 const allow = (rule: string, statement: string, basis: string) =>
@@ -12,11 +13,25 @@ const NOTICE_OWED = new Set(['EU', 'GB', 'DE', 'FR', 'NL', 'IE', 'ES', 'IT', 'SE
 /** Surfaces whose own rules prohibit unsolicited recruiting outreach. */
 const NO_COLD_OUTREACH: ReadonlySet<string> = new Set(['community']);
 
+/** Every identifier hash the caller holds for this person, single or plural. */
+const hashesOf = (c: { subjectHash?: string; subjectHashes?: readonly string[] }): readonly string[] =>
+  [...(c.subjectHash === undefined ? [] : [c.subjectHash]), ...(c.subjectHashes ?? [])];
+
 export const collectionRules: readonly PolicyRule[] = [
   {
+    /**
+     * Does not apply to `recruiter_entered` collection, and the rule's own
+     * statement says why: the output of a manual entry surface reaches the
+     * ledger "only through a human", and that path is a named human typing what
+     * they read on their own licensed seat. Firing here would refuse the one
+     * route the rule exists to leave open.
+     *
+     * Found by wiring the gate into the ledger: the rule blocked
+     * `recordManualEntry`, which is the documented exception to it.
+     */
     id: 'connector.persistence',
     gate: 'collection',
-    appliesTo: (c) => c.connector !== undefined,
+    appliesTo: (c) => c.connector !== undefined && c.collectionMethod !== 'recruiter_entered',
     evaluate: (c) =>
       c.connector!.persistence === 'persist'
         ? allow('connector.persistence', `${c.connector!.id} may be persisted.`, c.connector!.termsRef)
@@ -47,18 +62,48 @@ export const collectionRules: readonly PolicyRule[] = [
 
 export const enrichmentRules: readonly PolicyRule[] = [
   {
+    /**
+     * The key decides, not the caller.
+     *
+     * This rule used to read a boolean the caller supplied, which meant a caller
+     * passing `sensitive: false` for a date of birth defeated it entirely and
+     * nothing noticed. `classify` now holds the system's opinion: a caller may
+     * escalate an attribute the list does not recognise, and may never
+     * de-escalate one it does.
+     */
     id: 'sensitive.quarantine',
     gate: 'enrichment',
-    appliesTo: (c) => c.attributeIsSensitive !== undefined,
-    evaluate: (c) =>
-      c.attributeIsSensitive && c.writingToSensitiveTable !== true
-        ? deny(
-            'sensitive.quarantine',
-            'A protected or sensitive attribute may not be written to the ordinary attribute table. ' +
-              'These may inform timing and prioritisation only, never selection.',
-            'architecture.md s6.2',
-          )
-        : allow('sensitive.quarantine', 'Attribute is stored in the correct namespace.', 'architecture.md s6.2'),
+    appliesTo: (c) => c.attributeKey !== undefined || c.attributeIsSensitive !== undefined,
+    evaluate: (c) => {
+      const verdict = c.attributeKey === undefined
+        ? { sensitive: c.attributeIsSensitive === true, ground: null, callerUnderstated: false }
+        : requiredNamespace(c.attributeKey, c.attributeIsSensitive === true);
+
+      if (verdict.callerUnderstated) {
+        return deny(
+          'sensitive.quarantine',
+          `"${c.attributeKey}" is a ${verdict.ground} attribute and was submitted as ordinary. ` +
+            'Sensitivity is decided by the key, not by the caller: these may inform timing and ' +
+            'prioritisation only, never selection, and that holds whatever the caller believes.',
+          'Canadian Human Rights Act prohibited grounds; architecture.md s6.2',
+        );
+      }
+      if (verdict.sensitive && c.writingToSensitiveTable !== true) {
+        return deny(
+          'sensitive.quarantine',
+          'A protected or sensitive attribute may not be written to the ordinary attribute table. ' +
+            'These may inform timing and prioritisation only, never selection.',
+          'architecture.md s6.2',
+        );
+      }
+      return allow(
+        'sensitive.quarantine',
+        verdict.sensitive
+          ? `Quarantined as a ${verdict.ground ?? 'caller declared sensitive'} attribute.`
+          : 'Attribute is stored in the correct namespace.',
+        'architecture.md s6.2',
+      );
+    },
   },
   {
     id: 'notice.indirect_collection',
@@ -82,17 +127,25 @@ export const enrichmentRules: readonly PolicyRule[] = [
 
 export const sendRules: readonly PolicyRule[] = [
   {
+    /**
+     * Checked against every identifier held for this person, not one.
+     *
+     * Someone who asks to be forgotten by replying to an email must not then
+     * receive an InMail because the suppression was keyed to the address.
+     */
     id: 'send.suppression',
     gate: 'send',
-    appliesTo: (c) => c.subjectHash !== undefined,
-    evaluate: async (c, l) =>
-      (await l.isSuppressed(c.subjectHash!))
+    appliesTo: (c) => hashesOf(c).length > 0,
+    evaluate: async (c, l) => {
+      const hits = await Promise.all(hashesOf(c).map((h) => l.isSuppressed(h)));
+      return hits.some(Boolean)
         ? deny(
             'send.suppression',
             'This person has asked to be forgotten. No contact, on any channel, in any mandate.',
             'AESC Candidate Bill of Rights; architecture.md s8',
           )
-        : allow('send.suppression', 'No suppression record.', 'architecture.md s8'),
+        : allow('send.suppression', 'No suppression record on any known identifier.', 'architecture.md s8');
+    },
   },
   {
     id: 'send.consent_basis',
@@ -117,13 +170,39 @@ export const sendRules: readonly PolicyRule[] = [
     },
   },
   {
+    /**
+     * Who is writing. This is a drafting concern, so it binds from the first
+     * draft: a message that never says who sent it is not a message a senior
+     * person answers, quite apart from the statute.
+     */
+    id: 'send.identifies_sender',
+    gate: 'send',
+    appliesTo: (c) => c.message !== undefined,
+    evaluate: (c) =>
+      c.message!.identifiesSender
+        ? allow('send.identifies_sender', 'The message identifies its sender.', "Canada's anti spam legislation")
+        : deny(
+            'send.identifies_sender',
+            'The message does not identify its sender. That is a structural element, not template text.',
+            "Canada's anti spam legislation",
+          ),
+  },
+  {
+    /**
+     * The mailing address and the unsubscribe are added by the sending layer,
+     * so they bind at send and not at draft. Running them on a draft would
+     * block every draft forever and teach a recruiter to ignore the gate, which
+     * is how a real control becomes decoration.
+     *
+     * The rule is not softened, only correctly placed. Phase 3b cannot send
+     * without satisfying it.
+     */
     id: 'send.required_elements',
     gate: 'send',
-    appliesTo: (c) => c.message !== undefined && c.channel === 'email',
+    appliesTo: (c) => c.message?.stage === 'send' && c.channel === 'email',
     evaluate: (c) => {
       const m = c.message!;
       const missing = [
-        m.identifiesSender ? null : 'sender identification',
         m.hasMailingAddress ? null : 'a valid mailing address',
         m.hasUnsubscribe ? null : 'a working unsubscribe',
       ].filter((x): x is string => x !== null);

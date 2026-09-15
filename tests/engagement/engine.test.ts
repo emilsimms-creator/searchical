@@ -29,6 +29,21 @@ async function scaffold(tx: Tx, tenantId: string) {
     INSERT INTO prospects (tenant_id, mandate_id, person_id)
     VALUES (${tenantId}::uuid, ${mandateId}::uuid, ${personId}::uuid) RETURNING id`));
 
+
+  // CASL puts the burden of proving consent on the sender, so the send gate
+  // refuses an email draft to someone with no recorded basis. A real pipeline
+  // records this when the public evidence is collected; the tests do the same
+  // rather than route around the gate.
+  await ledger.recordConsent({
+    personId, basis: 'implied_conspicuous_publication', capturedAt: START, evidenceId,
+    conspicuousPublication: {
+      publishedBySubject: true,
+      noRefusalNotice: true,
+      relevantToRole: true,
+      sourceUrl: 'https://example.org/kubecon-2026-talk',
+    },
+  });
+
   return { mandateId, personId, prospectId, evidenceId };
 }
 

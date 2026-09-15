@@ -12,6 +12,16 @@ export function errorChain(error: unknown): string {
   return parts.join(' | ');
 }
 
+/** Walk the cause chain and return the first error of a given class. */
+export function causeOfType<T>(error: unknown, type: new (...args: never[]) => T): T | null {
+  let current: unknown = error;
+  for (let depth = 0; depth < 8 && current instanceof Error; depth += 1) {
+    if (current instanceof type) return current as T;
+    current = (current as { cause?: unknown }).cause;
+  }
+  return null;
+}
+
 /** Assert that a rejected promise carries `pattern` anywhere on its cause chain. */
 export async function expectRejection(promise: Promise<unknown>, pattern: RegExp, note?: string) {
   let thrown: unknown;
