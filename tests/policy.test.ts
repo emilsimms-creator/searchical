@@ -173,3 +173,49 @@ describe('the send gate', () => {
     await expect(engine.enforce({ ...base, message: goodMessage })).rejects.toThrow(PolicyViolation);
   });
 });
+
+describe('compensation never rides in outreach', () => {
+  const send = async (body: string) =>
+    new PolicyEngine(lookups()).evaluate({
+      gate: 'send',
+      jurisdiction: 'CA',
+      now: NOW,
+      channel: 'email',
+      message: { ...goodMessage, body },
+    });
+
+  const reason = (d: Awaited<ReturnType<typeof send>>) =>
+    d.reasons.find((r) => r.rule === 'send.no_compensation_in_outreach');
+
+  /**
+   * Pay is raised once the conversation has earned it. Before contact there is
+   * no version of a figure that helps: it screens people out on the one
+   * dimension the research calls hygiene rather than motivation, and it commits
+   * the client to something nobody has agreed.
+   */
+  it('refuses a figure, a range, or the word itself', async () => {
+    for (const body of [
+      'Hi Ada, the base is $210,000 and I thought of you.',
+      'Hi Ada, this pays around 210k.',
+      'Hi Ada, the compensation is competitive.',
+      'Hi Ada, the salary band is worth a look.',
+      'Hi Ada, CAD figures on request.',
+    ]) {
+      const d = await send(body);
+      expect(d.allowed, body).toBe(false);
+      expect(reason(d)?.statement, body).toMatch(/Outreach does not carry a figure/);
+    }
+  });
+
+  /** There is no confirmed band that makes a number safe in a cold message. */
+  it('cannot be satisfied by any state of the mandate', async () => {
+    const d = await send('Hi Ada, the base is $210,000.');
+    expect(reason(d)?.allowed).toBe(false);
+  });
+
+  it('leaves an ordinary personalised draft alone', async () => {
+    const d = await send('Hi Ada, your KubeCon talk on multi-cluster failover stood out.');
+    expect(reason(d)).toBeUndefined();
+    expect(d.allowed).toBe(true);
+  });
+});

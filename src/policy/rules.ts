@@ -156,36 +156,35 @@ export const sendRules: readonly PolicyRule[] = [
   },
   {
     /**
-     * A figure in an outreach message is a commitment the client has to honour.
+     * Outreach does not carry a number. Ever.
      *
-     * The reply ladder tells a recruiter to answer a compensation question with
-     * a range anchored to track record, and that range has exactly one lawful
-     * source: a band the hiring leader has confirmed. A number that reached a
-     * senior candidate on the authority of a job posting, a market estimate or
-     * a recruiter's recollection cannot be withdrawn, and the person who
-     * discovers the difference is the candidate, at offer.
+     * Pay is raised once the conversation has earned it, which is the practice's
+     * own rule and is why the call record refuses a short call claiming
+     * compensation was discussed. Before contact there is no version of this
+     * that helps: a figure in a first touch either screens people out on the one
+     * dimension the research says is hygiene rather than motivation, or commits
+     * the client to something nobody has agreed, and it cannot be withdrawn once
+     * a senior candidate has read it.
+     *
+     * This was written as a conditional, allowing a figure where the band was
+     * confirmed. That was wrong. A confirmed band makes a number safe to say on
+     * a call, not safe to put in a cold message, and the two are different
+     * questions. The gate now refuses unconditionally, which removes both the
+     * condition and the context field that fed it.
      *
      * Deliberately over-detects. A false positive costs one look at a draft.
      */
-    id: 'send.compensation_confirmed',
+    id: 'send.no_compensation_in_outreach',
     gate: 'send',
     appliesTo: (c) => c.message?.body !== undefined && mentionsMoney(c.message.body),
-    evaluate: (c) =>
-      c.compensationBandConfirmed === true
-        ? allow(
-            'send.compensation_confirmed',
-            'The message refers to compensation and the band is confirmed by the hiring leader.',
-            'architecture.md s5.6',
-          )
-        : deny(
-            'send.compensation_confirmed',
-            c.compensationBandConfirmed === false
-              ? 'This message refers to compensation and the mandate has no confirmed band. A figure ' +
-                'quoted on an unconfirmed band cannot be withdrawn once a senior candidate has read it.'
-              : 'This message refers to compensation and no band status was supplied, so the gate ' +
-                'cannot establish there is a confirmed number behind it.',
-            'BC Pay Transparency Act and Ontario ESA posting rules make the stated range consequential; architecture.md s5.6',
-          ),
+    evaluate: () =>
+      deny(
+        'send.no_compensation_in_outreach',
+        'This message refers to compensation. Outreach does not carry a figure, a range or a ' +
+          'reference to pay: that conversation happens once contact is made and the person has a ' +
+          'reason to have it. Take the number out and send the rest.',
+        "The practice Playbook s4.5: pay is raised past the mid point of the call, never before it",
+      ),
   },
   {
     id: 'send.channel_permitted',

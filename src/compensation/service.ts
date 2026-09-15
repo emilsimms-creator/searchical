@@ -239,11 +239,20 @@ export class CompensationService {
   }
 
   /**
-   * What a recruiter may say out loud, and to whom.
+   * What a recruiter may say out loud, ONCE CONTACT IS MADE.
    *
-   * The reply ladder's prescribed action for a compensation question is to give
-   * a range anchored to track record. This is where that range comes from, and
-   * there is exactly one source for it: a band the client has confirmed.
+   * This is post contact only. Nothing in outreach quotes a number: the send
+   * gate refuses any draft that mentions pay at all, whatever the band says, and
+   * none of the eight templates carries a money token. This exists for the
+   * moment a candidate asks, which the reply ladder treats as strong early
+   * interest, and for the compensation conversation past the mid point of an
+   * exploratory call.
+   *
+   * At that point there is exactly one source for a range: a band the client has
+   * confirmed. A number that reached a senior candidate on the authority of a
+   * job posting, a market estimate or a recruiter's recollection cannot be
+   * withdrawn, and the person who discovers the difference is the candidate, at
+   * offer.
    */
   async quotableRange(mandateId: string): Promise<
     { quotable: true; text: string } | { quotable: false; reason: string }

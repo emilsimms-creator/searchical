@@ -69,7 +69,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**275 tests passing, typecheck clean.**
+**278 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See

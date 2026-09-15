@@ -1,6 +1,7 @@
 # Compensation
 
-**Status:** Complete. 38 compensation tests, part of 266 passing overall.
+**Status:** Complete. Compensation is internal intelligence and post contact conversation only:
+nothing the system writes to a candidate before contact mentions pay.
 **Currency:** CAD throughout, stored explicitly on every figure.
 **Audience:** Engineers. The reasoning is written so a recruiter can argue with it.
 
@@ -51,11 +52,22 @@ estimate that a recruiter confirmed reads downstream exactly like a number the c
 and the person who discovers the difference is the candidate, at offer.
 
 **Only a confirmed band is quotable, and only a confirmed band is compared.** The reply ladder
-already tells a recruiter to answer a compensation question with a range anchored to track record.
+tells a recruiter to answer a compensation question with a range anchored to track record.
 `quotableRange()` is where that range comes from, and it returns a refusal with a reason rather than
-a number when the band is absent, inferred or unconfirmed. The send gate enforces the same rule
-independently: a draft that mentions money at all is blocked unless the mandate's band is confirmed.
-That detector over-detects on purpose. A false positive costs a recruiter one look at a draft; a
+a number when the band is absent, inferred or unconfirmed.
+
+**Outreach carries no number at all, and there is no state of the mandate that changes that.** None
+of the eight templates contains a money token, and the send gate refuses any draft that mentions
+pay, a figure or a range, unconditionally. This rule was first written as a permission, allowing a
+figure where the band was confirmed. That was wrong, and the distinction is worth keeping straight:
+a confirmed band makes a number safe to say **on a call**, not safe to put in a **cold message**.
+Before contact a figure either screens people out on the one dimension the research calls hygiene
+rather than motivation, or commits the client to something nobody has agreed, and it cannot be
+withdrawn once a senior candidate has read it. Pay is raised once the conversation has earned it,
+which is the practice's own rule and is already why the call record refuses a short call claiming
+compensation was discussed.
+
+The detector over-detects on purpose. A false positive costs a recruiter one look at a draft; a
 false negative puts an unapproved figure in front of a senior candidate and cannot be taken back.
 
 ## Pay transparency, and the feature that would have been wrong

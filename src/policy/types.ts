@@ -44,12 +44,6 @@ export interface PolicyContext {
     /** The body, so the gate can see whether it quotes money. */
     readonly body?: string;
   };
-  /**
-   * Whether the mandate's compensation band has been confirmed by the hiring
-   * leader. Undefined means not supplied, and the money rule then abstains
-   * rather than guessing.
-   */
-  readonly compensationBandConfirmed?: boolean;
 }
 
 export interface PolicyReason {
