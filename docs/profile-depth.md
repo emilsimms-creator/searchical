@@ -1,6 +1,6 @@
 # Profile depth promotion
 
-**Status:** Complete. 38 promotion and robots tests, part of 391 passing overall.
+**Status:** Complete. 51 promotion, robots, redirect and budget tests, part of 404 passing overall.
 **Audience:** Engineers, and anyone who needs to know what this system fetches and what it keeps.
 
 Screening at snippet depth judges forty words a search engine chose. Promotion reads the page, so
@@ -53,6 +53,42 @@ The crawler identifies itself, with a contact URL, rather than pretending to be 
 is read once per host and a crawl delay is honoured, with a two second floor per host even where the
 site names none.
 
+## Redirects are re-checked against the host that answers
+
+The platform's `fetch` will happily follow a redirect to another host, and that host's robots.txt
+would never be consulted. That was a real defect rather than a missing feature: **a site that
+disallows this crawler could be reached anyway by any page elsewhere that happened to redirect to
+it.**
+
+So the fetcher uses `redirect: 'manual'` and hands the target back, and the promoter loops: resolve
+the location against the page it came from, work out the new host, read that host's robots.txt, and
+apply its rules. Every hop, not just the first. A chain longer than five is a loop or a page that
+does not want to be read, and is refused as such.
+
+Each promotion carries its `chain`, every URL actually requested in order. More than one entry means
+the page redirected, and **the last entry is what was really read**. That is what a citation should
+name: citing the URL you asked for when a different one answered is a small lie that becomes a
+problem the first time somebody checks.
+
+A cross-host redirect also waits on the new host's own crawl delay rather than inheriting the first
+host's.
+
+## The fetch budget
+
+The crawl delay bounds the **rate** and bounds nothing else, which is how a mandate with a wide
+market and a permissive robots file quietly sends several hundred requests to a small conference
+site over an afternoon. Politeness at two seconds a request is still a lot of requests.
+
+`Promoter` carries a budget, per host and in total, defaulting to 25 and 250. **Every request
+counts**: robots.txt, the page, and each redirect hop. Undercounting would defeat the purpose,
+because a redirect chain is three requests to someone's server however it is described in the code.
+Enforcement sits in the one method every outbound request passes through, so the budget counts what
+was actually sent rather than what the code meant to send.
+
+Exhausting the budget is a stop, not a failure. Leads not reached keep their snippet verdict and say
+why they were not read, and `spend()` reports the run's load so it can be stated rather than
+guessed.
+
 ## Fetch cheap first
 
 `promoteAndRescreen` spends a request only on leads the snippet screen did not already settle.
@@ -93,13 +129,14 @@ screen, then promotion.
 
 ## Open
 
-**No per source fetch budget.** A mandate with a wide market and a permissive robots file could put
-real load on a small conference site. The crawl delay bounds the rate but nothing bounds the total,
-and it should.
-
 **No caching between runs.** Re-running a mandate refetches every page. Storing fetched bodies would
 change the retention answer, so the cache needs its own terms position rather than being added as an
 optimisation.
 
-**Redirects are followed without re-checking robots.** A redirect to another host is currently
-fetched under the first host's rules. That is wrong and worth fixing before this runs at volume.
+**A cross-host redirect is followed without questioning relevance.** Robots now governs whether it
+may be fetched, which was the defect. Whether a lead from a conference programme that lands on an
+unrelated host is still evidence about the same person is a separate question, and the `chain` makes
+it visible rather than answering it.
+
+**The budget is per run, not per period.** Two runs an hour apart each get a fresh allowance. A
+standing daily cap per host would be the honest next step if this ever runs on a schedule.

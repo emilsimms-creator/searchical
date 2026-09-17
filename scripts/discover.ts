@@ -155,7 +155,8 @@ async function main() {
 
   rule(live ? 'PROMOTED TO PROFILE DEPTH' : 'PROMOTED TO PROFILE DEPTH (against a sample page)');
   const fetcher: PageFetcher = live ? httpPageFetcher() : SAMPLE_FETCHER;
-  const promoted = await promoteAndRescreen(screened, new Promoter(fetcher), terms, constraints);
+  const promoter = new Promoter(fetcher);
+  const promoted = await promoteAndRescreen(screened, promoter, terms, constraints);
   for (const item of promoted) {
     const depth = item.depth === 'profile' ? 'read the page' : 'snippet only';
     console.log(`  ${item.verdict.toUpperCase().padEnd(8)} ${item.lead.title}  (${depth})`);
@@ -165,9 +166,15 @@ async function main() {
     if (item.promotion?.promoted) {
       console.log(`    retention: ${item.promotion.retention}`);
     }
+    if (item.promotion && item.promotion.chain.length > 1) {
+      console.log(`    redirected: ${item.promotion.chain.join(' -> ')}`);
+    }
     console.log(`    ${item.headline}`);
     console.log('');
   }
+  const spend = promoter.spend();
+  console.log(`  Load: ${spend.total} request(s) across ${spend.byHost.size} host(s), ` +
+    `budget ${spend.budget.perHost} per host and ${spend.budget.total} in total.`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

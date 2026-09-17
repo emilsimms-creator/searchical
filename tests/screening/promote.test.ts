@@ -31,13 +31,13 @@ function promoter(pages: Record<string, { text?: string; statedLocation?: string
       if (!page || page.refused) {
         return {
           lead: l, promoted: false, text: null, statedLocation: null, retention: 'ephemeral',
-          robots: null,
+          robots: null, chain: [l.url],
           refusal: { reason: 'robots_disallows', detail: page?.refused ?? 'no page' },
         };
       }
       return {
         lead: l, promoted: true, text: page.text ?? '', statedLocation: page.statedLocation ?? null,
-        retention: 'ephemeral', refusal: null,
+        retention: 'ephemeral', refusal: null, chain: [l.url],
         robots: { allowed: true, rule: 'no rule matches this path', crawlDelayMs: null },
       };
     },

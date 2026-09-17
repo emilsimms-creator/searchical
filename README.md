@@ -73,7 +73,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**391 tests passing, typecheck clean.**
+**404 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
@@ -97,7 +97,9 @@ the approval queue with its edit rate, the reply ladder and the exploratory call
 
 **Profile depth promotion.** A lead the snippet screen could not settle gets its page read, subject
 to the site's own robots.txt, honoured to the standard. LinkedIn is never fetched at any depth. The
-page body is never kept: promotion sharpens a judgment without creating a record. See
+page body is never kept: promotion sharpens a judgment without creating a record. Redirects are
+re-checked against the host that actually answers, and a fetch budget bounds the total load a run
+puts on other people's servers. See
 [docs/profile-depth.md](docs/profile-depth.md).
 
 **Screening, with the checks it cannot make named rather than faked.** Every lead is judged against
