@@ -12,7 +12,21 @@ import { readFileSync } from 'node:fs';
 import {
   DISCOVERY_SOURCES, braveSearchProvider, generateDiscoveryQueries, harvest, harvestSummary,
 } from '@/discovery';
-import type { MandateTerm, SupportedSegment } from '@/mandate/types';
+import { fixtureSearchProvider, type SearchHit } from '@/discovery';
+import { screenLeads, screeningSummary } from '@/screening';
+import type { MandateConstraint, MandateTerm, SupportedSegment } from '@/mandate/types';
+
+/** Stand in results, so the screen can be demonstrated without a search key. */
+const SAMPLE: SearchHit[] = [
+  { url: 'https://kubecon.example.org/speakers/ada-okafor', rank: 1,
+    title: 'Ada Okafor, VP Engineering at Example Corp',
+    snippet: 'Session: running Kubernetes across three regions, and what Terraform could not fix.' },
+  { url: 'https://kubecon.example.org/speakers/rav-menon', rank: 2,
+    title: 'Rav Menon, Junior Platform Engineer',
+    snippet: 'Lightning talk on Kubernetes operators.' },
+  { url: 'https://kubecon.example.org/attendees/list', rank: 3,
+    title: 'Someone who was there', snippet: 'Attended the conference.' },
+];
 
 const rule = (label: string) =>
   console.log(`\n${'-'.repeat(74)}\n${label}\n${'-'.repeat(74)}`);
@@ -33,6 +47,7 @@ function vocabularyFrom(lines: readonly string[]): MandateTerm[] {
     if (line === '' || line.startsWith('#')) continue;
     if (line.toLowerCase().startsWith('titles:')) { kind = 'title_variant'; rank = 1; continue; }
     if (line.toLowerCase().startsWith('skills:')) { kind = 'must_have_skill'; rank = 1; continue; }
+    if (line.toLowerCase().startsWith('exclusions:')) { kind = 'exclusion'; rank = 1; continue; }
     terms.push({
       kind, term: line, origin: 'recruiter', status: 'confirmed',
       observedCount: null, rank: rank++,
@@ -50,7 +65,11 @@ async function main() {
 
   const terms = file
     ? vocabularyFrom(readFileSync(file, 'utf8').split('\n'))
-    : vocabularyFrom(['titles:', 'Vice President, Engineering', 'skills:', 'Kubernetes', 'Terraform']);
+    : vocabularyFrom([
+        'titles:', 'Vice President, Engineering',
+        'skills:', 'Kubernetes', 'Terraform',
+        'exclusions:', 'Junior', 'Intern',
+      ]);
 
   rule('DISCOVERY SOURCES');
   for (const s of DISCOVERY_SOURCES.filter((s) => s.segments.includes(segment))) {
@@ -71,19 +90,42 @@ async function main() {
   }
   for (const w of warnings) console.log(`  WARNING: ${w}\n`);
 
-  if (!live) {
-    console.log('\n  Add --live with BRAVE_SEARCH_API_KEY set to run these against the web.');
-    return;
-  }
+  // A worked example of the screen, so the layer is visible without a key.
+  const constraints: MandateConstraint[] = [
+    { kind: 'security_clearance', severity: 'disqualifying', inferred: false,
+      statement: 'Must be eligible to obtain Secret clearance.' },
+    { kind: 'citizenship_or_status', severity: 'disqualifying', inferred: false,
+      statement: 'Priority to Canadian citizens and permanent residents.' },
+    { kind: 'location_or_onsite', severity: 'strong_preference', inferred: false,
+      statement: 'On site twelve days a month.' },
+  ];
+
+  const provider = live
+    ? braveSearchProvider()
+    : fixtureSearchProvider(new Map(queries.map((q) => [q.query, SAMPLE])));
 
   rule('LEADS');
-  const result = await harvest(braveSearchProvider(), queries, { limitPerQuery: 10, region: 'CA' });
+  const result = await harvest(provider, queries, { limitPerQuery: 10, region: 'CA' });
   for (const lead of result.leads) {
     console.log(`  ${lead.disposition === 'may_persist' ? '[record]' : '[open it]'} ${lead.title}`);
     console.log(`    ${lead.url}  (${lead.sourceId})`);
   }
   console.log(`\n  ${harvestSummary(result)}`);
   for (const f of result.failures) console.log(`  FAILED ${f.sourceId}: ${f.reason}`);
+
+  rule(live ? 'SCREENED' : 'SCREENED (against sample leads, since no key is set)');
+  for (const s of screenLeads(result.leads, terms, constraints)) {
+    console.log(`  ${s.verdict.toUpperCase().padEnd(8)} ${s.lead.title}`);
+    console.log(`    ${s.headline}`);
+    for (const m of s.matches) console.log(`    + ${m.statement}`);
+    for (const c of s.concerns) console.log(`    - ${c.statement}`);
+    for (const q of s.openQuestions) console.log(`    ? [${q.kind}] ${q.question}`);
+    if (s.prohibitedChecksSkipped.length > 0) {
+      console.log(`    ! not screened, protected ground: ${s.prohibitedChecksSkipped.join(', ')}`);
+    }
+    console.log('');
+  }
+  console.log(`  ${screeningSummary(screenLeads(result.leads, terms, constraints), terms)}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
