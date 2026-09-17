@@ -13,7 +13,8 @@ import {
   DISCOVERY_SOURCES, braveSearchProvider, generateDiscoveryQueries, harvest, harvestSummary,
 } from '@/discovery';
 import { fixtureSearchProvider, type SearchHit } from '@/discovery';
-import { screenLeads, screeningSummary } from '@/screening';
+import { Promoter, httpPageFetcher, type PageFetcher } from '@/discovery';
+import { promoteAndRescreen, screenLeads, screeningSummary } from '@/screening';
 import type { MandateConstraint, MandateTerm, SupportedSegment } from '@/mandate/types';
 
 /** Stand in results, so the screen can be demonstrated without a search key. */
@@ -27,6 +28,26 @@ const SAMPLE: SearchHit[] = [
   { url: 'https://kubecon.example.org/attendees/list', rank: 3,
     title: 'Someone who was there', snippet: 'Attended the conference.' },
 ];
+
+/** A recorded page, so promotion can be demonstrated without reaching the web. */
+const SAMPLE_FETCHER: PageFetcher = {
+  id: 'sample',
+  async fetchText(url) {
+    if (url.endsWith('/robots.txt')) {
+      return { status: 200, contentType: 'text/plain', body: 'User-agent: *\nDisallow: /attendees' };
+    }
+    if (url.includes('ada-okafor')) {
+      return {
+        status: 200, contentType: 'text/html',
+        body: '<html><body><h1>Ada Okafor</h1>' +
+          '<p itemprop="addressLocality">Toronto, Ontario</p>' +
+          '<p>Vice President, Engineering at Example Corp. Runs Kubernetes across three regions ' +
+          'with Terraform.</p></body></html>',
+      };
+    }
+    return { status: 404, contentType: 'text/html', body: 'Not found' };
+  },
+};
 
 const rule = (label: string) =>
   console.log(`\n${'-'.repeat(74)}\n${label}\n${'-'.repeat(74)}`);
@@ -102,7 +123,11 @@ async function main() {
 
   const provider = live
     ? braveSearchProvider()
-    : fixtureSearchProvider(new Map(queries.map((q) => [q.query, SAMPLE])));
+    // Only the conference query returns sample hits, so the demo shows a
+    // surface that can actually be fetched rather than one held at pointer only.
+    : fixtureSearchProvider(new Map(
+        queries.map((q) => [q.query, q.sourceId === 'conference_programmes' ? SAMPLE : []]),
+      ));
 
   rule('LEADS');
   const result = await harvest(provider, queries, { limitPerQuery: 10, region: 'CA' });
@@ -125,7 +150,24 @@ async function main() {
     }
     console.log('');
   }
-  console.log(`  ${screeningSummary(screenLeads(result.leads, terms, constraints), terms)}`);
+  const screened = screenLeads(result.leads, terms, constraints);
+  console.log(`  ${screeningSummary(screened, terms)}`);
+
+  rule(live ? 'PROMOTED TO PROFILE DEPTH' : 'PROMOTED TO PROFILE DEPTH (against a sample page)');
+  const fetcher: PageFetcher = live ? httpPageFetcher() : SAMPLE_FETCHER;
+  const promoted = await promoteAndRescreen(screened, new Promoter(fetcher), terms, constraints);
+  for (const item of promoted) {
+    const depth = item.depth === 'profile' ? 'read the page' : 'snippet only';
+    console.log(`  ${item.verdict.toUpperCase().padEnd(8)} ${item.lead.title}  (${depth})`);
+    if (item.promotion && !item.promotion.promoted) {
+      console.log(`    not read: ${item.promotion.refusal!.reason} · ${item.promotion.refusal!.detail}`);
+    }
+    if (item.promotion?.promoted) {
+      console.log(`    retention: ${item.promotion.retention}`);
+    }
+    console.log(`    ${item.headline}`);
+    console.log('');
+  }
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

@@ -41,6 +41,9 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'LinkedIn public profiles, via search engine X-ray',
     access: 'search_xray',
     persistence: 'manual_entry_only',
+    // The User Agreement prohibits automated access, so the page is never
+    // fetched by this system at any depth. A human opens it on their own seat.
+    automatedFetch: 'never',
     site: 'linkedin.com/in',
     yields: ['identity', 'employer'],
     whySeniorPeopleAreHere:
@@ -69,6 +72,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'GitHub profiles and contributions, via search engine X-ray',
     access: 'search_xray',
     persistence: 'manual_entry_only',
+    automatedFetch: 'robots_permitting',
     site: 'github.com',
     yields: ['identity', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -102,6 +106,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Conference and summit speaker programmes',
     access: 'search_xray',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'employer', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -133,6 +138,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Open source foundation contributor and maintainer lists (CNCF, Apache, Linux Foundation)',
     access: 'directory',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'employer', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -159,6 +165,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Vendor ambassador and expert programmes (AWS Community Builders, Microsoft MVP, Google Developer Experts)',
     access: 'directory',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'employer', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -185,6 +192,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'ORCID researcher registry',
     access: 'directory',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: 'orcid.org',
     yields: ['identity', 'employer', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -212,6 +220,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Company leadership and about pages',
     access: 'search_xray',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'employer', 'trigger'],
     whySeniorPeopleAreHere:
@@ -239,6 +248,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Corporate registries and securities filings (SEDAR+, Companies House, EDGAR)',
     access: 'directory',
     persistence: 'persist',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'employer', 'trigger'],
     whySeniorPeopleAreHere:
@@ -264,6 +274,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Personal engineering blogs, dev.to and Hashnode',
     access: 'search_xray',
     persistence: 'manual_entry_only',
+    automatedFetch: 'robots_permitting',
     site: null,
     yields: ['identity', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -287,6 +298,7 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Stack Overflow profiles and answers',
     access: 'search_xray',
     persistence: 'manual_entry_only',
+    automatedFetch: 'robots_permitting',
     site: 'stackoverflow.com',
     yields: ['identity', 'skill_evidence'],
     whySeniorPeopleAreHere:
@@ -313,6 +325,8 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     name: 'Contracted people data provider',
     access: 'licensed',
     persistence: 'persist',
+    // Reached through its own API under contract, never by fetching pages.
+    automatedFetch: 'never',
     site: null,
     yields: ['identity', 'employer', 'contact', 'trigger'],
     whySeniorPeopleAreHere:

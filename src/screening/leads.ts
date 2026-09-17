@@ -1,6 +1,7 @@
 import type { Lead } from '@/discovery/harvest';
+import type { Promotion } from '@/discovery/promote';
 import type { MandateConstraint, MandateTerm } from '@/mandate/types';
-import { screenAll } from './screen';
+import { screen, screenAll } from './screen';
 import type { ScreenResult, ScreeningEvidence } from './types';
 
 /**
@@ -79,4 +80,55 @@ export function screeningSummary(
       : null,
   ].filter((p): p is string => p !== null);
   return parts.join(' ');
+}
+
+/**
+ * Screen cheaply, then read the pages that earned it.
+ *
+ * Promotion costs a request to somebody else's server, so it is spent only on
+ * leads the snippet screen did not already settle. A lead the mandate's own
+ * exclusions rejected is not fetched at all: there is nothing a page could say
+ * that would change the verdict, and fetching it anyway would be load on a
+ * stranger's site in exchange for nothing.
+ *
+ * A promotion that is refused is not a failure. The lead keeps its snippet
+ * verdict and carries the reason, so a recruiter can see that the page was not
+ * read and why, rather than assuming it was.
+ */
+export async function promoteAndRescreen(
+  screened: readonly ScreenedLead[],
+  promoter: { promote(lead: Lead): Promise<Promotion> },
+  terms: readonly MandateTerm[],
+  constraints: readonly MandateConstraint[],
+): Promise<readonly (ScreenedLead & { promotion: Promotion | null })[]> {
+  const out: (ScreenedLead & { promotion: Promotion | null })[] = [];
+
+  for (const item of screened) {
+    if (item.verdict === 'reject') {
+      out.push({ ...item, promotion: null });
+      continue;
+    }
+    const promotion = await promoter.promote(item.lead);
+    if (!promotion.promoted || promotion.text === null) {
+      out.push({ ...item, promotion });
+      continue;
+    }
+    const deeper = screen({
+      evidence: {
+        text: promotion.text,
+        statedLocation: promotion.statedLocation,
+        sourceId: item.lead.sourceId,
+        depth: 'profile',
+      },
+      terms,
+      constraints,
+    });
+    out.push({ ...deeper, lead: item.lead, promotion });
+  }
+
+  const rank: Record<ScreenResult['verdict'], number> = { advance: 0, hold: 1, reject: 2 };
+  return out.sort((a, b) =>
+    rank[a.verdict] - rank[b.verdict] ||
+    b.matches.length - a.matches.length ||
+    a.openQuestions.length - b.openQuestions.length);
 }

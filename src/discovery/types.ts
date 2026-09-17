@@ -42,11 +42,23 @@ export interface TermsPosition {
   readonly openQuestion: string | null;
 }
 
+/**
+ * Whether this system may fetch a page from this surface automatically.
+ *
+ * Separate from `persistence` on purpose, because fetching and keeping are
+ * different permissions and conflating them gets one of them wrong. LinkedIn is
+ * the clear case: its User Agreement prohibits automated access, so the page is
+ * never fetched by the system at all, whatever anyone intends to do with it
+ * afterwards. Elsewhere the site's own robots.txt is the operative instruction.
+ */
+export type AutomatedFetch = 'never' | 'robots_permitting';
+
 export interface DiscoverySource {
   readonly id: string;
   readonly name: string;
   readonly access: DiscoveryAccess;
   readonly persistence: DiscoveryPersistence;
+  readonly automatedFetch: AutomatedFetch;
   /** The host a search_xray source is restricted to. Null for the others. */
   readonly site: string | null;
   /** What this surface actually tells you about a person. */
