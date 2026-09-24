@@ -321,6 +321,41 @@ export const DISCOVERY_SOURCES: readonly DiscoverySource[] = [
     etiquette: 'Reference the specific answer, not the reputation number.',
   },
   {
+    id: 'linkedin_signals',
+    name: 'LinkedIn Signals, via LinkedIn\'s partner MCP',
+    access: 'licensed',
+    persistence: 'persist',
+    // Reached through LinkedIn's own tool under contract, never by fetching pages.
+    automatedFetch: 'never',
+    site: null,
+    yields: ['trigger', 'identity', 'employer'],
+    whySeniorPeopleAreHere:
+      'Several of the receptivity signals the practice\'s own scorecard defines are LinkedIn native: ' +
+      'recruiter only Open to Work, a burst of profile updates, engaging with a competitor. A ' +
+      'sanctioned feed of those is the receptivity engine\'s best possible input, and the only lawful ' +
+      'route to them at volume.',
+    segments: ['senior_executive', 'senior_it_consultant'],
+    regions: ['CA', 'US', 'GB', 'EU', 'AU', 'IN', 'BR'],
+    terms: {
+      summary:
+        'Sanctioned access under a partner agreement, which makes it the opposite case to LinkedIn ' +
+        'public profiles: governed by the contract, not by the scraping prohibition. Reported by the ' +
+        'operator as newly released with CDW as first partner; not confirmable from public sources ' +
+        'when recorded, consistent with a programme under NDA.',
+      citation: 'contract://linkedin-signals-not-yet-recorded',
+      verified: false,
+      verifiedOn: null,
+      openQuestion:
+        'Whose agreement Searchical runs on. Partner access is tied to the named licensee, so ' +
+        'CDW\'s agreement covers Searchical only if Searchical is operated by CDW or LinkedIn ' +
+        'consents in writing. Also needed: the endpoint, the tool list, the signal vocabulary, and ' +
+        'what the terms allow to be kept.',
+    },
+    etiquette:
+      'A signal is a reason to reach out now, not a script. Never tell someone you saw their Open to ' +
+      'Work setting: a recruiter only setting is shared on the understanding it stays with recruiters.',
+  },
+  {
     id: 'licensed_provider',
     name: 'Contracted people data provider',
     access: 'licensed',

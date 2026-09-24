@@ -22,6 +22,7 @@ and every score it produces can be explained and replayed.**
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 | [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
 | [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
+| [LinkedIn Signals](docs/linkedin-signals.md) | You as operator, and whoever holds the LinkedIn agreement | The slot for LinkedIn's partner MCP, the entitlement gate that keeps it shut, and what is needed to switch it on |
 | [Profile depth promotion](docs/profile-depth.md) | Engineers, and anyone who needs to know what this system fetches and what it keeps | Why fetching and keeping are different permissions, robots to RFC 9309, and why an unreachable robots file is a refusal |
 | [Screening](docs/screening.md) | Engineers, and anyone who has to defend a screening decision later | What can honestly be judged from what evidence, why citizenship is never screened, and why a non-negotiable becomes a question rather than a pass |
 | [Discovery](docs/discovery.md) | Engineers, and you as operator deciding which surfaces to clear | Where the system looks for people on the open web, what each surface's terms actually permit, and why each one gets a differently shaped query |
@@ -73,7 +74,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**404 tests passing, typecheck clean.**
+**419 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
@@ -94,6 +95,11 @@ backtested before it is installed. See [docs/phase-2.md](docs/phase-2.md).
 personalisation gate that makes a generic message unqueueable at both the service and the database,
 the approval queue with its edit rate, the reply ladder and the exploratory call. Nothing sends. See
 [docs/phase-3a.md](docs/phase-3a.md).
+
+**LinkedIn Signals, slot only.** A place for LinkedIn's partner MCP, which is sanctioned access
+under contract rather than scraping. It will not open until an agreement naming the operating entity
+is recorded and the server's spec is in hand, and its signal map stays empty until LinkedIn's
+vocabulary is documented. See [docs/linkedin-signals.md](docs/linkedin-signals.md).
 
 **Profile depth promotion.** A lead the snippet screen could not settle gets its page read, subject
 to the site's own robots.txt, honoured to the standard. LinkedIn is never fetched at any depth. The
