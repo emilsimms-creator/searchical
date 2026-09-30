@@ -95,12 +95,22 @@ export interface PolicyRule {
   evaluate(ctx: PolicyContext, lookups: PolicyLookups): Promise<PolicyReason> | PolicyReason;
 }
 
+/** Who asked and about what, so a refusal can be audited after its transaction rolls back. */
+export interface PolicyAuditContext {
+  readonly actorType: 'user' | 'system' | 'connector';
+  readonly actorId: string;
+  readonly entityType: string;
+  readonly entityId: string | null;
+}
+
 export class PolicyViolation extends Error {
   readonly decision: PolicyDecision;
-  constructor(decision: PolicyDecision) {
+  readonly audit: PolicyAuditContext | null;
+  constructor(decision: PolicyDecision, audit: PolicyAuditContext | null = null) {
     const blocked = decision.reasons.filter((r) => !r.allowed).map((r) => r.statement);
     super(`policy blocked at the ${decision.gate} gate: ${blocked.join('; ')}`);
     this.name = 'PolicyViolation';
     this.decision = decision;
+    this.audit = audit;
   }
 }

@@ -99,7 +99,7 @@ export function screen(input: ScreenInput): ScreenResult {
     }
   }
 
-  const verdict = decide(matches, concerns);
+  const verdict = decide(matches, concerns, evidence);
   return {
     verdict,
     depth: evidence.depth,
@@ -111,10 +111,57 @@ export function screen(input: ScreenInput): ScreenResult {
   };
 }
 
-function decide(matches: readonly Finding[], concerns: readonly Finding[]): ScreenVerdict {
+/**
+ * Advance needs evidence that this is a PERSON, not only evidence of the topic.
+ *
+ * Found on the live uOttawa run. Real search results for an identity and access
+ * management mandate were pushed through the screen and fourteen of sixteen
+ * advanced, and not one of the fourteen was a person: a Udemy course, a
+ * Wikipedia article, a GitHub topic page and a run of vendor explainers. Skill
+ * terms appear far more densely in documentation about a skill than on the page
+ * of anyone who has it, so a screen that advances on skill matches ranks the
+ * documentation above the people. The one genuine lead, a local IAM summit,
+ * came last.
+ *
+ * Role titles are what describe people. So a lead advances on a confirmed title
+ * match, or on skill matches where the URL is shaped like a person's own page
+ * (a profile, a speaker page, a user page). Skills alone are a hold, with the
+ * reason stated, and never a rejection: the author of a good article is still
+ * a candidate, and a human has to work out who that is.
+ */
+function decide(
+  matches: readonly Finding[],
+  concerns: readonly Finding[],
+  evidence: ScreeningEvidence,
+): ScreenVerdict {
   if (concerns.some((c) => c.severity === 'exclusion')) return 'reject';
-  if (matches.length === 0) return 'hold';
-  return 'advance';
+  const vocabulary = matches.filter((m) => m.severity === 'positive');
+  if (vocabulary.length === 0) return 'hold';
+  // Profile depth means the page has already been read and judged to be the
+  // person's own; the gate is for thin evidence, not for everything.
+  if (evidence.depth !== 'snippet') return 'advance';
+  if (vocabulary.some((m) => m.statement.startsWith('Carries a title'))) return 'advance';
+  if (personShaped(evidence.url)) return 'advance';
+  return 'hold';
+}
+
+/** URL shapes that are a person's own page rather than a page about a topic. */
+const PERSON_PATH = /\/(?:in|people|person|speakers?|team|profiles?|users?|members?|authors?|staff|bio)\/[^/?#]+/i;
+
+export function personShaped(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    if (PERSON_PATH.test(u.pathname)) return true;
+    // A code host's top level path segment is an account, not a topic.
+    if (/(^|\.)github\.com$/i.test(u.hostname)) {
+      const parts = u.pathname.split('/').filter(Boolean);
+      return parts.length === 1 && !['topics', 'orgs', 'search', 'explore', 'features'].includes(parts[0]!.toLowerCase());
+    }
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 function toQuestion(constraint: MandateConstraint, can: ReturnType<typeof checkability>): OpenQuestion {
@@ -147,32 +194,42 @@ function observeWeakly(
       severity: constraint.severity,
     };
   }
-  // Pull the distinctive words out of the constraint and see whether the
-  // evidence happens to contain them. Presence is a hint worth surfacing.
-  const distinctive = distinctiveWords(constraint.statement);
-  const hit = distinctive.map((w) => findWord(haystack, w)).find((h) => h !== null);
-  return hit
-    ? {
-        statement: `Evidence touches on "${constraint.statement}", which is worth confirming rather ` +
-          'than assuming.',
+  // Only specific tokens, never common words. The live uOttawa run matched
+  // "based" (from "office based") inside "Role-Based", and "access" inside
+  // "Access Control", and counted both as findings. A constraint observation
+  // must rest on a token that means the same thing wherever it appears: a named
+  // language, or a credential written as an acronym.
+  for (const token of specificTokens(constraint)) {
+    const hit = findWord(haystack, token);
+    if (hit) {
+      return {
+        statement: `Evidence mentions "${token}", which bears on "${constraint.statement}". Worth ` +
+          'confirming rather than assuming.',
         matched: hit,
         severity: constraint.severity,
-      }
-    : null;
+      };
+    }
+  }
+  return null;
 }
 
-const STOP = new Set([
-  'the', 'and', 'for', 'with', 'this', 'that', 'must', 'have', 'has', 'are', 'was', 'were', 'role',
-  'work', 'working', 'required', 'requires', 'requirement', 'experience', 'years', 'least', 'able',
-  'will', 'from', 'into', 'their', 'they', 'not', 'but', 'its', 'own', 'you', 'your', 'per', 'all',
-  'any', 'may', 'can', 'does', 'within', 'under', 'over', 'more', 'than', 'also', 'such', 'each',
-]);
+const LANGUAGES = [
+  'english', 'french', 'bilingual', 'spanish', 'portuguese', 'german', 'mandarin', 'cantonese',
+  'hindi', 'punjabi', 'arabic', 'japanese', 'italian', 'dutch', 'korean', 'tagalog',
+];
 
-const distinctiveWords = (statement: string): string[] =>
-  Array.from(new Set(
-    statement.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
-      .filter((w) => w.length >= 5 && !STOP.has(w)),
-  )).slice(0, 6);
+function specificTokens(constraint: MandateConstraint): string[] {
+  const statement = constraint.statement;
+  if (constraint.kind === 'language') {
+    const lower = statement.toLowerCase();
+    return LANGUAGES.filter((l) => lower.includes(l));
+  }
+  if (constraint.kind === 'licence_or_credential' || constraint.kind === 'security_clearance') {
+    // Acronyms of three or more capitals: CISSP, CISM, PMP, CIDPRO, TOGAF.
+    return Array.from(new Set(statement.match(/\b[A-Z][A-Z0-9]{2,}\b/g) ?? []));
+  }
+  return [];
+}
 
 const normalise = (text: string): string =>
   text.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
@@ -217,6 +274,11 @@ function headlineFor(
     return `Rejected: ${first?.statement ?? 'the mandate excludes something present here.'}`;
   }
   if (verdict === 'hold') {
+    if (matches.some((m) => m.severity === 'positive')) {
+      return 'Matches the topic but shows no sign of being a person: skills without a role title ' +
+        'usually mean a page about the skill, not someone who has it. If the author is the point, a ' +
+        `human has to identify them.${tail}`;
+    }
     return 'Nothing for or against. The evidence is too thin to say, which is a fact about the ' +
       `evidence rather than the person.${tail}`;
   }
@@ -237,6 +299,7 @@ export function screenAll(
     .map((input, index) => ({ ...screen(input), index }))
     .sort((a, b) =>
       rank[a.verdict] - rank[b.verdict] ||
-      b.matches.length - a.matches.length ||
+      b.matches.filter((m) => m.severity === 'positive').length -
+        a.matches.filter((m) => m.severity === 'positive').length ||
       a.openQuestions.length - b.openQuestions.length);
 }

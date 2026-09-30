@@ -18,7 +18,8 @@
     "build": "next build",
     "start": "next start",
     "seed:pilot": "tsx --tsconfig tsconfig.json scripts/seed-pilot.ts",
-    "discover": "tsx --tsconfig tsconfig.json scripts/discover.ts"
+    "discover": "tsx --tsconfig tsconfig.json scripts/discover.ts",
+    "e2e": "tsx --tsconfig tsconfig.json scripts/e2e.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",

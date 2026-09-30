@@ -1,0 +1,24 @@
+{
+  "id": "uottawa-iam-lead-analyst",
+  "spec": "fixtures/uottawa-iam-lead-analyst.txt",
+  "label": "positive",
+  "why": "In scope senior IAM specialist leading four analysts. Lists accountabilities and states no first year outcomes, which the first live run filled by restating the duties and so silenced the question. Names no city: the employer is a university and 'Ottawa' must not be inferred from 'uOttawa'. Bilingualism sits under Other Qualifications, so it is a preference to confirm, not a disqualifier. The protocols are listed as a set (SAML, OAuth, OIDC, LDAP, SCIM) and must-haves are capped at six, so no single protocol beyond SAML is required: an early version of this case demanded OAuth and failed a sound extraction.",
+  "expect": {
+    "segment": "senior_it_consultant",
+    "searchPlan": true,
+    "constraintKinds": [
+      "prior_experience",
+      "language",
+      "location_or_onsite"
+    ],
+    "gaps": [
+      "location",
+      "firstYearOutcomes"
+    ],
+    "skills": [
+      "saml",
+      "identity"
+    ],
+    "location": "null"
+  }
+}

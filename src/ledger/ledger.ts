@@ -58,7 +58,11 @@ export class Ledger {
       allowed: decision.allowed,
       reasons: decision.reasons.map((r) => ({ rule: r.rule, allowed: r.allowed, statement: r.statement })),
     });
-    if (!decision.allowed) throw new PolicyViolation(decision);
+    if (!decision.allowed) {
+      throw new PolicyViolation(decision, {
+        actorType: this.#actor.type, actorId: this.#actor.id, entityType: 'policy', entityId: null,
+      });
+    }
   }
 
   /** Register a connector as a source of facts. Idempotent per tenant. */

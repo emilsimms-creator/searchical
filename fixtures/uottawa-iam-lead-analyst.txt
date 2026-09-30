@@ -1,0 +1,114 @@
+JOB DESCRIPTION
+General Information
+Position Title:    Lead Analyst, IT Security
+Position Number:   103071
+Faculty / Service and Department: Information Technology
+Reports to:    Senior Manager, IT Security Services
+Effective Date:    2025
+Position Purpose
+Designs, develops, implements, integrates, tests and manages solutions to support the University’s Identity and Access Management (IAM) business objectives. Involved in all phases of systems analysis, both the planning of system development and the technical design University wide. The systems impacted include large-scale mission critical systems. Provides leadership and guidelines in the implementation of solutions, ensuring the use of best practices while adhering to established University architectural standards. Works with stakeholders to plan, estimate, prioritize and assign work to technical resources. Supports and maintains operational applications and works on the design, testing and improvement of the applications that support various endeavours.  Works with minimum supervision and acts as a specialist with a deep knowledge of complex technologies to enable and support critical University-wide systems and supporting technologies.
+Specific Accountabilities
+1. Planning, Design and Deployment: Works closely with the Product Manager responsible for IAM with respect to design guidance based on a thorough understanding of the appropriate mission-critical systems and their underlying technology.
+2. Solution Development & Enhancement: Designs, develops, and implements identity & access management solutions using enterprise platforms, optimizing identity lifecycle management, role-based access control, and other identity-based processes.
+3. Team Lead: Supervise a team of Senior Analysts to plan, estimate, prioritize and assign work to technical resources.  Provides advice to staff regarding system development methods, design alternatives and technical options.
+4. Support and Consulting:  Works closely with the other technical and architecture teams to perform in-depth reviews of suitable options and of the existence of delivered functionality before customizing platforms.  Provides supporting documentation to request, justify, and implement any customization deemed necessary.
+5. Project Management: Works closely with the Senior Manager and Product Manager to oversee overall systems testing, systems performance and migration of projects to the Production environment.  Ensures that appropriate controls and progress reports are prepared regularly.  Ensure that risks are monitored and that risk-mitigation strategies are implemented when necessary.
+6. Standards and Best Practices: Ensures development standards, design frameworks, and security protocols are adhered to, leading efforts to document best practices for all related development activities.
+7. Impact Assessment: Reviews new functionality introduced in platform updates within their portfolio, assesses potential impacts, and provides recommendation for implementation.
+8. Troubleshooting and Incident Response: Builds strong relationships with stakeholders to effectively troubleshoot and resolve system issues. Documents all problems, diagnosis, and resolutions for problems, including effective support for contingency planning.
+9. Development Life Cycle: Analyzes complex business requirements, assists in fit/gap analysis, and evaluates system impacts. Participate actively in architecture design, solution validation, implementation, testing, and migration.
+10. System Maintenance & Security Administration: Works closely with security experts to review and implement access controls, schedule system maintenance, oversee role and permission configurations, and ensure continuous system performance
+Knowledge, Experience and Skills
+Essential Qualifications:
+
+A University degree in Computer Science or Information Technology or a related field or an equivalent combination of education and experience
+Minimum 7 years of experience in identity & access management, security, or related area
+Minimum 5 years of experience in solution development, platform engineering, and implementation
+
+Key Competencies (required for all positions-cannot be modified):
+
+Planning
+Initiative
+Client service orientation
+Teamwork and cooperation
+
+Other Qualifications:
+Advanced knowledge of various programming languages and scripting languages (e.g.: Java, JavaScript, Python, Node, PowerShell, etc.) and of computing hardware, software and software development methodologies
+Strong understanding of IAM concepts, including access certification, RBAC, ABAC, identity lifecycle management, and policy enforcement
+Extensive experience designing end-to-end business system solutions in a complex application and technology environment.
+In-depth knowledge of IAM protocols and standards such as SAML, OAuth, OIDC, LDAP, and SCIM
+Experience in integrating IAM solutions with cloud and hybrid environments
+Experience working on large-scale mission critical systems such as but not limited to Saviynt
+Proficiency in IAM, SSO, MFA, PAM, and other access management solutions
+Experience with APIs, integrations, middleware, and automation
+Proficiency in database management, including SQL and Oracle
+In-depth analytical skills for complex problem solving – identification, diagnosis, resolution
+Leadership skills, ability to coach and mentor other IT professionals
+Knowledge of the University’s information technology policies, procedures and standards would be considered an asset
+Excellent communication, interpersonal, and relationship-building skills with the ability to build and maintain strong working relationships with all levels of management and staff
+Strong change management skills and adaptability to evolving technologies
+Bilingualism – French and English (written and spoken).
+
+Direct Reporting Relationships
+Direct Reports
+(Titles)
+ | Main purpose/role of each report
+ | Total number of FTEs reporting to this direct report
+ | Senior Analyst, IT Security
+ | The Senior Analyst, IT Security is responsible for managing identities and related access; documenting processes, gathering intelligence and security information as part of the University’s Identity and Access Management (IAM) process
+ | 4
+ |
+Typical Contacts or Working Relationships
+Contact
+ | Purpose/Result of Contact
+ | Frequency
+ | Enterprise Architecture Team
+ | Ensure alignment of solutions with overall enterprise architecture strategy.
+ | Quarterly
+ | Senior Manager, IT Security Services
+ | Provides leadership and guidelines in the implementation of application solutions, ensuring the use of best practices and adhering to the architectural roadmap.
+ | Weekly
+ | IAM Product Manager
+ | Ensure constant alignment with the IAM roadmap, its execution and the future of IAM at uOttawa.
+ | Daily
+ | Developers, Analysts
+ | Works with IT managers and Product Managers to plan, estimate, prioritize and assign work to technical resources.
+Promotes knowledge sharing to continually improve implementation methodology
+ | Daily
+ | Vendors/Contractors
+ | Provide information regarding technical problems and ensure their timely resolution.
+Keep abreast of new or emerging technologies.
+ | Monthly
+ | Peers in other departments / organizations
+ | Exchange information to ensure that there is mutual understanding of needs and requirements.
+Provide / exchange expertise relating to system problems.
+ | Daily
+ |
+Initiative, Problem Solving, Key Issues and Challenges
+Analyzes requirements and evaluates potential solutions. Assesses the severity of a problem to determine the risk and impact on the faculty, service or University.
+Works on projects/issues of high complexity, involving mission-critical systems, which require in-depth knowledge across multiple technical areas and business segments.
+Provides coaching and mentoring to more junior technical staff as appropriate.
+
+Decision Making
+Decisions:
+Chooses the most appropriate tool or technique to investigate and perform diagnosis, repairs and upgrades.
+Define the standards for systems development and design or approves processes and procedures to ensure consistency.
+Recommendations:
+Recommends the most appropriate solutions to resolve business problems.
+Recommends priority and work assignment for technical resources.
+Recommends long-term strategies for the evolution of the applications and systems.
+Recommends and advises on how to maximize the use of existing systems delivered functionality before customizing.
+Recommends several options to mitigate risk and issues, taking into consideration impacts on timelines as well as other processes or systems.
+Recommends ways to improve the process of delivering PeopleSoft solutions, based on sound analysis and judgements.
+Dimensions
+N/A
+
+Working Environment and Conditions
+Physical Effort
+Position is required to sit for extended periods of time, usually with freedom to move about. There is a rare need to lift and manipulate equipment and to bend, stop and work in awkward positions during installation and repair.
+Physical Environment
+The position works in an office environment with rare exposure to unpleasant conditions. There may be occasional work in the server room where there is noise from a fan and mildly warm conditions. There is an occasional requirement to walk outside to perform work in a different building.
+Sensory Attention
+Work activities involve a frequent need to concentrate on a variety of sensory inputs for lengthy durations at a time requiring diligence and attention to interpret effectively. Frequent meetings.
+Mental Stress
+Deadlines that have aspects of conflicting and competing pressures, dealings with demanding stakeholders.

@@ -74,7 +74,7 @@ describe('screening a harvest', () => {
    */
   it('says plainly when a mandate has given the screen no power to reject', () => {
     const noExclusions = TERMS.filter((t) => t.kind !== 'exclusion');
-    const screened = screenLeads([lead('Rav', 'Junior engineer, Kubernetes')], noExclusions, []);
+    const screened = screenLeads([lead('Rav', 'Junior engineer, VP Engineering track, Kubernetes')], noExclusions, []);
     expect(screened[0]!.verdict).toBe('advance');
     expect(screeningSummary(screened, noExclusions))
       .toMatch(/cannot reject anyone: every verdict here is advance or hold by construction/);

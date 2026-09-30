@@ -223,7 +223,11 @@ export class EngagementService {
       },
     });
     await this.#auditPolicy(decision, subject.personId);
-    if (!decision.allowed) throw new PolicyViolation(decision);
+    if (!decision.allowed) {
+      throw new PolicyViolation(decision, {
+        actorType: 'user', actorId: this.#actor.id, entityType: 'person', entityId: subject.personId,
+      });
+    }
 
     const res = (await this.#tx.execute(sql`
       SELECT engagement_queue_message(

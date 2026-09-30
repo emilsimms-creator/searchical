@@ -27,6 +27,7 @@ is the failure this eval exists to prevent.
 | `senior-database-administrator` | positive | In scope senior individual contributor carrying six hard constraints that are not search terms, and naming no city despite an on-site rule. Found the lost constraints defect, then the description-shaped search terms defect |
 | `senior-cybersecurity-grc` | positive | In scope, carries two different titles for the same role, and invites domain inference the engine must label rather than assert. Found the unearned provenance defect |
 | `vp-engineering` | positive | The first in-scope executive: VP Engineering reporting to a Chief Product and Technology Officer, clearing both bars. Closes the last untested path, and confirms the location rule holds on a specification that names its employer and an office environment but never a city |
+| `uottawa-iam-lead-analyst` | positive | A real University of Ottawa IAM lead specification that lists accountabilities and states no first year outcomes. The model restated the duties as outcomes and hedged in prose, which silenced the intake question. Found the hedged answer defect, and must not infer Ottawa from uOttawa |
 | `director-enterprise-strategy` | negative | A genuine executive and genuinely not this practice's market: corporate strategy at a credit union. Clears the seniority bar, fails the domain bar. Found the second axis of force fitting, and the search strings that contradicted their own channel plan |
 
 **Five cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred

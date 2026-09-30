@@ -19,6 +19,8 @@ export interface ScreeningEvidence {
   readonly statedLocation?: string | null;
   readonly sourceId: string;
   readonly depth: EvidenceDepth;
+  /** Where the evidence came from, used only to tell a person's page from a topic's. */
+  readonly url?: string;
 }
 
 /** Whether a kind of requirement can be judged from this kind of evidence. */

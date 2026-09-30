@@ -18,6 +18,7 @@ export function evidenceFromLead(lead: Lead): ScreeningEvidence {
     text: `${lead.title}. ${lead.snippet}`,
     sourceId: lead.sourceId,
     depth: 'snippet',
+    url: lead.url,
     statedLocation: null,
   };
 }

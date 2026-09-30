@@ -76,6 +76,19 @@ for (const u of unverified) {
   console.log(`  NOT FOUND IN SOURCE: "${u.quote}"\n    claimed for: ${u.statement}`);
 }
 
+// The three fields most likely to be invented. Found on a live uOttawa run:
+// the report showed which were missing but never what the model put in the
+// ones it filled, so "never invent" could not be checked by reading it.
+rule('PERFORMANCE INTAKE (what the model filled, to be checked against the spec)');
+const show = (label: string, value: string | null) =>
+  console.log(`  ${label.padEnd(20)} ${value === null || value.trim() === '' ? '(null, becomes a question)' : value}`);
+show('first year outcomes', draft.intake.firstYearOutcomes);
+show('operating range', draft.intake.operatingRange);
+show('career move case', draft.intake.careerMoveCase);
+show('compensation', draft.compensation
+  ? `${draft.compensation.currency} ${draft.compensation.baseMin ?? '?'} to ${draft.compensation.baseMax ?? '?'} (quote: "${draft.compensation.sourceQuote}")`
+  : null);
+
 rule('INTAKE GAPS (questions for the hiring leader)');
 const gaps = deriveIntakeGaps(draft);
 if (gaps.length === 0) console.log('  None. The specification answered everything.');

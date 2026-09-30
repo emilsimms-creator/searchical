@@ -22,6 +22,7 @@ and every score it produces can be explained and replayed.**
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 | [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
 | [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
+| [Test run: uOttawa IAM](docs/test-runs/2026-09-30-uottawa-iam.md) | You as operator, and anyone deciding what to build next | A real specification end to end, the five defects it found, and what it says about reach |
 | [LinkedIn Signals](docs/linkedin-signals.md) | You as operator, and whoever holds the LinkedIn agreement | The slot for LinkedIn's partner MCP, the entitlement gate that keeps it shut, and what is needed to switch it on |
 | [Profile depth promotion](docs/profile-depth.md) | Engineers, and anyone who needs to know what this system fetches and what it keeps | Why fetching and keeping are different permissions, robots to RFC 9309, and why an unreachable robots file is a refusal |
 | [Screening](docs/screening.md) | Engineers, and anyone who has to defend a screening decision later | What can honestly be judged from what evidence, why citizenship is never screened, and why a non-negotiable becomes a question rather than a pass |
@@ -74,7 +75,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**419 tests passing, typecheck clean.**
+**432 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See
@@ -82,8 +83,8 @@ engine, the audit trail and CI are in place, with all three exit criteria proven
 
 **Phase 1 complete, with a live eval.** The Mandate Engine turns a job specification into a confirmed
 market vocabulary, a ranked channel plan, four search strings and the pipeline arithmetic.
-`npm run eval` grades the extraction prompt against five real job specifications on eighteen
-programmatic pass criteria, and passes 5 of 5. See [docs/phase-1.md](docs/phase-1.md) and
+`npm run eval` grades the extraction prompt against six real job specifications on eighteen
+programmatic pass criteria, and passes 6 of 6. See [docs/phase-1.md](docs/phase-1.md) and
 [evals/README.md](evals/README.md).
 
 **Phase 2 complete.** The Receptivity Engine scores who to approach and when: twenty three signals on

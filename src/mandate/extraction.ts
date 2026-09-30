@@ -269,10 +269,18 @@ Four rules govern your output.
    each one in sourceQuote, so a recruiter can check it against the source rather than trust a
    paraphrase.
 
-5. OUTCOMES, NOT A SKILLS CHECKLIST. For firstYearOutcomes, describe what this person must have
-   delivered twelve months in, in the specification's own terms. For careerMoveCase, describe the
-   stretch and growth that would make a strong, currently employed person consider this a step up.
-   If the specification only lists requirements and offers no such case, return null.
+5. OUTCOMES, NOT A SKILLS CHECKLIST. For firstYearOutcomes, give what the specification says this
+   person must have DELIVERED twelve months in: a result with an end state, such as a platform
+   migrated, a programme shipped, a capability stood up. A list of ongoing duties restated in the
+   future tense is NOT an outcome, and it is the most common failure on this field: most job
+   descriptions list accountabilities and state no outcomes at all, and then the answer is null.
+   For careerMoveCase, give the stretch the specification itself offers that would make a strong,
+   currently employed person consider this a step up. If it offers none, return null.
+
+   NO HEDGED ANSWERS, on any intake field. If you find yourself writing that the specification does
+   not state something, or that it is a question for the hiring leader, return null instead. The
+   null is what raises the question with the hiring leader. A caveated answer silences it, because
+   the caveat lives in prose the system cannot act on, and the recruiter reads the confident half.
 
 SEGMENT TRIAGE. This practice recruits SENIOR TECHNOLOGY TALENT, and nothing else. Both segments
 below are technology segments; the channels, communities and directories behind them were
@@ -429,6 +437,34 @@ export function verifySourceQuotes(
     }))];
 }
 
+/**
+ * Whether a filled intake field admits, in its own words, that the
+ * specification does not settle it.
+ *
+ * Found on a live run against a real University of Ottawa specification. The
+ * model rewrote the ongoing duties as "twelve months in" outcomes and then
+ * wrote that "the specification does not state targets ... the outcome
+ * measures themselves are a question for the hiring leader". Because the field
+ * was not null, no question was raised: the model's honesty sat in prose the
+ * system could not act on, and a recruiter reads the confident half. The same
+ * run, repeated, returned the career move case as null once and as a hedged
+ * paragraph the next time, so the prompt alone cannot be relied on.
+ *
+ * This is the deterministic backstop. It makes the model's own admission raise
+ * the question the null would have raised.
+ */
+export function admitsNotStated(value: string): boolean {
+  return [
+    /\bdoes not (?:state|say|give|specify|name|mention|offer|set out|define)\b/i,
+    /\b(?:is|are|was|were|remains?) not (?:stated|specified|given|defined)\b/i,
+    /\bnot stated\b/i,
+    /\bun(?:evidenced|stated|specified)\b/i,
+    /\bquestion for the (?:hiring|client)/i,
+    /\b(?:put|raised|confirmed|asked) (?:to|with|of) the (?:hiring (?:leader|manager)|client)\b/i,
+    /\bshould be (?:confirmed|put to|raised with|asked)\b/i,
+  ].some((p) => p.test(value));
+}
+
 const INTAKE_QUESTIONS: Record<keyof PerformanceIntake, string> = {
   firstYearOutcomes:
     'What must this person have delivered twelve months in? Name two or three concrete outcomes, ' +
@@ -458,6 +494,13 @@ export function deriveIntakeGaps(draft: MandateDraft): IntakeGap[] {
     const value = draft.intake[field];
     if (value === null || value.trim() === '') {
       gaps.push({ field, question: INTAKE_QUESTIONS[field] });
+    } else if (admitsNotStated(value)) {
+      gaps.push({
+        field,
+        question:
+          'The draft answer admits the specification does not settle this, so it is an inference ' +
+          'rather than the client\'s answer. ' + INTAKE_QUESTIONS[field],
+      });
     }
   }
 

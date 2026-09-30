@@ -74,7 +74,7 @@ describe('screening a person', () => {
   /** "Sales" must not match "wholesaler", or the screen rejects on noise. */
   it('matches exclusions on whole words only', () => {
     const r = screen({
-      evidence: evidence('Leads platform engineering for a wholesaler. Kubernetes at scale.'),
+      evidence: evidence('VP Engineering for a wholesaler. Kubernetes at scale.'),
       terms: TERMS, constraints: [],
     });
     expect(r.verdict).toBe('advance');

@@ -319,6 +319,58 @@ describe('the send gate runs before a draft reaches the queue', () => {
     expect(out.messageId).toBeTruthy();
   });
 
+  /**
+   * Found on the live uOttawa end to end run: a refusal's audit row was written
+   * inside the transaction the refusal then rolled back, so refusals vanished
+   * from the trail while approvals stayed. The earlier test only checked an
+   * allowed decision, which is how it went unnoticed.
+   */
+  it('keeps a refused decision in the audit trail after its transaction rolls back', async () => {
+    let personId = '';
+    await expect(h.app.withTenant(tenant, async (tx) => {
+      const built = await scaffold(tx, { consent: true });
+      personId = built.personId;
+      return queue(tx, built, 1, 'Hi, your KubeCon talk stood out. The base is $210,000. Emil Simms.');
+    })).rejects.toThrow(/policy blocked at the send gate/);
+
+    const rows = await h.app.withTenant(tenant, async (tx) => ((await tx.execute(sql`
+      SELECT actor_id, entity_type, entity_id, detail FROM audit_log WHERE action = 'policy.send'
+    `)) as unknown as { rows: {
+      actor_id: string; entity_type: string; entity_id: string;
+      detail: { allowed: boolean; rolled_back: boolean; reasons: { rule: string; allowed: boolean }[] };
+    }[] }).rows);
+
+    // Exactly once: the in-transaction copy rolled back, the durable copy stayed.
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.detail.allowed).toBe(false);
+    expect(rows[0]!.detail.rolled_back).toBe(true);
+    expect(rows[0]!.actor_id).toBe('emil');
+    expect(rows[0]!.entity_type).toBe('person');
+    expect(rows[0]!.detail.reasons.find((r) => !r.allowed)!.rule).toBe('send.no_compensation_in_outreach');
+    // The person row itself rolled back with the work, which is correct: the
+    // audit names the attempt, it does not resurrect the data.
+    expect(personId).not.toBe('');
+  });
+
+  it('does the same for a refusal at the enrichment gate in the ledger', async () => {
+    await expect(h.app.withTenant(tenant, async (tx) => {
+      const ledger = new Ledger(tx, { type: 'user', id: 'emil' });
+      const sourceId = await ledger.registerSource(recruiterManualEntry);
+      const evidenceId = await ledger.recordEvidence({
+        sourceId, collectionMethod: 'recruiter_entered', collectedAt: START,
+        lawfulBasis: 'legitimate_interest', jurisdiction: 'CA', confidence: 0.9,
+      });
+      const personId = await person(tx, tenant);
+      await ledger.recordAttribute({ personId, key: 'date_of_birth', value: 'x', evidenceId, sensitive: false });
+    })).rejects.toThrow(/policy blocked at the enrichment gate/);
+
+    const rows = await h.app.withTenant(tenant, async (tx) => ((await tx.execute(sql`
+      SELECT detail FROM audit_log WHERE action = 'policy.enrichment'
+    `)) as unknown as { rows: { detail: { allowed: boolean; rolled_back: boolean } }[] }).rows);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.detail).toMatchObject({ allowed: false, rolled_back: true });
+  });
+
   it('records the send decision against the person', async () => {
     const detail = await h.app.withTenant(tenant, async (tx) => {
       const built = await scaffold(tx, { consent: true });

@@ -102,8 +102,14 @@ export function evaluatePersonalisation(
 /** Length ceilings are enforced at composition, not suggested. */
 export function checkLength(template: MessageTemplate, body: string): string | null {
   if (template.maxChars !== undefined && body.length > template.maxChars) {
-    return `${body.length} characters, over the ${template.maxChars} ceiling for ${template.name}. ` +
-      `The shortest InMails outperform the longest by 41 percent.`;
+    // The evidence has to match the channel. The live uOttawa run refused a
+    // connection note and justified it with a finding about InMails.
+    const why = template.channel === 'linkedin_inmail'
+      ? 'The shortest InMails outperform the longest by 41 percent.'
+      : template.channel === 'linkedin_connection'
+        ? 'LinkedIn caps the length of a connection note, so a longer draft cannot be sent as written.'
+        : 'Past this length the message stops being read to the end.';
+    return `${body.length} characters, over the ${template.maxChars} ceiling for ${template.name}. ${why}`;
   }
   if (template.maxWords !== undefined) {
     const words = body.trim().split(/\s+/).filter(Boolean).length;
