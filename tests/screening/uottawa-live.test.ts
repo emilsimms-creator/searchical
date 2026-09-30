@@ -9,7 +9,7 @@ import type { MandateConstraint, MandateTerm } from '@/mandate/types';
  *
  * The hits below are the real results the generated foundation and conference
  * queries returned. None of them is a person. Before the fix, fourteen of these
- * sixteen advanced, and the one genuine lead, a local IAM summit, came last.
+ * sixteen advanced, and the one genuine lead, an IAM summit page, came last.
  * Every URL is a public documentation or event page; no individual is named.
  */
 const t = (kind: MandateTerm['kind'], term: string, rank: number): MandateTerm =>

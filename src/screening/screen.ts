@@ -120,7 +120,7 @@ export function screen(input: ScreenInput): ScreenResult {
  * Wikipedia article, a GitHub topic page and a run of vendor explainers. Skill
  * terms appear far more densely in documentation about a skill than on the page
  * of anyone who has it, so a screen that advances on skill matches ranks the
- * documentation above the people. The one genuine lead, a local IAM summit,
+ * documentation above the people. The one genuine lead, an IAM summit page,
  * came last.
  *
  * Role titles are what describe people. So a lead advances on a confirmed title

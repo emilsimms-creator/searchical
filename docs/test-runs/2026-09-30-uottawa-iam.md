@@ -13,7 +13,7 @@ model and a real PostgreSQL. Five defects were found and four were fixed.
 | Vocabulary | Market titles proposed (IAM Architect, Lead IAM Engineer, Identity Architect). The HR title "Lead Analyst, IT Security" was rated at 0.2 confidence |
 | Search plan | 4 strings, 5 channels |
 | Compensation | No band stated, so nothing is quotable and a gap is raised |
-| Discovery | Generated queries were run against the real web. No person was found; one local event was |
+| Discovery | Generated queries were run against the real web. No person was found; one IAM event page was (NKST IAM Summit 2026, which is in Toronto, not Ottawa; see the correction below) |
 | Screening | Initially advanced 14 of 16 documentation pages. Fixed |
 | Engagement | Technologist path: LinkedIn connection note first, then email, email, voicemail, email over 14 days |
 | Gates | Over-length note refused. Note missing one of two hooks refused. Draft quoting money refused. Valid note queued |
@@ -38,7 +38,7 @@ three further live runs, and the full eval passes 6 of 6 on the new prompt.
 **2. Screening advanced documentation over people. Fixed.** The real hits from the generated queries
 went through harvest and screening, and 14 of 16 advanced. None was a person: a Udemy course, a
 Wikipedia article, a GitHub topic page, vendor explainers. Skill terms appear far more densely in
-documentation about a skill than on the page of anyone who has it. The one real lead, a local IAM
+documentation about a skill than on the page of anyone who has it. The one real lead, an IAM
 summit, came last. Advance now needs a confirmed role title, or skill matches on a URL shaped like a
 person's own page. Skills alone are a hold, with the reason given.
 
@@ -88,3 +88,39 @@ research on the event lists in the meantime.
 Keep the HR title in the vocabulary even though the model rated it low. Canadian universities share
 job families like Analyst, Senior Analyst and Lead Analyst, so the peer at another university likely
 holds exactly that title. Rejecting it would miss the sector's own talent pool.
+
+## Correction: the summit is in Toronto
+
+The first version of this record called the NKST IAM Summit 2026 a local Ottawa event and
+recommended its speaker list for an Ottawa search. **It is in Toronto** (28 January 2026, Novotel
+Toronto Centre). The error came from a search summary that was not cross-checked, and it was caught
+when the event was checked directly for the prospecting work below. The lesson is the same one the
+screening fix encodes: a summary of a page is not the page.
+
+## Update from the hiring manager (30 September 2026)
+
+The hiring manager answered most of the intake gaps. Title in the brief: **Technical Design Lead,
+Identity & Access Management (IAM)**. The job description's "Lead Analyst, IT Security" is the HR
+title, so both belong in the vocabulary.
+
+| Question | Answer |
+| --- | --- |
+| Location | On site at the main campus, downtown Ottawa. Hybrid, three office days a week (subject to change) |
+| Candidate location | National Capital Region, or willing to relocate before employment. Now disqualifying |
+| Bilingualism | Proficiency in both official languages required. Now disqualifying, where the job description had it as a preference |
+| Compensation | $107,503 to $134,379 CAD. Defined benefit pension, 20 days vacation plus the 7 to 9 day winter closure, dependent tuition, full health and dental |
+| Timing | Submissions by 5pm on Friday 9 October 2026. Fill by 30 November 2026 |
+| Engagement | Permanent, under OECM agreement #2023-420 |
+
+Still open: first-year outcomes, and whether the PeopleSoft line in the job description is real.
+
+**The band is between federal IT-03 and IT-04.** As of the rates effective 22 December 2024,
+IT-03 is $101,343 to $125,914 and IT-04 is $116,037 to $144,434 (from fedpay.ca, which cites the
+Treasury Board; canada.ca was unreachable from this environment). For an IT-03 senior analyst this is
+a raise plus a lead title. For most IT-04s it is a pay cut. That points the search at people one step
+below this role who are ready to lead, not at peers.
+
+**A system gap this exposes.** The default sequence runs five touches over fourteen days, and the
+client's submission window is nine. The sequence planner has no notion of a client deadline, so it
+would plan outreach that finishes after submissions close. A mandate needs a submission date, and the
+planner should compress the sequence or fall back to warm channels when the full cadence does not fit.
