@@ -1,0 +1,237 @@
+          REQUEST FOR TENDER
+                 FOR
+           NETWORK DESIGNER
+
+
+
+
+THE ALGONQUIN COLLEGE OF APPLIED ARTS AND TECHNOLOGY
+ 1385 WOODROFFE AVENUE I OTTAWA, ONTARIO IK2G 1V8
+
+
+
+
+                     Page 1 of 6
+Table of Contents
+
+BACKGROUND......................................................................................................................... 3
+DESCRIPTION OF WORK/ DELIVERABLES ............................................................................ 3
+LOCATION ............................................................................................................................... 4
+TIMELINE ................................................................................................................................. 4
+REQUIREMENTS..................................................................................................................... 4
+BUDGET.................................................................................................................................... 5
+INTELLECTUAL PROPERTY ...................................................................................................... 5
+INSURANCE ............................................................................................................................. 6
+WSIB ......................................................................................................................................... 6
+PAYMENT TERMS .................................................................................................................... 6
+TERMINATION BY EITHER PARTY ......................................................................................... 6
+
+
+
+
+                                                               Page 2 of 6
+BACKGROUND
+
+The Algonquin College of Applied Arts and Technology (AC) is a publicly funded English-
+language college and member of Polytechnics Canada located in Ottawa, Ontario, Canada.
+The College serves the National Capital Region and the outlying areas of Eastern Ontario,
+Western Quebec, and Upstate New York. The College has three campuses; a primary
+campus located in Ottawa, Ontario, and secondary campuses located in Perth, Ontario,
+and Pembroke, Ontario.
+
+The (AC) Information Technology Services (ITS) department provides support services for
+approximately 65,000 which includes students, faculty, administrative staff, and distance
+learning.
+
+DESCRIPTION OF WORK/ DELIVERABLES
+
+The Network Designer will support the Algonquin College Information Technology Services
+(ITS) department by coordinating the design, planning, implementation, testing, commissioning,
+and acceptance of structured cabling and associated physical technology infrastructure. The
+consultant will report to the Manager, Network and Voice Operations and will serve as the
+primary ITS coordination point for cabling activities associated with new construction,
+renovations, retrofits, office changes, technology deployments, and other projects affecting
+College spaces or infrastructure.
+
+The consultant will work closely with Facilities, architects, engineers, consultants, contractors,
+cabling vendors, and College teams including Network, Audio Visual (AV), Endpoint, Security,
+and emergency communications. The role will ensure that technology infrastructure
+requirements are identified early, incorporated into project designs, implemented correctly,
+tested, documented, and accepted in accordance with College standards.
+
+The Network Designer will be responsible for delivering the following:
+
+  1. Coordinate ITS structured cabling requirements for new construction, renovations,
+     retrofits, office changes, technology deployments, and other infrastructure projects.
+  2. Review architectural, electrical, communications, and construction drawings to confirm
+     that ITS requirements are identified and incorporated into project designs.
+  3. Coordinate the design and placement of network data outlets, wireless access points,
+     emergency phones, emergency broadcast speakers, AV infrastructure, endpoint
+     requirements, and Security-related cabling.
+  4. Ensure that cable pathways, conduits, cable trays, J-hooks, telecommunications rooms,
+     equipment locations, and associated physical infrastructure are appropriately planned
+     and designed.
+  5. Ensure that project designs and installations comply with the College's ITS
+     Communications Infrastructure Specifications, Standards and Practices.
+  6. Coordinate structured cabling activities from initial requirements and design through
+     procurement, implementation, testing, commissioning, deficiency resolution, and final
+     acceptance.
+  7. Coordinate with Facilities, consultants, contractors, vendors, Network, AV, Endpoint,
+     Security, emergency communications, and other College stakeholders.
+  8. Participate in Facilities and construction project meetings to identify ITS impacts,
+     dependencies, risks, site-readiness conditions, and infrastructure requirements early in
+     the project lifecycle.
+
+                                            Page 3 of 6
+ 9. Review contractor designs, drawings, quotations, bills of materials, and implementation
+     approaches for alignment with approved College standards and project requirements.
+ 10. Coordinate and monitor cabling vendors during implementation to ensure work is
+     completed according to approved designs, specifications, schedules, and site
+     requirements.
+ 11. Coordinate copper and fibre installations, including vendor mobilization, site access,
+     installation, testing, deficiency resolution, documentation, and acceptance.
+ 12. Ensure installed cabling is properly tested, labelled, documented, and accepted before
+     project close-out.
+ 13. Coordinate network infrastructure implementation associated with construction projects,
+     including switch requirements, Power over Ethernet (PoE), patching, wireless access
+     point placement and deployment, and related network activities.
+ 14. Coordinate the College's Move, Add and Change (MAC) process, including requirements
+     gathering, estimates, vendor engagement, scheduling, implementation, testing, invoice
+     validation, and close-out.
+ 15. Maintain structured cabling documentation, drawings, test results, deficiency logs, and
+     as-built records.
+ 16. Track and coordinate the resolution of infrastructure deficiencies identified during
+     implementation, testing, and commissioning.
+ 17. Perform basic physical network activities where appropriate, including Ethernet patching,
+     installation of patch cables, and connectivity verification.
+ 18. Coordinate handover to operational teams and ensure that test results, as-built
+     documentation, warranties, deficiencies, and supporting information are complete.
+ 19. Support procurement activities related to structured cabling, fibre infrastructure,
+     equipment, and associated contractor services.
+
+LOCATION
+
+The incumbent will perform work on-site to meet the objectives of the position. This position
+is classified as on-site. The on-site location will be Algonquin College Ottawa Campus.
+Work can be conducted flexibly during Algonquin's core business hours of 8:30am to
+4:30pm and cannot exceed 7.25 hours per day.
+
+TIMELINE
+
+This incumbent will be required for an initial six (6) month contract with possibility of
+extension.
+
+REQUIREMENTS
+
+The ideal candidate must possess the following qualifications:
+
+ 1. Post-secondary diploma or degree in telecommunications, information technology,
+    electronics, engineering technology, construction technology, or a related field, or an
+    equivalent combination of education and relevant experience.
+ 2. A minimum of five years of progressively responsible experience coordinating structured
+    cabling, telecommunications, network infrastructure, or technology components of
+    construction and renovation projects in a complex organization.
+ 3. Demonstrated experience reviewing architectural, electrical,
+    communications, and construction drawings and translating technology
+    requirements into coordinated designs and implementation activities.
+
+                                           Page 4 of 6
+ 4. Practical knowledge of copper and fibre-optic cabling, pathways and
+     spaces, telecommunications rooms, equipment racks, patching, labelling,
+     testing, certification, and as-built documentation.
+ 5. Demonstrated experience coordinating cabling contractors, consultants, vendors, Facilities
+     teams, and technical stakeholders through design, procurement, installation, testing,
+     commissioning, deficiency resolution, and acceptance.
+ 6. Working knowledge of network infrastructure dependencies, including data outlets,
+     wireless access points, Power over Ethernet (PoE), network switches, AV systems,
+     endpoint connectivity, Security systems, and emergency communications infrastructure.
+ 7. Experience reviewing contractor drawings, quotations, bills of materials, test results,
+     deficiencies, and close-out documentation for compliance with approved requirements and
+     standards.
+ 8. Experience coordinating Move, Add and Change (MAC) requests, including requirements
+     gathering, estimating, vendor engagement, scheduling, implementation, testing, invoice
+     validation, and close-out.
+ 9. Ability to manage multiple concurrent projects and service requests, maintain accurate
+     records, identify risks and dependencies, and follow issues through to resolution.
+ 10. Strong written and verbal communication skills, including the ability to prepare clear
+     requirements, meeting records, status updates, deficiency logs, and stakeholder
+     communications.
+ 11. Ability to work independently in active construction and operational environments while
+     coordinating effectively with internal teams and external service providers.
+ 12. BICSI credentials or training related to telecommunications distribution design, installation,
+     or project management are considered an asset.
+ 13. Knowledge of applicable occupational health and safety requirements and experience
+     working in construction or renovation environments are considered assets.
+
+BUDGET
+
+Vendors are to provide an hourly rate for services.
+Expenses for meals, alcohol or hospitality will not be reimbursed by AC as per the Broader
+Public Sector Directive from the Government of Ontario.
+
+INTELLECTUAL PROPERTY
+
+If during the course of performing work pursuant to this Contract the Contractor (which
+includes, without limitation, Contractor Personnel) should conceive, develop, create or
+become the author of any Intellectual Property ("Foreground Intellectual Property"), such
+Foreground Intellectual Property shall be solely and exclusively owned by the College. The
+Contractor hereby irrevocably and unconditionally assigns, and agrees it shall assign, to the
+College all right, title and interest to such Foreground Intellectual Property without any
+additional consideration payable to the Contractor. The Contractor shall be solely
+responsible for ensuring and shall ensure that any Contractor Personnel has agreed to
+assign and does assign all right, title and interest to such Foreground Intellectual Property
+to the College, directly or indirectly through Contractor, and Contractor shall obtain all
+waivers of moral rights necessary, without additional consideration payable to the
+Contractor or Contractor Personnel. The Contractor shall, whenever requested by the
+College, execute and have executed at its sole expense, any and all applications,
+assignments and other instruments necessary to confirm or register the College's rights
+hereunder.
+
+
+                                           Page 5 of 6
+For greater certainty, the College shall own the Foreground Intellectual Property in all work
+delivered to the College hereunder. Any Intellectual Property in existence prior to the
+Effective Date of this Contract or created other than in the course of performing work
+pursuant to this Contract ("Background Intellectual Property") shall not be deemed to be
+Foreground Intellectual Property. To the extent any Background Intellectual Property is
+incorporated in work supplied by the Contractor hereunder, the Contractor shall use
+reasonable efforts to identify such Background Intellectual Property to the College and, for
+no additional consideration payable by the College, the Contractor shall and hereby does
+grant, or represents and warrants that the College is granted, a perpetual, non-exclusive
+license to such Background Intellectual Property as necessary to allow the College to fully
+exploit such work for the College purposes, including without limitation a license to, in
+whole or in part, modify, translate, distribute, transmit, perform, reproduce, in any format
+and otherwise make use of the applicable work (and sublicense others to exercise these
+rights) during the term of this Contract and following expiration or termination for any
+reason.
+
+INSURANCE
+
+The successful Contractor must provide proof of insurance to an inclusive limit of not less
+than $2,000,000 (two million) per occurrence:
+
+Professional Liability: $2,000,000 General Liability: $2,000,000 Cyber: $2,000,000
+
+WSIB
+
+The successful Contractor must provide WSIB (or equivalent) certification.
+
+PAYMENT TERMS
+
+AC's payment term is net 30 Days.
+All quoted pricing shall be exclusive of the harmonized sales tax (HST) or other similar taxes
+which, if applicable, should be stated separately.
+All pricing shall be provided in Canadian funds.
+
+TERMINATION BY EITHER PARTY
+
+The Purchaser may terminate this Agreement, in whole or in part, at any time without cause
+by giving the Supplier no less than fifteen (15) days written Notice of the termination and
+its effective date. AC's liability under this Agreement is limited to payments due to the
+Contractor up to the effective date of termination.
+
+
+
+
+                                         Page 6 of 6
+
