@@ -1,0 +1,24 @@
+{
+  "id": "network-designer-algonquin",
+  "spec": "fixtures/network-designer-algonquin.txt",
+  "label": "positive",
+  "why": "A real Algonquin College tender for a contract Network Designer in Ottawa: a stated minimum of five years of progressively responsible experience, coordination and hands on delivery, a title with no seniority marker, reporting to a Manager. Two live runs on 28 October 2026 refused it as out of scope and said themselves that it was borderline, which left the recruiter no way to act. It is the case for the technical_specialist segment, and the first contract engagement in the set. It also carries tender terms (insurance, WSIB, IP assignment) that bind the supplier rather than the person, which the extraction currently reports as candidate constraints.",
+  "expect": {
+    "segment": "technical_specialist",
+    "searchPlan": true,
+    "constraintKinds": [
+      "location_or_onsite",
+      "prior_experience",
+      "schedule"
+    ],
+    "gaps": [
+      "careerMoveCase",
+      "compensation"
+    ],
+    "skills": [
+      "structured cabling",
+      "fibre"
+    ],
+    "location": "place"
+  }
+}

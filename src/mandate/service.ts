@@ -2,13 +2,14 @@ import { and, eq, sql } from 'drizzle-orm';
 import type { TenantTx } from '@/db/client';
 import {
   channelRatings, channelSelections, intakeGaps, mandateConstraints, mandates, mandateTerms,
-  pipelineProjections, searchStrings, sourceOfHireEvents, targetCompanies,
+  pipelineProjections, searchStrings, sourceOfHireEvents, targetCompanies, triageOverrides,
 } from '@/db/schema';
 import type { LlmGateway } from '@/llm/gateway';
 import { CHANNEL_MATRIX_SEED } from './channel-matrix';
 import { deriveIntakeGaps, jobSpecExtraction, toDraft } from './extraction';
 import { projectPipeline, type PipelineInput } from './pipeline';
 import { planChannels, type ChannelPlan } from './planner';
+import { applyTriageOverride, type TriageOverrideRequest } from './triage';
 import { generateSearchStrings, type GeneratedStrings } from './strings';
 import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateConstraint, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
 import { validateVocabulary, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
@@ -143,62 +144,88 @@ export class MandateService {
       .returning({ id: mandates.id });
 
     const mandateId = row!.id;
-
-    if (vocabulary.terms.length > 0) {
-      await this.#tx.insert(mandateTerms).values(
-        vocabulary.terms.map((t) => ({
-          tenantId: args.tenantId,
-          mandateId,
-          kind: t.kind,
-          term: t.term,
-          origin: t.origin,
-          status: t.status,
-          observedCount: t.observedCount,
-          observedAt: t.observedCount === null ? null : new Date(),
-          extractionConfidence: t.extractionConfidence?.toString() ?? null,
-          rank: t.rank,
-        })),
-      );
-    }
-
-    if (gaps.length > 0) {
-      await this.#tx
-        .insert(intakeGaps)
-        .values(gaps.map((g) => ({ tenantId: args.tenantId, mandateId, field: g.field, question: g.question })));
-    }
-
-    if (draft.constraints.length > 0) {
-      await this.#tx
-        .insert(mandateConstraints)
-        .values(
-          draft.constraints.map((c) => ({
-            tenantId: args.tenantId,
-            mandateId,
-            kind: c.kind,
-            severity: c.severity,
-            statement: c.statement,
-            sourceQuote: c.sourceQuote ?? null,
-            inferred: c.inferred,
-          })),
-        )
-        .onConflictDoNothing();
-    }
-
-    if (draft.targetCompanies.length > 0) {
-      await this.#tx.insert(targetCompanies).values(
-        draft.targetCompanies.map((c) => ({
-          tenantId: args.tenantId,
-          mandateId,
-          name: c.name,
-          kind: c.kind,
-          rationale: c.rationale ?? null,
-          // Every target company joins the employer watchlist permanently.
-          watchlisted: true,
-        })),
-      );
-    }
+    await this.#insertChildren({ mandateId, tenantId: args.tenantId, draft, vocabulary, gaps });
 
     return { mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation' };
+  }
+
+  /**
+   * A recruiter overruling a refusal on seniority.
+   *
+   * The refused row kept no terms, constraints or intake, because nothing past
+   * triage was worth building for a role the practice does not recruit. So the
+   * job specification comes in again, the extraction runs fresh, and the draft
+   * is built onto the same mandate row rather than a new one: the practice
+   * keeps one record of what it was sent, with the refusal and the overrule
+   * both on it. The recruiter chooses the segment. The reason is theirs, kept
+   * verbatim, and the model's original verdict is stored beside it.
+   *
+   * The mandate lands as `awaiting_confirmation`. An overrule gets a role past
+   * triage and nothing further: the vocabulary gate still stands.
+   */
+  async overrideTriage(args: {
+    mandateId: string;
+    jobSpec: string;
+    segment: TriageOverrideRequest['segment'];
+    reason: string;
+    actor: Actor;
+    tenantId: string;
+  }): Promise<DraftedMandate> {
+    const mandate = await this.#requireMandate(args.mandateId);
+    if (mandate.status !== 'out_of_scope') {
+      throw new MandateError(
+        `mandate ${args.mandateId} is "${mandate.status}", not refused, so there is nothing to overrule`,
+      );
+    }
+
+    const extracted = toDraft(await this.#gateway.run(jobSpecExtraction, { jobSpec: args.jobSpec }));
+    // Throws when the refusal was on domain, when the reason is not a real one, or
+    // when a fresh read of the specification finds the role outside technology.
+    const draft = applyTriageOverride(
+      extracted,
+      { segment: args.segment, reason: args.reason, actor: args.actor.id },
+      mandate.outOfScopeReason,
+    );
+
+    const vocabulary = await validateVocabulary(
+      draft.terms,
+      { targetCompanies: draft.targetCompanies.map((c) => c.name), location: draft.location },
+      this.#titleFrequency,
+    );
+    const gaps = deriveIntakeGaps(draft);
+
+    // The refusal as the model first gave it, so the overrule can be read
+    // against what it overruled. Taken from the row, not from the fresh run.
+    await this.#tx.insert(triageOverrides).values({
+      tenantId: args.tenantId,
+      mandateId: args.mandateId,
+      originalReason: mandate.outOfScopeReason ?? 'both',
+      originalRationale: mandate.segmentRationale ?? '',
+      newSegment: args.segment,
+      reason: args.reason.trim(),
+      overriddenBy: args.actor.id,
+    });
+
+    await this.#tx
+      .update(mandates)
+      .set({
+        title: draft.title,
+        segment: draft.segment,
+        outOfScopeReason: null,
+        functionDomain: draft.functionDomain,
+        location: draft.location,
+        engagementType: draft.engagementType,
+        status: 'awaiting_confirmation',
+        firstYearOutcomes: draft.intake.firstYearOutcomes,
+        operatingRange: draft.intake.operatingRange,
+        careerMoveCase: draft.intake.careerMoveCase,
+        updatedAt: new Date(),
+      })
+      .where(eq(mandates.id, args.mandateId));
+
+    await this.#insertChildren({ mandateId: args.mandateId, tenantId: args.tenantId, draft, vocabulary, gaps });
+
+    return { mandateId: args.mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation' };
   }
 
   /**
@@ -381,6 +408,70 @@ export class MandateService {
       personId: args.personId ?? null,
       detail: args.detail ?? {},
     });
+  }
+
+  /** Everything a drafted mandate owns besides its own row: terms, gaps, constraints, target companies. */
+  async #insertChildren(args: {
+    mandateId: string;
+    tenantId: string;
+    draft: MandateDraft;
+    vocabulary: ValidatedVocabulary;
+    gaps: readonly IntakeGap[];
+  }): Promise<void> {
+    const { mandateId, draft, vocabulary, gaps } = args;
+    if (vocabulary.terms.length > 0) {
+      await this.#tx.insert(mandateTerms).values(
+        vocabulary.terms.map((t) => ({
+          tenantId: args.tenantId,
+          mandateId,
+          kind: t.kind,
+          term: t.term,
+          origin: t.origin,
+          status: t.status,
+          observedCount: t.observedCount,
+          observedAt: t.observedCount === null ? null : new Date(),
+          extractionConfidence: t.extractionConfidence?.toString() ?? null,
+          rank: t.rank,
+        })),
+      );
+    }
+
+    if (gaps.length > 0) {
+      await this.#tx
+        .insert(intakeGaps)
+        .values(gaps.map((g) => ({ tenantId: args.tenantId, mandateId, field: g.field, question: g.question })));
+    }
+
+    if (draft.constraints.length > 0) {
+      await this.#tx
+        .insert(mandateConstraints)
+        .values(
+          draft.constraints.map((c) => ({
+            tenantId: args.tenantId,
+            mandateId,
+            kind: c.kind,
+            severity: c.severity,
+            statement: c.statement,
+            sourceQuote: c.sourceQuote ?? null,
+            inferred: c.inferred,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    if (draft.targetCompanies.length > 0) {
+      await this.#tx.insert(targetCompanies).values(
+        draft.targetCompanies.map((c) => ({
+          tenantId: args.tenantId,
+          mandateId,
+          name: c.name,
+          kind: c.kind,
+          rationale: c.rationale ?? null,
+          // Every target company joins the employer watchlist permanently.
+          watchlisted: true,
+        })),
+      );
+    }
   }
 
   async #requireMandate(mandateId: string) {

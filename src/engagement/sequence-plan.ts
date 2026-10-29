@@ -1,3 +1,4 @@
+import type { SupportedSegment } from '@/mandate/types';
 import type { SequenceStepPlan } from './types';
 
 /**
@@ -55,8 +56,12 @@ export const DEFAULT_SEQUENCE: readonly SequenceStepPlan[] = [
 /**
  * Touch one differs by segment: a connection note converts better for senior
  * technologists, while executives get a short InMail or a warm introduction.
+ * Technical specialists are practitioners, not executives, so they follow the
+ * technologist path. That is the practice's own etiquette for practitioners and
+ * not research on this segment, which is why the channel plan for it is marked
+ * provisional.
  */
-export function sequenceFor(segment: 'senior_executive' | 'senior_it_consultant'): readonly SequenceStepPlan[] {
+export function sequenceFor(segment: SupportedSegment): readonly SequenceStepPlan[] {
   if (segment === 'senior_executive') return DEFAULT_SEQUENCE;
   return DEFAULT_SEQUENCE.map((step) =>
     step.touch === 1

@@ -29,13 +29,14 @@ is the failure this eval exists to prevent.
 | `vp-engineering` | positive | The first in-scope executive: VP Engineering reporting to a Chief Product and Technology Officer, clearing both bars. Closes the last untested path, and confirms the location rule holds on a specification that names its employer and an office environment but never a city |
 | `uottawa-iam-lead-analyst` | positive | A real University of Ottawa IAM lead specification that lists accountabilities and states no first year outcomes. The model restated the duties as outcomes and hedged in prose, which silenced the intake question. Found the hedged answer defect, and must not infer Ottawa from uOttawa |
 | `director-enterprise-strategy` | negative | A genuine executive and genuinely not this practice's market: corporate strategy at a credit union. Clears the seniority bar, fails the domain bar. Found the second axis of force fitting, and the search strings that contradicted their own channel plan |
+| `network-designer-algonquin` | positive | A real contract Network Designer tender in Ottawa: a stated five year minimum, coordination and hands on delivery, no seniority marker in the title. Two live runs refused it as out of scope while saying it was borderline, which left the recruiter no way to act. The case for the `technical_specialist` segment and the first contract engagement in the set |
 
 **Five cases is below the honest floor.** The guidance for a first eval is fifteen to a hundred
 inputs, and at n=3 a single flaky case swings the score by a third. This set is what exists, every
 member of it earned its place by finding a real defect, and **the first priority for this eval is
-more real specifications**. All three verdicts are now covered by a real document: `senior_executive`, `senior_it_consultant` and
-`out_of_scope` on each of its two axes. The gaps now: a contract or consulting engagement, a
-specification carrying a stated compensation band, and one that actually names its work location, so
+more real specifications**. All four verdicts are now covered by a real document: `senior_executive`, `senior_it_consultant`,
+`technical_specialist` and `out_of_scope` on each of its two axes. The gaps now: a specification
+carrying a stated compensation band, a second `technical_specialist` role that is not infrastructure, and one that actually names its work location, so
 that `location_shape` is exercised in the positive direction rather than only against null.
 
 ## How it grades

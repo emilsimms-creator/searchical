@@ -43,7 +43,7 @@ const scoredTerm = z.object({ term: searchableTerm, confidence: z.number().min(0
 
 const ExtractionOutput = z.object({
   title: z.string().min(1),
-  segment: z.enum(['senior_executive', 'senior_it_consultant', 'out_of_scope']),
+  segment: z.enum(['senior_executive', 'senior_it_consultant', 'technical_specialist', 'out_of_scope']),
   segmentRationale: z.string().min(1),
   outOfScopeReason: z.enum(['seniority', 'domain', 'both']).nullable(),
   functionDomain: z.string().min(1),
@@ -282,9 +282,10 @@ Four rules govern your output.
    null is what raises the question with the hiring leader. A caveated answer silences it, because
    the caveat lives in prose the system cannot act on, and the recruiter reads the confident half.
 
-SEGMENT TRIAGE. This practice recruits SENIOR TECHNOLOGY TALENT, and nothing else. Both segments
-below are technology segments; the channels, communities and directories behind them were
-researched for technology people. A role must clear BOTH bars, seniority and domain, to be in scope.
+SEGMENT TRIAGE. This practice recruits SENIOR TECHNOLOGY TALENT and experienced technology
+practitioners, and nothing else. All three segments below are technology segments; the channels,
+communities and directories behind them were researched for technology people. A role must clear
+BOTH bars, seniority and domain, to be in scope.
 
   senior_executive      Director level and above with organizational scope: a team, a budget, a
                         function. Titles like VP, Director, Head of, Chief.
@@ -292,12 +293,19 @@ researched for technology people. A role must clear BOTH bars, seniority and dom
                         contract and consulting engagements. Deep individual expertise, typically
                         eight years or more, usually with a title carrying Principal, Lead, Staff,
                         Senior or Architect.
+  technical_specialist  Experienced hands on practitioners and coordinators who work without
+                        supervision but do not carry design authority over an architecture or run
+                        a function: network designers, infrastructure and cabling coordinators,
+                        systems and network administrators, senior technicians and analysts.
+                        Typically about five years of progressively responsible experience stated
+                        as a minimum, usually engaged on contract. The title often carries none
+                        of Principal, Lead, Staff, Senior or Architect.
   out_of_scope          Everything else, on either axis.
 
 Return out_of_scope whenever the specification describes a role this practice does not recruit, and
 say so plainly in segmentRationale. Set outOfScopeReason to name the axis that failed:
 
-  "seniority"  the role is not senior enough, or is not the right shape.
+  "seniority"  the role is below even the technical_specialist band, or is not the right shape.
   "domain"     senior enough, but outside technology. A Director of Corporate Strategy, a Head of
                Finance or a VP of Marketing is a genuine executive and is not this practice's
                market; recommending a technology community to reach them is worse than declining.
@@ -306,11 +314,19 @@ say so plainly in segmentRationale. Set outOfScopeReason to name the axis that f
 Set outOfScopeReason to null whenever segment is not out_of_scope. Judge domain by what the person
 actually does, not by whether the employer happens to use technology or the specification mentions
 a dashboard: every modern executive role touches technology, and almost none of them are technology
-roles. The seniority signals are reliable: no minimum years of experience;
-entry level, graduate, apprentice or trainee framing; a training salary or training period; a
-qualification such as a diploma standing in for experience; explicit statements that prior
-experience is not required; junior, associate, coordinator, administrator, technician or analyst
-level titles with no seniority marker.
+roles. The signals that a role is below even the technical_specialist
+band are reliable: no minimum years of experience, or fewer than about three; entry level,
+graduate, apprentice or trainee framing; a training salary or training period; a qualification
+standing in for experience where NO minimum years are stated; explicit statements that prior
+experience is not required; work under direct supervision; junior or associate titles. A stated
+minimum of about five years of progressively responsible experience is NOT below the band, and
+neither is a diploma offered as an alternative to a degree when that minimum is stated.
+
+Choose between senior_it_consultant and technical_specialist on the evidence of the bar, not on
+the title. Eight or more years of deep individual expertise, design authority over an architecture,
+or a Principal, Lead, Staff, Senior or Architect title points to senior_it_consultant. A stated
+minimum of about five years, coordination or hands on delivery, and no design authority points to
+technical_specialist. When it is close, pick technical_specialist and say what makes it close.
 
 Do NOT stretch a role into the nearest segment. A refusal costs the recruiter a minute; a
 confidently wrong channel plan costs them a search. When the role sits genuinely on the boundary,
@@ -324,7 +340,7 @@ ${FIELD_CONTRACT}`;
 
 export const jobSpecExtraction: PromptVersion<{ jobSpec: string }, ExtractionOutputType> = {
   id: 'mandate.job_spec_extraction',
-  version: '1.0.0',
+  version: '1.1.0',
   outputSchema: ExtractionOutput,
   render({ jobSpec }) {
     return {

@@ -2,9 +2,10 @@ export type OutreachChannel =
   | 'linkedin_connection' | 'linkedin_inmail' | 'email' | 'phone' | 'voicemail' | 'referral';
 
 // One definition of the segment concept, owned by the mandate module. The
-// engagement engine only ever sees the two supported segments: an out of scope
+// engagement engine only ever sees the supported segments: an out of scope
 // mandate never reaches a sequence.
-export type { SupportedSegment } from '@/mandate/types';
+import type { SupportedSegment } from '@/mandate/types';
+export type { SupportedSegment };
 
 export interface MessageTemplate {
   readonly ordinal: number;
@@ -13,7 +14,7 @@ export interface MessageTemplate {
   readonly channel: OutreachChannel;
   /** Where this template sits in the default sequence. Null means it is situational. */
   readonly defaultTouch: number | null;
-  readonly segments: readonly ('senior_executive' | 'senior_it_consultant')[];
+  readonly segments: readonly SupportedSegment[];
   /**
    * Whether this template may only be queued with verified, person specific
    * evidence behind it. False for the close and the referral ask, which respond

@@ -82,7 +82,9 @@ async function main() {
   const live = args.includes('--live');
   const file = args.find((a) => !a.startsWith('--'));
   const segment: SupportedSegment =
-    args.includes('--executive') ? 'senior_executive' : 'senior_it_consultant';
+    args.includes('--executive') ? 'senior_executive'
+      : args.includes('--specialist') ? 'technical_specialist'
+      : 'senior_it_consultant';
 
   const terms = file
     ? vocabularyFrom(readFileSync(file, 'utf8').split('\n'))

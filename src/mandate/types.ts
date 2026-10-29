@@ -1,8 +1,22 @@
-/** The two segments this practice recruits, and the verdict for everything else. */
-export type SupportedSegment = 'senior_executive' | 'senior_it_consultant';
+/**
+ * The three segments this practice recruits, and the verdict for everything else.
+ *
+ * The first two are senior segments with researched channel ratings. The third,
+ * `technical_specialist`, is the hands on practitioner and coordinator band,
+ * typically engaged on contract. The matrix has no research of its own for it
+ * yet, so its channel plan is provisional and says so. See docs/third-segment.md.
+ */
+export type SupportedSegment = 'senior_executive' | 'senior_it_consultant' | 'technical_specialist';
 export type Segment = SupportedSegment | 'out_of_scope';
 
 export const isSupportedSegment = (s: Segment): s is SupportedSegment => s !== 'out_of_scope';
+
+/** How a segment is named to a recruiter. */
+export const SEGMENT_LABELS: Record<SupportedSegment, string> = {
+  senior_executive: 'senior executives',
+  senior_it_consultant: 'senior IT consultants',
+  technical_specialist: 'technical specialists',
+};
 /** `unstated` is a real answer: the specification did not say, so nothing was invented. */
 export type EngagementType = 'permanent' | 'contract' | 'either' | 'unstated';
 export type MandateStatus = 'draft' | 'awaiting_confirmation' | 'live' | 'closed' | 'out_of_scope';
@@ -191,18 +205,28 @@ export interface SearchString {
 export class MandateError extends Error {}
 
 /**
- * Raised when a mandate falls outside the two segments this practice recruits.
+ * Raised when a mandate falls outside the segments this practice recruits.
  *
  * A refusal costs a minute. A confidently wrong channel plan costs a search.
+ * When the refusal was on seniority alone, a recruiter can overrule it: see
+ * `applyTriageOverride`.
  */
 export class OutOfScopeError extends MandateError {
   readonly rationale: string;
   constructor(title: string, rationale: string) {
     super(
-      `"${title}" is outside the two segments this practice recruits (senior executives and senior ` +
-        `IT consultants), so no channel plan will be produced. ${rationale}`,
+      `"${title}" is outside the three segments this practice recruits (senior executives, senior ` +
+        `IT consultants and technical specialists), so no channel plan will be produced. ${rationale}`,
     );
     this.name = 'OutOfScopeError';
     this.rationale = rationale;
+  }
+}
+
+/** Raised when a recruiter's overrule of a refusal is not permitted, with the reason in plain words. */
+export class TriageOverrideError extends MandateError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TriageOverrideError';
   }
 }

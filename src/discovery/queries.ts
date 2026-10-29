@@ -1,7 +1,7 @@
 import type { MandateTerm } from '@/mandate/types';
 import { DISCOVERY_SOURCES, searchableSources } from './sources';
 import type { DiscoveryQuery, DiscoverySource } from './types';
-import type { SupportedSegment } from '@/mandate/types';
+import { SEGMENT_LABELS, type SupportedSegment } from '@/mandate/types';
 
 /**
  * Turn a confirmed mandate vocabulary into one query per discovery surface.
@@ -61,6 +61,22 @@ export function generateDiscoveryQueries(input: QueryInput): GeneratedQueries {
       warnings: [
         'No confirmed titles or skills, so no query can be formed. Confirm the market vocabulary ' +
         'first: a query built from unconfirmed terms searches for the wrong person very efficiently.',
+      ],
+    };
+  }
+
+  // Not a gap to paper over. The surfaces were each researched for one of the
+  // two senior segments, and none has been read for the practitioner band, so
+  // asking them about it would apply a developer market's etiquette and terms
+  // to a different market.
+  if (searchableSources(input.segment).length === 0) {
+    return {
+      queries: [],
+      warnings: [
+        `No open web surface has been researched for ${SEGMENT_LABELS[input.segment]}, so no discovery ` +
+        'query is generated. Source this segment through the recruiter\'s own LinkedIn Recruiter seat, ' +
+        'referrals from past placements and clients, and the professional bodies and employers the ' +
+        'mandate names. Each surface added later needs its terms read and dated first.',
       ],
     };
   }

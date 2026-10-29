@@ -15,7 +15,7 @@ import { claudeCliModel } from '@/llm/claude-cli';
 import {
   CHANNEL_MATRIX_SEED, deriveIntakeGaps, generateSearchStrings, isSupportedSegment,
   jobSpecExtraction, planChannels, projectPipeline, toDraft, validateVocabulary,
-  verifySourceQuotes, type MandateTerm,
+  verifySourceQuotes, applyTriageOverride, TriageOverrideError, type MandateTerm, type SupportedSegment,
 } from '@/mandate';
 
 const path = process.argv[2];
@@ -50,13 +50,45 @@ console.log(`  domain     ${draft.functionDomain}`);
 console.log(`  location   ${draft.location ?? '(not stated)'}`);
 console.log(`  engagement ${draft.engagementType}`);
 
-// Triage first. Everything downstream assumes one of the two segments.
+// A recruiter may overrule a refusal on seniority:
+//   --override technical_specialist --reason "Client confirms a five year contract coordinator is wanted"
+// The refusal is shown first and the overrule is printed beside it, so a report
+// can never read as though the model had said yes.
+const overrideIndex = process.argv.indexOf('--override');
+if (overrideIndex !== -1 && !isSupportedSegment(draft.segment)) {
+  const reasonIndex = process.argv.indexOf('--reason');
+  const override = {
+    segment: process.argv[overrideIndex + 1] as SupportedSegment,
+    reason: reasonIndex === -1 ? '' : (process.argv[reasonIndex + 1] ?? ''),
+    actor: process.env.SEARCHICAL_OPERATOR ?? 'dry-run',
+  };
+  try {
+    console.log(`  MODEL VERDICT  out_of_scope (${draft.outOfScopeReason ?? 'no reason recorded'})`);
+    draft = applyTriageOverride(draft, override, draft.outOfScopeReason);
+    console.log(`  OVERRULED      by ${override.actor}, into ${override.segment}`);
+    console.log(`  REASON GIVEN   ${override.reason}`);
+  } catch (error) {
+    if (error instanceof TriageOverrideError) {
+      rule('OVERRULE REFUSED');
+      console.log(`  ${error.message}`);
+      process.exit(0);
+    }
+    throw error;
+  }
+}
+
+// Triage first. Everything downstream assumes one of the three segments.
 if (!isSupportedSegment(draft.segment)) {
   rule('VERDICT: OUT OF SCOPE');
   console.log('  No channel plan will be produced. The channel matrix rates channels for senior');
-  console.log('  executives and senior IT consultants only, and inventing an opinion about a role');
-  console.log('  outside those two is how a search gets pointed at the wrong market entirely.');
+  console.log('  executives and senior IT consultants only (technical specialists get a provisional');
+  console.log('  plan), and inventing an opinion about a role outside those is how a search gets');
+  console.log('  pointed at the wrong market entirely.');
   console.log(`\n  ${draft.segmentRationale}`);
+  if (draft.outOfScopeReason === 'seniority') {
+    console.log('\n  Refused on seniority, so a recruiter may overrule it:');
+    console.log('    --override technical_specialist --reason "<why, at least 30 characters>"');
+  }
   process.exit(0);
 }
 

@@ -5,7 +5,7 @@ import { organizations, persons, tenants } from './tables';
 
 /** Mirrors migrations/0003_mandate.sql, which is the source of truth. */
 
-export const mandateSegment = pgEnum('mandate_segment', ['senior_executive', 'senior_it_consultant', 'out_of_scope']);
+export const mandateSegment = pgEnum('mandate_segment', ['senior_executive', 'senior_it_consultant', 'technical_specialist', 'out_of_scope']);
 export const engagementTypeEnum = pgEnum('engagement_type', ['permanent', 'contract', 'either', 'unstated']);
 export const mandateStatus = pgEnum('mandate_status', ['draft', 'awaiting_confirmation', 'live', 'closed', 'out_of_scope']);
 export const confidentialityLevel = pgEnum('confidentiality_level', [
@@ -52,6 +52,22 @@ export const mandates = pgTable('mandates', {
   confirmedBy: text('confirmed_by'),
   confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
 }, (t) => [index('mandates_tenant_status_idx').on(t.tenantId, t.status)]);
+
+/**
+ * A recruiter overruling a seniority refusal. Append only: the row is the record
+ * that a person, not the model, put this mandate into a segment, and why.
+ */
+export const triageOverrides = pgTable('triage_overrides', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  mandateId: uuid('mandate_id').notNull().references(() => mandates.id, { onDelete: 'cascade' }),
+  originalReason: outOfScopeReason('original_reason').notNull(),
+  originalRationale: text('original_rationale').notNull(),
+  newSegment: mandateSegment('new_segment').notNull(),
+  reason: text('reason').notNull(),
+  overriddenBy: text('overridden_by').notNull(),
+  overriddenAt: timestamp('overridden_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [unique('triage_overrides_one_per_mandate').on(t.mandateId)]);
 
 export const intakeGaps = pgTable('intake_gaps', {
   id: uuid('id').primaryKey().defaultRandom(),

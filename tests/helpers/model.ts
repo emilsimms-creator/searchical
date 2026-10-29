@@ -263,3 +263,70 @@ export const DIRECTOR_ENTERPRISE_STRATEGY_EXTRACTION = {
   ],
   compensation: null,
 } as const;
+
+/**
+ * The Algonquin College Network Designer tender, refused on seniority.
+ *
+ * Both live extractions on 28 October 2026 returned this verdict and both said
+ * it was borderline, so a recruiter could overrule. The wording follows the live
+ * output. Kept because it is the specification that showed a refusal the
+ * recruiter could not act on.
+ */
+export const ALGONQUIN_NETWORK_DESIGNER_REFUSED_EXTRACTION = {
+  title: 'Network Designer',
+  segment: 'out_of_scope',
+  segmentRationale:
+    'Domain is squarely technology (structured cabling, fibre, PoE, wireless access points), but the ' +
+    'seniority bar is not cleared. The requirement is "A minimum of five years of progressively ' +
+    'responsible experience", the title carries no seniority marker, and the work is overwhelmingly ' +
+    'coordination rather than design authority. This is borderline: a recruiter may reasonably overrule it.',
+  outOfScopeReason: 'seniority',
+  functionDomain: 'IT infrastructure: structured cabling and physical technology infrastructure for construction projects',
+  location: 'Ottawa, Ontario',
+  engagementType: 'contract',
+  firstYearOutcomes: null,
+  operatingRange:
+    'Primary ITS coordination point for structured cabling across construction, renovation and the Move, Add and Change process',
+  careerMoveCase: null,
+  titleVariants: [
+    { term: 'Structured Cabling Designer', confidence: 0.55 },
+    { term: 'Network Designer', confidence: 0.5 },
+    { term: 'Telecommunications Designer', confidence: 0.45 },
+    { term: 'Structured Cabling Project Coordinator', confidence: 0.45 },
+  ],
+  mustHaveSkills: [
+    { term: 'structured cabling', confidence: 0.95 },
+    { term: 'fibre optic cabling', confidence: 0.85 },
+    { term: 'construction drawings', confidence: 0.55 },
+  ],
+  exclusions: [{ term: 'junior', confidence: 0.8 }],
+  targetCompanies: [],
+  constraints: [
+    {
+      kind: 'location_or_onsite',
+      severity: 'disqualifying',
+      statement: 'Fully on site at the Algonquin College Ottawa campus',
+      sourceQuote: 'This position is classified as on-site.',
+      inferred: false,
+    },
+    {
+      kind: 'prior_experience',
+      severity: 'disqualifying',
+      statement: 'At least five years of progressively responsible experience coordinating structured cabling',
+      sourceQuote: 'A minimum of five years of progressively responsible experience',
+      inferred: false,
+    },
+  ],
+  compensation: null,
+} as const;
+
+/** The same specification as the model reads it once the prompt knows the third segment. */
+export const ALGONQUIN_NETWORK_DESIGNER_EXTRACTION = {
+  ...ALGONQUIN_NETWORK_DESIGNER_REFUSED_EXTRACTION,
+  segment: 'technical_specialist',
+  segmentRationale:
+    'A stated minimum of five years of progressively responsible experience, coordination and hands on ' +
+    'delivery with no design authority over an architecture, engaged on contract. That is the ' +
+    'technical specialist band. It is close to the line with a coordinator title, which is why it is flagged.',
+  outOfScopeReason: null,
+} as const;

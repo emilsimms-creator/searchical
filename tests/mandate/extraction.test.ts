@@ -45,7 +45,7 @@ describe('job specification extraction', () => {
     expect(gateway.records).toHaveLength(1);
     expect(gateway.records[0]).toMatchObject({
       promptId: 'mandate.job_spec_extraction',
-      promptVersion: '1.0.0',
+      promptVersion: '1.1.0',
       modelId: 'fake-model',
       ok: true,
     });

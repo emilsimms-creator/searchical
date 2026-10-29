@@ -26,7 +26,7 @@ describe('segment triage', () => {
   });
 
   it('still plans normally for the supported segments', () => {
-    for (const segment of ['senior_executive', 'senior_it_consultant'] as const) {
+    for (const segment of ['senior_executive', 'senior_it_consultant', 'technical_specialist'] as const) {
       expect(() => planChannels(CHANNEL_MATRIX_SEED, segment)).not.toThrow();
     }
   });
@@ -101,7 +101,7 @@ describe('the NAV CANADA Technologist specification', () => {
           decisions: [{ kind: 'title_variant', term: 'Technologist', decision: 'confirm' }],
         }),
       ),
-      /outside the two segments/,
+      /outside the three segments/,
       'an out of scope mandate must not be confirmable',
     );
   });
@@ -113,7 +113,7 @@ describe('the NAV CANADA Technologist specification', () => {
 
     await expectRejection(
       h.app.withTenant(tenant, (tx) => service(tx).buildSearchPlan({ mandateId: drafted.mandateId, tenantId: tenant })),
-      /outside the two segments/,
+      /outside the three segments/,
       'no channel plan for an out of scope mandate',
     );
 
