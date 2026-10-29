@@ -1,6 +1,6 @@
 # The third segment, and the recruiter's overrule
 
-**Status:** Complete. Typecheck clean and the full suite passing, with the extraction eval run live. See the numbers at the end.
+**Status:** Complete. 454 tests passing, typecheck clean, and the live extraction eval passing 7 of 7 cases.
 **Audience:** Engineers, and the recruiter who will use the override and has to defend it later.
 **Found by:** the Algonquin College Network Designer tender, run through the Mandate Engine on 28 October 2026.
 
@@ -88,8 +88,13 @@ assignment clauses bind the supplier, not the person, and come out as disqualify
 the candidate. They need their own kind.
 
 **The compensation question is salary shaped.** For a contract paid by the hour it asks for base,
-bonus and pension. Nor is it yet clear whether Ontario's pay transparency rule applies to a
-contractor tender, which is a question for counsel.
+bonus and pension. It also adds a note on Ontario's pay transparency rule, and whether that rule
+applies to a contractor tender is not established, so it is a question for counsel.
+
+**The plan skips phone and voicemail while the sequence has a voicemail touch.** The matrix rates
+phone 2 for senior IT consultants and 4 for executives, so the lower score skips it, yet touch four
+of every sequence is a voicemail. This predates the new segment and applies to the consultant plan
+too. It needs a decision on which one is right.
 
 **Sequences follow the technologist path.** Touch one is a connection note, as for senior IT
 consultants. That is the practice's own etiquette for practitioners and not research on this
@@ -109,3 +114,20 @@ npm run mandate:dry-run -- fixtures/network-designer-algonquin.txt --via-cli \
 
 In code, `service.overrideTriage({ mandateId, jobSpec, segment, reason, actor, tenantId })`.
 The dry run applies the same pure rules (`applyTriageOverride`) and writes nothing.
+
+## Verified
+
+**The full suite:** 454 tests passing, 22 of them new, and typecheck clean.
+
+**The live extraction eval, run against the model on 29 October 2026:** 7 of 7 cases pass, triage
+7 of 7, negatives 2 of 2. The Algonquin tender now comes back as `technical_specialist` with
+every source quote verified, the NAV CANADA Technologist is still refused, and the credit union
+strategy role is still refused on domain. One run per case, so this shows the prompt change did not
+move the existing verdicts, not that they are stable.
+
+**An overrule of a domain refusal, tried live:** the Director of Enterprise Strategy, refused on
+domain, with a plausible reason supplied, is refused again with the explanation above.
+
+**What this does not show.** The overrule path itself is exercised end to end by tests against the
+in memory database and a fake model. No live run has yet been refused on seniority and then
+overruled, because the updated prompt places the tender in the segment on its own.
