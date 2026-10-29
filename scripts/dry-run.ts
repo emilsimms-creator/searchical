@@ -15,7 +15,8 @@ import { claudeCliModel } from '@/llm/claude-cli';
 import {
   CHANNEL_MATRIX_SEED, deriveIntakeGaps, generateSearchStrings, isSupportedSegment,
   jobSpecExtraction, planChannels, projectPipeline, toDraft, validateVocabulary,
-  verifySourceQuotes, applyTriageOverride, TriageOverrideError, type MandateTerm, type SupportedSegment,
+  verifySourceQuotes, applyTriageOverride, TriageOverrideError, catchmentFor, selectDomainPack, suggestFromPack,
+  type MandateTerm, type SupportedSegment,
 } from '@/mandate';
 
 const path = process.argv[2];
@@ -140,6 +141,11 @@ for (const t of vocabulary.terms) {
 }
 
 const plan = planChannels(CHANNEL_MATRIX_SEED, draft.segment);
+const pack = selectDomainPack({
+  segment: draft.segment,
+  functionDomain: draft.functionDomain,
+  titles: draft.terms.filter((t) => t.kind === 'title_variant').map((t) => t.term),
+});
 
 rule('SEARCH STRINGS (as if every term were confirmed)');
 const asConfirmed: MandateTerm[] = draft.terms.map((t) => ({ ...t, status: 'confirmed' }));
@@ -148,6 +154,7 @@ try {
     terms: asConfirmed,
     location: draft.location,
     skippedChannels: plan.selections.filter((c) => c.priority === 'skip').map((c) => c.channelCode),
+    alsoNear: pack ? catchmentFor(pack, draft.location).map((e) => e.name) : [],
   });
   for (const s of strings) console.log(`  [${s.kind}]\n    ${s.value}\n`);
   for (const w of warnings) console.log(`  WARNING (${w.term}): ${w.warning}`);
@@ -160,6 +167,26 @@ console.log(`  ${plan.note}\n`);
 for (const c of plan.recommended) console.log(`  ${c.fit}/5  ${c.name}\n        ${c.etiquette}`);
 console.log(`\n  Skipped (${plan.selections.filter((s) => s.priority === 'skip').length}): ` +
   plan.selections.filter((s) => s.priority === 'skip').map((s) => s.name).join(', '));
+
+if (pack) {
+  const suggestion = suggestFromPack(pack, asConfirmed, draft.location);
+  rule(`DOMAIN PACK: ${pack.name} (${suggestion.status.toUpperCase()}, discovery surfaces off)`);
+  console.log(`  ${pack.summary}\n`);
+  const show = (label: string, rows: readonly { name: string; note: string }[]) => {
+    console.log(`  ${label}`);
+    for (const r of rows) console.log(`    ${r.name}\n      ${r.note}`);
+    console.log('');
+  };
+  show('Title variants the vocabulary does not hold yet (accept with additions, never automatic)', suggestion.suggestedTitleVariants);
+  show('Look alikes: the same words, a different market', pack.lookAlikes);
+  show('Credentials', pack.credentials);
+  for (const c of pack.employerClasses) show(`Employers: ${c.name}`, c.examples);
+  show('Bodies a recruiter can approach by hand', pack.bodies);
+  show('Also searched, as the work location stays put', suggestion.alsoSearch);
+  console.log(`  ${pack.standingExclusion}\n`);
+  console.log('  Open questions');
+  for (const q of pack.openQuestions) console.log(`    ${q}`);
+}
 
 rule('PIPELINE');
 const pipeline = projectPipeline({ targetConversations: 10, longListSize: 75, constraints: draft.constraints });

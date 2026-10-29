@@ -10,6 +10,7 @@ import { deriveIntakeGaps, jobSpecExtraction, toDraft } from './extraction';
 import { projectPipeline, type PipelineInput } from './pipeline';
 import { planChannels, type ChannelPlan } from './planner';
 import { applyTriageOverride, type TriageOverrideRequest } from './triage';
+import { catchmentFor, selectDomainPack, suggestFromPack, type DomainPackSuggestion } from './domain-packs';
 import { generateSearchStrings, type GeneratedStrings } from './strings';
 import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateConstraint, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
 import { validateVocabulary, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
@@ -26,6 +27,12 @@ export interface DraftedMandate {
   readonly status: 'awaiting_confirmation' | 'out_of_scope';
   /** Set only when the verdict is out_of_scope: why, in the recruiter's terms. */
   readonly outOfScopeReason?: string;
+  /**
+   * What the practice knows about this kind of practitioner, when it knows
+   * anything. Suggestions the recruiter may accept through `additions`, never
+   * part of the vocabulary until they do.
+   */
+  readonly domainPack?: DomainPackSuggestion;
 }
 
 export interface SearchPlan {
@@ -35,6 +42,8 @@ export interface SearchPlan {
   readonly pipeline: PipelineProjection;
   /** Requirements that are not search terms. Qualify against these before sequencing. */
   readonly constraints: readonly MandateConstraint[];
+  /** The domain pack in play, if any, with the places it adds to the search. Null when none applies. */
+  readonly domainPack: DomainPackSuggestion | null;
 }
 
 export interface TermDecision {
@@ -146,7 +155,7 @@ export class MandateService {
     const mandateId = row!.id;
     await this.#insertChildren({ mandateId, tenantId: args.tenantId, draft, vocabulary, gaps });
 
-    return { mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation' };
+    return { mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation', ...this.#packFor(draft, vocabulary.terms) };
   }
 
   /**
@@ -225,7 +234,10 @@ export class MandateService {
 
     await this.#insertChildren({ mandateId: args.mandateId, tenantId: args.tenantId, draft, vocabulary, gaps });
 
-    return { mandateId: args.mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation' };
+    return {
+      mandateId: args.mandateId, draft, vocabulary, gaps, status: 'awaiting_confirmation',
+      ...this.#packFor(draft, vocabulary.terms),
+    };
   }
 
   /**
@@ -333,10 +345,23 @@ export class MandateService {
     // for a channel the same plan tells the recruiter to skip is a
     // contradiction inside one output.
     const terms = await this.#allTerms(args.mandateId);
+    // A domain pack widens where the search looks and never what it looks for:
+    // the pack's places are added to the strings, and its vocabulary reaches the
+    // search only if the recruiter accepted it at confirmation.
+    const segment = mandate.segment as Segment;
+    const pack = isSupportedSegment(segment)
+      ? selectDomainPack({
+          segment,
+          functionDomain: mandate.functionDomain,
+          titles: terms.filter((t) => t.kind === 'title_variant').map((t) => t.term),
+        })
+      : null;
+    const domainPack = pack ? suggestFromPack(pack, terms, mandate.location) : null;
     const strings = generateSearchStrings({
       terms,
       location: mandate.location,
       skippedChannels: channels.selections.filter((c) => c.priority === 'skip').map((c) => c.channelCode),
+      alsoNear: pack ? catchmentFor(pack, mandate.location).map((e) => e.name) : [],
     });
 
     const constraints = await this.#constraintsFor(args.mandateId);
@@ -383,7 +408,7 @@ export class MandateService {
       ratesSampleSize: pipeline.ratesSampleSize,
     });
 
-    return { mandateId: args.mandateId, strings, channels, pipeline, constraints };
+    return { mandateId: args.mandateId, strings, channels, pipeline, constraints, domainPack };
   }
 
   /**
@@ -472,6 +497,16 @@ export class MandateService {
         })),
       );
     }
+  }
+
+  #packFor(draft: MandateDraft, terms: readonly MandateTerm[]): { domainPack?: DomainPackSuggestion } {
+    if (!isSupportedSegment(draft.segment)) return {};
+    const pack = selectDomainPack({
+      segment: draft.segment,
+      functionDomain: draft.functionDomain,
+      titles: draft.terms.filter((t) => t.kind === 'title_variant').map((t) => t.term),
+    });
+    return pack ? { domainPack: suggestFromPack(pack, terms, draft.location) } : {};
   }
 
   async #requireMandate(mandateId: string) {

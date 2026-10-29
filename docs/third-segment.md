@@ -1,6 +1,6 @@
 # The third segment, and the recruiter's overrule
 
-**Status:** Complete. 454 tests passing, typecheck clean, and the live extraction eval passing 7 of 7 cases.
+**Status:** Complete. 474 tests passing, typecheck clean, and the live extraction eval passing 7 of 7 cases (run before the domain pack, which does not touch extraction).
 **Audience:** Engineers, and the recruiter who will use the override and has to defend it later.
 **Found by:** the Algonquin College Network Designer tender, run through the Mandate Engine on 28 October 2026.
 
@@ -78,10 +78,7 @@ carries a terms position that has to be read and dated. Discovery for a technica
 therefore forms no query and says so, rather than applying a developer market's etiquette to a
 different market. A test fails if a surface is added without a deliberate decision.
 
-**No domain pack.** Where infrastructure and cabling practitioners actually gather, such as their
-professional bodies, trade events and regional employers, has not been researched, and the specific
-names should be verified before they are hardcoded. This is the same domain blind gap the uOttawa
-run found, and it is the next build.
+**No discovery surface, and a domain pack that suggests instead.** See the next section.
 
 **Supplier terms are still reported as candidate constraints.** The tender's insurance, WSIB and IP
 assignment clauses bind the supplier, not the person, and come out as disqualifying constraints on
@@ -100,6 +97,52 @@ too. It needs a decision on which one is right.
 consultants. That is the practice's own etiquette for practitioners and not research on this
 segment.
 
+## The domain pack
+
+The channel matrix is domain blind by construction: a segment is a seniority band, so a network
+designer and a platform engineer in the same band get the same plan. A **domain pack**
+(`src/mandate/domain-packs.ts`) holds what the practice knows about where one kind of practitioner
+actually is. The first is **structured cabling and physical technology infrastructure**, built from
+the Algonquin tender and one round of open web search on 29 October 2026.
+
+**A pack is knowledge, not a search surface.** It suggests vocabulary, names employer classes,
+credentials and bodies, and carries a catchment. It enables no automated query: `discoverySurfaces`
+is typed as an empty list and a test holds it there, because a surface needs its terms read and
+dated first.
+
+**Everything in it is flagged unverified.** The sites that would settle most of it (BICSI, Job Bank)
+could not be reached from the session, so every entry carries its source, the day it was collected
+and a reason it has not been read. The type for a verified entry requires a name and a date, so the
+first promotion has to be deliberate. A test fails while any entry is anything else.
+
+**It widens where the search looks and never what it looks for.** The pack's title variants are
+offered on the draft as suggestions. They enter the vocabulary only if the recruiter accepts them
+through `additions`, and the confirmation gate still stands. The test for this adds one accepted
+title and shows that nothing else from the pack reaches the strings.
+
+**What it says about the market.** This band is found through employers, not communities: cabling
+and ICT contractors, engineering firms with a telecommunications group, institutional IT and
+facilities teams, and federal institutions. Four credentials (BICSI RCDD, Technician, Installer and
+the registered project manager credential) matter, and no BICSI event in Canada was found for 2026.
+It also lists the look alikes that share the words and not the market, such as an outside plant
+network designer at a carrier, and holds a standing exclusion: the client's own staff, and for a
+contract role the client's current cabling vendors and consultants, until the client says otherwise.
+
+**Gatineau.** Added to the search at the operator's instruction as close to Ottawa. The **work
+location stays Ottawa**: the catchment widens where a person may live, not where the role is. It
+reaches the conference search and the provider query as a place group. The LinkedIn Recruiter Boolean
+carries no place, because Recruiter takes location as a filter, so the recruiter adds Gatineau there.
+Whether French is needed, and how a Quebec resident working on site in Ontario is handled, are not
+established.
+
+**Pay is not in the pack**, and a test keeps it out. The operator set pay aside for this mandate as
+inaccurate.
+
+**Still open.** Whether BICSI runs an Ottawa or Eastern Ontario chapter or a searchable credential
+directory, which vendors the client uses and whether a non solicit applies, whether the federal
+standing arrangement's unionized split matters, which college programmes feed the role, and whether
+any posting found is still open. The pack lists them as questions.
+
 ## Using it
 
 ```bash
@@ -117,7 +160,7 @@ The dry run applies the same pure rules (`applyTriageOverride`) and writes nothi
 
 ## Verified
 
-**The full suite:** 454 tests passing, 22 of them new, and typecheck clean.
+**The full suite:** 474 tests passing, typecheck clean. 22 of them came with the segment and 20 with the domain pack.
 
 **The live extraction eval, run against the model on 29 October 2026:** 7 of 7 cases pass, triage
 7 of 7, negatives 2 of 2. The Algonquin tender now comes back as `technical_specialist` with

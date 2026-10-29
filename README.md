@@ -22,7 +22,7 @@ and every score it produces can be explained and replayed.**
 | [Phase 1 notes](docs/phase-1.md) | Engineers | The Mandate Engine: extraction, vocabulary validation, the confirmation gate, channel planning, search strings, pipeline arithmetic |
 | [Phase 2 notes](docs/phase-2.md) | Engineers | The Receptivity Engine: the two clocks, the employer watchlist, the stacking rule, versioned and backtestable scoring |
 | [Phase 3a notes](docs/phase-3a.md) | Engineers | The Engagement Engine, drafting half: the sequence, the eight templates, the personalisation gate, the approval queue, the reply ladder |
-| [The third segment](docs/third-segment.md) | Engineers, and the recruiter who will use the override | Why a contract Network Designer tender was refused with no way to act, the technical specialist segment, the recorded overrule of a seniority refusal, and why its channel plan is provisional |
+| [The third segment](docs/third-segment.md) | Engineers, and the recruiter who will use the override | Why a contract Network Designer tender was refused with no way to act, the technical specialist segment, the recorded overrule of a seniority refusal, why its channel plan is provisional, and the first domain pack, structured cabling in Ottawa and Gatineau, flagged unverified |
 | [Test run: uOttawa IAM](docs/test-runs/2026-09-30-uottawa-iam.md) | You as operator, and anyone deciding what to build next | A real specification end to end, the five defects it found, and what it says about reach |
 | [LinkedIn Signals](docs/linkedin-signals.md) | You as operator, and whoever holds the LinkedIn agreement | The slot for LinkedIn's partner MCP, the entitlement gate that keeps it shut, and what is needed to switch it on |
 | [Profile depth promotion](docs/profile-depth.md) | Engineers, and anyone who needs to know what this system fetches and what it keeps | Why fetching and keeping are different permissions, robots to RFC 9309, and why an unreachable robots file is a refusal |
@@ -76,7 +76,7 @@ functions, and only a real Postgres demonstrates those.
 
 ## Status
 
-**454 tests passing, typecheck clean.**
+**474 tests passing, typecheck clean.**
 
 **Phase 0 complete.** Tenancy, the evidence ledger, the connector capability contract, the policy
 engine, the audit trail and CI are in place, with all three exit criteria proven by test. See

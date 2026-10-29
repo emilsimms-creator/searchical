@@ -7,3 +7,4 @@ export { generateSearchStrings, type GeneratedStrings, type StringGenerationWarn
 export { validateVocabulary, fixtureTitleFrequency, type TitleFrequencySource, type ValidatedVocabulary } from './vocabulary';
 export { jobSpecExtraction, toDraft, deriveIntakeGaps, verifySourceQuotes, type ExtractionOutputType, type QuoteCheck } from './extraction';
 export { MandateService, seedChannelRatings, channelCodesWithNoColdOutreach, type DraftedMandate, type SearchPlan, type TermDecision } from './service';
+export { DOMAIN_PACKS, INFRASTRUCTURE_CABLING_PACK, selectDomainPack, suggestFromPack, catchmentFor, type DomainPack, type DomainPackSuggestion, type PackEntry, type EmployerClass, type Verification } from './domain-packs';

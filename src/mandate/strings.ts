@@ -46,6 +46,13 @@ export interface StringGenerationInput {
    * "Skipped", which is how this was found.
    */
   readonly skippedChannels?: readonly string[];
+  /**
+   * Places to search as well as `location`, from a domain pack's catchment. The
+   * work location does not change: this widens where a person may live. The
+   * LinkedIn Recruiter Boolean carries no place, because Recruiter takes the
+   * location as a filter, so the recruiter sets it there.
+   */
+  readonly alsoNear?: readonly string[];
 }
 
 /**
@@ -88,6 +95,11 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
   }
 
   const location = input.location?.trim() ?? '';
+  const alsoNear = (input.alsoNear ?? []).map((l) => l.trim()).filter((l) => l.length > 0);
+  // One place as before, or a group when the catchment adds some.
+  const place = location
+    ? alsoNear.length > 0 ? `(${orGroup([location, ...alsoNear])})` : quote(location)
+    : '';
   const titleGroup = `(${orGroup(titles)})`;
   const skillGroup = skills.length > 0 ? `(${orGroup(skills)})` : '';
   const exclusionGroup = exclusions.length > 0 ? ` NOT (${orGroup(exclusions)})` : '';
@@ -103,7 +115,7 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
         titleGroup,
         skillGroup,
         '(speaker OR keynote OR panel OR talk)',
-        location ? quote(location) : '',
+        place,
         // Excluding the noise matters more than including the keywords.
         ADVERT_EXCLUSIONS.join(' '),
       ]
@@ -126,7 +138,7 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
   } else if (skills.length > 0) {
     strings.push({
       kind: 'github_xray',
-      value: ['site:github.com', skillGroup, location ? quote(location) : '', ADVERT_EXCLUSIONS.join(' ')]
+      value: ['site:github.com', skillGroup, place, ADVERT_EXCLUSIONS.join(' ')]
         .filter(Boolean)
         .join(' '),
     });
@@ -156,6 +168,7 @@ export function generateSearchStrings(input: StringGenerationInput): GeneratedSt
         allOfSkillsAnyMatch: skills,
         noneOfTerms: exclusions,
         ...(location ? { location } : {}),
+        ...(location && alsoNear.length > 0 ? { alsoWithin: alsoNear } : {}),
       },
       null,
       0,
