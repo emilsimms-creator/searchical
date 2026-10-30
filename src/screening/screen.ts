@@ -1,3 +1,4 @@
+import { matchOffLimits } from '@/mandate/off-limits';
 import type { MandateConstraint, MandateTerm } from '@/mandate/types';
 import { checkability, questionFor, whyUnverifiable } from './checkability';
 import type {
@@ -23,6 +24,10 @@ import type {
  *   3. A protected ground is never screened at all, and the result says so.
  *   4. Nothing positive and nothing negative is a HOLD, not a reject. Thin
  *      evidence is a fact about the evidence, not about the person.
+ *   5. Evidence that names an organisation the client has put off limits is a
+ *      HOLD whatever else it shows, and never an advance. It is not a reject: a
+ *      mention is not proof of employment, and a former employee or an unrelated
+ *      namesake is still somebody a person may approach. A person decides.
  */
 export function screen(input: ScreenInput): ScreenResult {
   const { evidence, terms, constraints } = input;
@@ -30,6 +35,18 @@ export function screen(input: ScreenInput): ScreenResult {
 
   const matches: Finding[] = [];
   const concerns: Finding[] = [];
+
+  // 0. Off limits, checked first so nothing below can talk past it.
+  const offLimitsHit = matchOffLimits(evidence.text, input.offLimits ?? []);
+  if (offLimitsHit) {
+    concerns.push({
+      statement:
+        `Names ${offLimitsHit.matchedName}, which is off limits for this mandate (${offLimitsHit.entry.basis.replace(/_/g, ' ')}; ` +
+        `${offLimitsHit.entry.source}).`,
+      matched: offLimitsHit.matchedName,
+      severity: 'off_limits',
+    });
+  }
 
   // 1. Confirmed exclusions. A human accepted these as disqualifying vocabulary.
   for (const term of confirmed(terms, 'exclusion')) {
@@ -135,6 +152,8 @@ function decide(
   evidence: ScreeningEvidence,
 ): ScreenVerdict {
   if (concerns.some((c) => c.severity === 'exclusion')) return 'reject';
+  // Off limits holds the line without discarding the person: see rule 5.
+  if (concerns.some((c) => c.severity === 'off_limits')) return 'hold';
   const vocabulary = matches.filter((m) => m.severity === 'positive');
   if (vocabulary.length === 0) return 'hold';
   // Profile depth means the page has already been read and judged to be the
@@ -274,6 +293,11 @@ function headlineFor(
     return `Rejected: ${first?.statement ?? 'the mandate excludes something present here.'}`;
   }
   if (verdict === 'hold') {
+    const offLimits = concerns.find((c) => c.severity === 'off_limits');
+    if (offLimits) {
+      return `Do not approach until a person has checked: ${offLimits.statement} A mention is not proof ` +
+        `they work there, and it is not proof they do not.${tail}`;
+    }
     if (matches.some((m) => m.severity === 'positive')) {
       return 'Matches the topic but shows no sign of being a person: skills without a role title ' +
         'usually mean a page about the skill, not someone who has it. If the author is the point, a ' +
@@ -299,6 +323,9 @@ export function screenAll(
     .map((input, index) => ({ ...screen(input), index }))
     .sort((a, b) =>
       rank[a.verdict] - rank[b.verdict] ||
+      // Within a verdict, an off limits flag sorts last: it is the one nobody should work first.
+      Number(a.concerns.some((c) => c.severity === 'off_limits')) -
+        Number(b.concerns.some((c) => c.severity === 'off_limits')) ||
       b.matches.filter((m) => m.severity === 'positive').length -
         a.matches.filter((m) => m.severity === 'positive').length ||
       a.openQuestions.length - b.openQuestions.length);

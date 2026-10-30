@@ -1,3 +1,4 @@
+import type { OffLimitsEntry } from '@/mandate/off-limits';
 import type { ConstraintKind, ConstraintSeverity, MandateConstraint, MandateTerm } from '@/mandate/types';
 
 /**
@@ -49,7 +50,7 @@ export interface Finding {
   readonly statement: string;
   /** The text that established it, so a recruiter can check rather than trust. */
   readonly matched: string | null;
-  readonly severity: ConstraintSeverity | 'exclusion' | 'positive';
+  readonly severity: ConstraintSeverity | 'exclusion' | 'off_limits' | 'positive';
 }
 
 /** A non-negotiable that this evidence could not settle, phrased for the call. */
@@ -85,6 +86,8 @@ export interface ScreenInput {
   readonly evidence: ScreeningEvidence;
   readonly terms: readonly MandateTerm[];
   readonly constraints: readonly MandateConstraint[];
+  /** Organisations the client or an agreement has put out of bounds for this mandate. */
+  readonly offLimits?: readonly OffLimitsEntry[];
 }
 
 export class ScreeningError extends Error {}

@@ -69,6 +69,26 @@ export const triageOverrides = pgTable('triage_overrides', {
   overriddenAt: timestamp('overridden_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [unique('triage_overrides_one_per_mandate').on(t.mandateId)]);
 
+/**
+ * An organisation whose people are not to be approached for one mandate: the
+ * client's own staff, their vendors, anyone under a non solicit. Entries are
+ * lifted, never deleted, so the history of what was restricted survives.
+ */
+export const mandateOffLimits = pgTable('mandate_off_limits', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  mandateId: uuid('mandate_id').notNull().references(() => mandates.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  aliases: text('aliases').array().notNull().default([]),
+  basis: text('basis').notNull(),
+  source: text('source').notNull(),
+  recordedBy: text('recorded_by').notNull(),
+  recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+  liftedAt: timestamp('lifted_at', { withTimezone: true }),
+  liftedBy: text('lifted_by'),
+  liftedReason: text('lifted_reason'),
+});
+
 export const intakeGaps = pgTable('intake_gaps', {
   id: uuid('id').primaryKey().defaultRandom(),
   tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),

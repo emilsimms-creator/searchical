@@ -1,6 +1,6 @@
 # The third segment, and the recruiter's overrule
 
-**Status:** Complete. 474 tests passing, typecheck clean, and the live extraction eval passing 7 of 7 cases (run before the domain pack, which does not touch extraction).
+**Status:** Complete. 492 tests passing, typecheck clean, and the live extraction eval passing 7 of 7 cases (run before the domain pack, which does not touch extraction).
 **Audience:** Engineers, and the recruiter who will use the override and has to defend it later.
 **Found by:** the Algonquin College Network Designer tender, run through the Mandate Engine on 28 October 2026.
 
@@ -143,6 +143,39 @@ directory, which vendors the client uses and whether a non solicit applies, whet
 standing arrangement's unionized split matters, which college programmes feed the role, and whether
 any posting found is still open. The pack lists them as questions.
 
+## Who is off limits
+
+The pack named cabling contractors as the likeliest place to find candidates, and in the same breath
+as the class most exposed to a non solicit, because the client's own vendors are in it. The question
+was put to the client and the answer was one vendor, **FCI**. That answer had nowhere to go except a
+sentence, so it now has a table (`migrations/0013_off_limits.sql`) and a rule.
+
+**The record.** `recordOffLimits` takes the organisation as the client named it, a basis (client
+vendor, client staff, non solicit or other) and its source: who said so and when, which is required
+because an exclusion nobody can trace is one nobody will dare lift. Entries are never deleted or
+renamed. `liftOffLimits` records who lifted it and why, at least twenty characters, and the entry
+stays, so "we approached them after the client said no" and "after the client lifted it" stay
+distinguishable. The database holds this too: the application role can only change the three lift
+columns, a half completed lift is refused, and there is one live entry per organisation.
+
+**The rule in screening.** Evidence that names an off limits organisation is a **hold** whatever else
+it shows, never an advance, and it sorts last so nobody works it first. It is not a reject. A mention
+is not proof of employment, and a former employee or an unrelated namesake is still somebody a person
+may approach. The matcher errs towards a hit on purpose: "FCI Connectors" matches, and "Pacific" does
+not. A false hit costs a look. A miss approaches somebody the client said not to. The deeper read in
+profile promotion carries the same list, because a page read in full is where an employer turns up
+that a snippet did not carry.
+
+**Aliases are never guessed.** The entry is the name as the client gave it. "FCI" is an abbreviation
+other companies share, so an alias is added only once somebody has confirmed it is the same
+organisation. One search suggested an Ottawa company, Fleming Communications Inc. (FCi), as a
+possible match. That is unconfirmed and is not recorded.
+
+**It shows on the plan.** `SearchPlan.offLimits` lists the live entries, and the dry run prints a
+section that asks for them when none is recorded. LinkedIn's own company exclusion has to be set by
+hand on the Recruiter seat, because a Boolean `NOT` on a short name would also remove former
+employees and unrelated namesakes.
+
 ## Using it
 
 ```bash
@@ -160,7 +193,7 @@ The dry run applies the same pure rules (`applyTriageOverride`) and writes nothi
 
 ## Verified
 
-**The full suite:** 474 tests passing, typecheck clean. 22 of them came with the segment and 20 with the domain pack.
+**The full suite:** 492 tests passing, typecheck clean. 22 of them came with the segment, 20 with the domain pack and 18 with off limits.
 
 **The live extraction eval, run against the model on 29 October 2026:** 7 of 7 cases pass, triage
 7 of 7, negatives 2 of 2. The Algonquin tender now comes back as `technical_specialist` with

@@ -1,8 +1,8 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { TenantTx } from '@/db/client';
 import {
   channelRatings, channelSelections, intakeGaps, mandateConstraints, mandates, mandateTerms,
-  pipelineProjections, searchStrings, sourceOfHireEvents, targetCompanies, triageOverrides,
+  mandateOffLimits, pipelineProjections, searchStrings, sourceOfHireEvents, targetCompanies, triageOverrides,
 } from '@/db/schema';
 import type { LlmGateway } from '@/llm/gateway';
 import { CHANNEL_MATRIX_SEED } from './channel-matrix';
@@ -10,6 +10,7 @@ import { deriveIntakeGaps, jobSpecExtraction, toDraft } from './extraction';
 import { projectPipeline, type PipelineInput } from './pipeline';
 import { planChannels, type ChannelPlan } from './planner';
 import { applyTriageOverride, type TriageOverrideRequest } from './triage';
+import { OFF_LIMITS_BASES, type OffLimitsBasis, type OffLimitsEntry } from './off-limits';
 import { catchmentFor, selectDomainPack, suggestFromPack, type DomainPackSuggestion } from './domain-packs';
 import { generateSearchStrings, type GeneratedStrings } from './strings';
 import { MandateError, OutOfScopeError, isSupportedSegment, type ChannelRatingSeed, type IntakeGap, type MandateConstraint, type MandateDraft, type MandateTerm, type PipelineProjection, type Segment } from './types';
@@ -44,6 +45,12 @@ export interface SearchPlan {
   readonly constraints: readonly MandateConstraint[];
   /** The domain pack in play, if any, with the places it adds to the search. Null when none applies. */
   readonly domainPack: DomainPackSuggestion | null;
+  /**
+   * Who is off limits, live entries only. Checked before names are worked: the
+   * screen holds anyone who names one of these, and a plan that shows an empty
+   * list is a plan that never asked.
+   */
+  readonly offLimits: readonly OffLimitsEntry[];
 }
 
 export interface TermDecision {
@@ -408,7 +415,8 @@ export class MandateService {
       ratesSampleSize: pipeline.ratesSampleSize,
     });
 
-    return { mandateId: args.mandateId, strings, channels, pipeline, constraints, domainPack };
+    const offLimits = await this.offLimitsFor(args.mandateId);
+    return { mandateId: args.mandateId, strings, channels, pipeline, constraints, domainPack, offLimits };
   }
 
   /**
@@ -497,6 +505,80 @@ export class MandateService {
         })),
       );
     }
+  }
+
+  /**
+   * Record an organisation as off limits for a mandate.
+   *
+   * Aliases are recorded only when somebody has confirmed they are the same
+   * organisation. "FCI" is a name and an abbreviation that other companies share,
+   * and an alias that is a guess excludes the wrong people and misses the right
+   * ones, so the entry is the name as the client gave it.
+   */
+  async recordOffLimits(args: {
+    mandateId: string;
+    tenantId: string;
+    actor: Actor;
+    name: string;
+    basis: OffLimitsBasis;
+    /** Who said so, and when. Required, and not a formality. */
+    source: string;
+    aliases?: readonly string[];
+  }): Promise<{ id: string }> {
+    await this.#requireMandate(args.mandateId);
+    if (!OFF_LIMITS_BASES.includes(args.basis)) {
+      throw new MandateError(`off limits basis must be one of ${OFF_LIMITS_BASES.join(', ')}`);
+    }
+    if (args.name.trim().length < 2) throw new MandateError('an off limits entry needs the name of an organisation');
+    if (args.source.trim().length < 10) {
+      throw new MandateError('an off limits entry needs its source: who said so, and when');
+    }
+    const [row] = await this.#tx
+      .insert(mandateOffLimits)
+      .values({
+        tenantId: args.tenantId,
+        mandateId: args.mandateId,
+        name: args.name.trim(),
+        aliases: (args.aliases ?? []).map((a) => a.trim()).filter((a) => a.length > 0),
+        basis: args.basis,
+        source: args.source.trim(),
+        recordedBy: args.actor.id,
+      })
+      .onConflictDoNothing()
+      .returning({ id: mandateOffLimits.id });
+    if (!row) throw new MandateError(`${args.name.trim()} is already off limits for this mandate`);
+    return row;
+  }
+
+  /**
+   * Lift an off limits entry, with who lifted it and why. The entry stays: what
+   * was restricted, and when it stopped being, is part of the record.
+   */
+  async liftOffLimits(args: { id: string; actor: Actor; reason: string }): Promise<void> {
+    if (args.reason.trim().length < 20) {
+      throw new MandateError('lifting an off limits entry needs a reason of at least 20 characters');
+    }
+    const rows = await this.#tx
+      .update(mandateOffLimits)
+      .set({ liftedAt: new Date(), liftedBy: args.actor.id, liftedReason: args.reason.trim() })
+      .where(and(eq(mandateOffLimits.id, args.id), isNull(mandateOffLimits.liftedAt)))
+      .returning({ id: mandateOffLimits.id });
+    if (rows.length === 0) throw new MandateError(`no live off limits entry ${args.id} to lift`);
+  }
+
+  /** The live entries for a mandate. Lifted ones are history, not restrictions. */
+  async offLimitsFor(mandateId: string): Promise<readonly OffLimitsEntry[]> {
+    const rows = await this.#tx
+      .select()
+      .from(mandateOffLimits)
+      .where(and(eq(mandateOffLimits.mandateId, mandateId), isNull(mandateOffLimits.liftedAt)))
+      .orderBy(mandateOffLimits.recordedAt);
+    return rows.map((r) => ({
+      name: r.name,
+      aliases: r.aliases,
+      basis: r.basis as OffLimitsBasis,
+      source: r.source,
+    }));
   }
 
   #packFor(draft: MandateDraft, terms: readonly MandateTerm[]): { domainPack?: DomainPackSuggestion } {

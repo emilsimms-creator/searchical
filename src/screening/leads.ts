@@ -1,5 +1,6 @@
 import type { Lead } from '@/discovery/harvest';
 import type { Promotion } from '@/discovery/promote';
+import type { OffLimitsEntry } from '@/mandate/off-limits';
 import type { MandateConstraint, MandateTerm } from '@/mandate/types';
 import { screen, screenAll } from './screen';
 import type { ScreenResult, ScreeningEvidence } from './types';
@@ -40,9 +41,10 @@ export function screenLeads(
   leads: readonly Lead[],
   terms: readonly MandateTerm[],
   constraints: readonly MandateConstraint[],
+  offLimits: readonly OffLimitsEntry[] = [],
 ): readonly ScreenedLead[] {
   const results = screenAll(
-    leads.map((lead) => ({ evidence: evidenceFromLead(lead), terms, constraints })),
+    leads.map((lead) => ({ evidence: evidenceFromLead(lead), terms, constraints, offLimits })),
   );
   return results.map((r) => ({ ...r, lead: leads[r.index]! }));
 }
@@ -101,6 +103,7 @@ export async function promoteAndRescreen(
   promoter: { promote(lead: Lead): Promise<Promotion> },
   terms: readonly MandateTerm[],
   constraints: readonly MandateConstraint[],
+  offLimits: readonly OffLimitsEntry[] = [],
 ): Promise<readonly (ScreenedLead & { promotion: Promotion | null })[]> {
   const out: (ScreenedLead & { promotion: Promotion | null })[] = [];
 
@@ -123,6 +126,9 @@ export async function promoteAndRescreen(
       },
       terms,
       constraints,
+      // A page read in full is where an employer shows up that a snippet did not
+      // carry, so the deeper screen is the one most likely to catch this.
+      offLimits,
     });
     out.push({ ...deeper, lead: item.lead, promotion });
   }
@@ -130,6 +136,8 @@ export async function promoteAndRescreen(
   const rank: Record<ScreenResult['verdict'], number> = { advance: 0, hold: 1, reject: 2 };
   return out.sort((a, b) =>
     rank[a.verdict] - rank[b.verdict] ||
+    Number(a.concerns.some((c) => c.severity === 'off_limits')) -
+      Number(b.concerns.some((c) => c.severity === 'off_limits')) ||
     b.matches.length - a.matches.length ||
     a.openQuestions.length - b.openQuestions.length);
 }

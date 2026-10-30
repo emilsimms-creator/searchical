@@ -8,3 +8,4 @@ export { validateVocabulary, fixtureTitleFrequency, type TitleFrequencySource, t
 export { jobSpecExtraction, toDraft, deriveIntakeGaps, verifySourceQuotes, type ExtractionOutputType, type QuoteCheck } from './extraction';
 export { MandateService, seedChannelRatings, channelCodesWithNoColdOutreach, type DraftedMandate, type SearchPlan, type TermDecision } from './service';
 export { DOMAIN_PACKS, INFRASTRUCTURE_CABLING_PACK, selectDomainPack, suggestFromPack, catchmentFor, type DomainPack, type DomainPackSuggestion, type PackEntry, type EmployerClass, type Verification } from './domain-packs';
+export { matchOffLimits, OFF_LIMITS_BASES, type OffLimitsEntry, type OffLimitsBasis, type OffLimitsHit } from './off-limits';
