@@ -38,6 +38,18 @@ describe('matching an off limits organisation', () => {
     expect(matchOffLimits(text, [{ ...FCI, aliases: ['Fleming Communications Inc.'] }])?.matchedName).toBe('Fleming Communications Inc.');
   });
 
+  it('catches Fleming Communications Inc. in the three ways a profile writes it, once that alias is confirmed', () => {
+    const confirmed: OffLimitsEntry = { ...FCI, aliases: ['Fleming Communications Inc.', 'Fleming Communications'] };
+    for (const text of [
+      'Structured Cabling Designer at Fleming Communications Inc.',
+      'Structured Cabling Designer at Fleming Communications, Ottawa',
+      'Cabling designer, FCi',
+    ]) {
+      expect(matchOffLimits(text, [confirmed]), text).not.toBeNull();
+    }
+    expect(matchOffLimits('Fleming Heating and Air', [confirmed])).toBeNull();
+  });
+
   it('has nothing to match when nothing is off limits', () => {
     expect(matchOffLimits('Designer at FCI', [])).toBeNull();
   });

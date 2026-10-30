@@ -168,8 +168,21 @@ that a snippet did not carry.
 
 **Aliases are never guessed.** The entry is the name as the client gave it. "FCI" is an abbreviation
 other companies share, so an alias is added only once somebody has confirmed it is the same
-organisation. One search suggested an Ottawa company, Fleming Communications Inc. (FCi), as a
-possible match. That is unconfirmed and is not recorded.
+organisation. For the Algonquin search the operator confirmed on 30 October 2026 that FCI is
+**Fleming Communications Inc.**, an Ottawa company. The entry is therefore FCI with the aliases
+"Fleming Communications Inc." and the short form "Fleming Communications", which is the same company
+written the way a profile usually writes it. A hit on the short form costs a look, and a miss
+approaches someone the client said not to.
+
+```ts
+await service.recordOffLimits({
+  mandateId, tenantId, actor: { id: 'emil' },
+  name: 'FCI',
+  aliases: ['Fleming Communications Inc.', 'Fleming Communications'],
+  basis: 'client_vendor',
+  source: 'Operator, 30 October 2026: the client\'s cabling vendor is FCI, confirmed as Fleming Communications Inc.',
+});
+```
 
 **It shows on the plan.** `SearchPlan.offLimits` lists the live entries, and the dry run prints a
 section that asks for them when none is recorded. LinkedIn's own company exclusion has to be set by

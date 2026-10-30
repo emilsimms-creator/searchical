@@ -188,9 +188,9 @@ if (pack) {
   for (const q of pack.openQuestions) console.log(`    ${q}`);
 }
 
-// Who is off limits comes before names. Pass --off-limits "FCI" (repeatable) to
-// record what the client has said. Nothing is written: this shows what a screen
-// would hold on.
+// Who is off limits comes before names. Pass --off-limits "FCI=Fleming Communications Inc.|Fleming Communications"
+// (repeatable; aliases after the equals sign, separated by a bar, only once confirmed) to
+// show what a screen would hold on. Nothing is written.
 const offLimitsNames = process.argv.flatMap((a, i) => (a === '--off-limits' ? [process.argv[i + 1] ?? ''] : []))
   .filter((n) => n.trim() !== '');
 rule('OFF LIMITS (settle before any names are worked)');
@@ -198,7 +198,11 @@ if (offLimitsNames.length === 0) {
   console.log('  None recorded. Ask the client who is off limits: their own staff are always out, and for a');
   console.log('  contract role so are their current vendors and consultants until they say otherwise.');
 } else {
-  for (const n of offLimitsNames) console.log(`  ${n}   a screen holds anyone whose evidence names this, and a person checks`);
+  for (const raw of offLimitsNames) {
+    const [name, aliases] = raw.split('=');
+    console.log(`  ${name}${aliases ? `  (also: ${aliases.split('|').join('; ')})` : ''}`);
+    console.log('    a screen holds anyone whose evidence names this, and a person checks');
+  }
   console.log('\n  Aliases are not guessed. Add one only once somebody has confirmed it is the same organisation.');
   console.log('  Set the same company as an exclusion in the LinkedIn Recruiter company filter by hand.');
 }
